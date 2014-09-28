@@ -3,11 +3,11 @@
 import requests
 import urllib
 import json
+import os
+import pickle
 #---------------------------------------------------------------------------
 class Doubanfm(object):
-    def __init__(self, email, password):
-        self.email = email
-        self.password = password
+    def __init__(self):
         self.login_data = {}
         self.channel_id = 0
         self.channels = []
@@ -16,31 +16,48 @@ class Doubanfm(object):
         self.login()
         self.get_channels()
 
+    def win_login(self):
+        email = raw_input('email:')
+        password = raw_input('password:')
+        return email,password
+
     def login(self):
         '登陆douban.fm获取token'
-        login_data = {
-                'app_name': 'radio_desktop_win',
-                'version': '100',
-                'email': self.email,
-                'password': self.password
-                }
-        s = requests.post('http://www.douban.com/j/app/login', login_data)
-        dic = eval(s.text)
-        if dic['r'] == '1':
-            print dic['err']
+        if  os.path.exists('.douban_token.txt'):
+            with open('.douban_token.txt', 'r') as f:
+                self.login_data = pickle.load(f)
+                print self.login_data
+                self.token = self.login_data['token']
+                self.user_name = self.login_data['user_name']
+                self.user_id = self.login_data['user_id']
+                self.expire = self.login_data['expire']
         else:
-            self.token = dic['token']
-            self.user_name = dic['user_name']
-            self.user_id = dic['user_id']
-            self.expire = dic['expire']
-            self.login_data = {
-                'app_name' : 'radio_desktop_win',
-                'version' : '100',
-                'user_id' : self.user_id,
-                'expire' : self.expire,
-                'token' : self.token
+            self.email,self.password = self.win_login()
+            login_data = {
+                    'app_name': 'radio_desktop_win',
+                    'version': '100',
+                    'email': self.email,
+                    'password': self.password
                     }
-            print 'login success'
+            s = requests.post('http://www.douban.com/j/app/login', login_data)
+            dic = eval(s.text)
+            if dic['r'] == '1':
+                print dic['err']
+            else:
+                self.token = dic['token']
+                self.user_name = dic['user_name']
+                self.user_id = dic['user_id']
+                self.expire = dic['expire']
+                self.login_data = {
+                    'app_name' : 'radio_desktop_win',
+                    'version' : '100',
+                    'user_id' : self.user_id,
+                    'expire' : self.expire,
+                    'token' : self.token,
+                    'user_name' : self.user_name
+                        }
+                with open('.douban_token.txt','w') as f:
+                    pickle.dump(self.login_data, f)
 
     def get_channels(self):
         '获取channel'

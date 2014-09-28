@@ -12,8 +12,8 @@ class Cli(object):
     PREFIX_DESELECTED = '    '
     SUFFIX_SELECTED = '' # 空格标记行后缀
     SUFFIX_DESELECTED = ''
-    VERSION = ' v0.1.0 / '
-    TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + colored(VERSION)# 标题
+    VERSION = ' v0.1.0'
+    TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + VERSION + ' \ '# 标题
 
     def __init__(self, lines):
         self.love = colored('♥ ', 'red')
@@ -31,10 +31,13 @@ class Cli(object):
         top = self.topline
         bottom = self.topline + self.screenline + 1
         for index,i in enumerate(self.lines[top:bottom]):
+            '箭头指向'
             if index == self.markline:
                 prefix = self.PREFIX_SELECTED
+                i = colored(i, 'blue')
             else:
                 prefix = self.PREFIX_DESELECTED
+            '选择频道'
             if index + self.topline == self.displayline:
                 suffix = self.SUFFIX_SELECTED
             else:

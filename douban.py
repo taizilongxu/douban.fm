@@ -6,8 +6,7 @@ import getch
 import subprocess
 from termcolor import colored
 #---------------------------------------------------------------------------
-
-douban = douban_token.Doubanfm('', '')
+douban = douban_token.Doubanfm()
 
 lines = []
 def get_channellines():
