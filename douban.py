@@ -65,6 +65,7 @@ class Win(cli.Cli):
                 '下一首'
                 self.SUFFIX_SELECTED = '正在加载请稍后...'
                 self.display()
+                douban.skip_song()
                 douban.get_song()
                 song = douban.playingsong
                 '是否是红心歌曲'
@@ -76,6 +77,18 @@ class Win(cli.Cli):
                 self.display()
                 # subprocess.Popen('killall -9 mplayer', shell=True)
                 # subprocess.Popen('mplayer' + song['url'] + '>dev/null 2>&1', shell=True)
+            elif c =='b':
+                '不再播放'
+                douban.bye()
+                douban.get_song()
+                song = douban.playingsong
+                '是否是红心歌曲'
+                if song['like'] == 1:
+                    love = self.love
+                else:
+                    love = ''
+                self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+                self.display()
             elif c == 'q':
                 exit()
 

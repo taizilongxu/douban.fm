@@ -17,6 +17,7 @@ class Doubanfm(object):
         self.get_channels()
 
     def win_login(self):
+        '登陆界面'
         email = raw_input('email:')
         password = raw_input('password:')
         return email,password
@@ -26,7 +27,6 @@ class Doubanfm(object):
         if  os.path.exists('.douban_token.txt'):
             with open('.douban_token.txt', 'r') as f:
                 self.login_data = pickle.load(f)
-                print self.login_data
                 self.token = self.login_data['token']
                 self.user_name = self.login_data['user_name']
                 self.user_id = self.login_data['user_id']
@@ -60,7 +60,7 @@ class Doubanfm(object):
                     pickle.dump(self.login_data, f)
 
     def get_channels(self):
-        '获取channel'
+        '获取channel,c存入self.channels'
         r = requests.get('http://www.douban.com/j/app/radio/channels')
         print r.text
         self.channels = eval(r.text)['channels']
@@ -69,10 +69,30 @@ class Doubanfm(object):
     #     self.channel_num = num
 
     def get_playlist(self):
-        '获取播放列表'
+        '当playlist为空,获取播放列表'
         self.login_data['channel'] = self.channel_id
         post_data = self.login_data.copy()
         post_data['type'] = 'n'
+
+        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data).strip()
+        s = requests.get(url)
+        self.playlist = eval(s.text)['song']
+
+    def skip_song(self):
+        '下一首'
+        post_data = self.login_data.copy()
+        post_data['type'] = 's'
+        post_data['sid'] = self.playingsong['sid']
+
+        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data).strip()
+        s = requests.get(url)
+        self.playlist = eval(s.text)['song']
+
+    def bye(self):
+        'bye,不再播放'
+        post_data = self.login_data.copy()
+        post_data['type'] = 'b'
+        post_data['sid'] = self.playingsong['sid']
 
         url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data).strip()
         s = requests.get(url)
