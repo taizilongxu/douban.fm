@@ -10,7 +10,10 @@ class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
         self.channel_id = 0
-        self.channels = []
+        self.channels = [{
+            'name':'红心兆赫',
+            'channel_id' : -3
+            }]
         self.playlist = []
         self.playingsong = {}
         self.login()
@@ -63,7 +66,7 @@ class Doubanfm(object):
         '获取channel,c存入self.channels'
         r = requests.get('http://www.douban.com/j/app/radio/channels')
         print r.text
-        self.channels = eval(r.text)['channels']
+        self.channels += eval(r.text)['channels']
 
     # def select_channel(self,num):
     #     self.channel_num = num
