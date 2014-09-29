@@ -2,11 +2,14 @@
 
 目前只支持linux,其他平台暂时未做测试,但是只要满足python2.7理论上就可以运行
 
-这个版本是基于 node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,因为自己不熟悉node.js,所以做了个python版本,而且python版本需要安装的依赖更少,尚有部分功能还未添加.
+这个版本cli是参考了 node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,因为自己不熟悉node.js,所以做了个python版本,而且python版本需要安装的依赖更少,尚有部分功能还未添加,长期维护中
 
 
 ![](img/1.png)
 
+###登陆
+
+第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在.douban_token.txt,下次登陆无需输入密码.
 
 ###依赖
 
@@ -30,12 +33,23 @@
 ###已完成功能
 
 * 登陆token
-* PRO
+* PRO 暂时只支持最高128kbps
 * cli设计
 * 播放,下一首,红心,不再播放
 
 ###TODO
 
+* 歌曲暂停
+* 连续操作会产生字符在终端输出的bug
+* 连续播放歌曲
+* 歌曲结束request
+* 播放歌曲数
+* 红心数
+* 不再播放数
 * 进度条
 * 歌词
-* 连续操作会产生字符在终端输出的bug
+
+###参考资料
+
+* node.js版本的[douban.fm](https://github.com/turingou/douban.fm)
+* [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
