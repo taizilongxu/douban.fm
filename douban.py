@@ -18,7 +18,11 @@ lines = get_channellines()
 
 class Win(cli.Cli):
     def __init__(self, lines):
-        self.TITLE += douban.user_name + ' >'
+        if douban.pro == 0:
+            PRO = ''
+        else:
+            PRO = colored('PRO', attrs = ['reverse'])
+        self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >'
         super(Win, self).__init__(lines)
 
     def run(self):

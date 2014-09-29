@@ -10,14 +10,25 @@ class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
         self.channel_id = 0
+        # 红心兆赫需要手动添加
         self.channels = [{
             'name':'红心兆赫',
             'channel_id' : -3
             }]
+        # pro用户
+        self.pro = 0
         self.playlist = []
         self.playingsong = {}
         self.login()
         self.get_channels()
+        # 查看是否是pro用户
+        self.is_pro()
+
+    def is_pro(self):
+        self.get_playlist()
+        self.get_song()
+        if not int(self.playingsong['kbps']) == 64:
+            self.pro = 1
 
     def win_login(self):
         '登陆界面'
@@ -65,7 +76,6 @@ class Doubanfm(object):
     def get_channels(self):
         '获取channel,c存入self.channels'
         r = requests.get('http://www.douban.com/j/app/radio/channels')
-        print r.text
         self.channels += eval(r.text)['channels']
 
     # def select_channel(self,num):
