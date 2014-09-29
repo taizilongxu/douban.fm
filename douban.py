@@ -45,6 +45,8 @@ class Win(cli.Cli):
             elif c == ' ':
                 '选择频道,播放歌曲'
                 if self.markline + self.topline != self.displayline:
+                    if douban.playingsong:
+                        subprocess.Popen('killall -9 mplayer', shell=True)
                     self.displaysong()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
@@ -59,7 +61,7 @@ class Win(cli.Cli):
                         love = ''
                     self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
                     self.display()
-                    # subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
             elif c == 'r':
                 '标记红心,取消标记'
                 if douban.playingsong:
@@ -88,8 +90,8 @@ class Win(cli.Cli):
                         love = ''
                     self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
                     self.display()
-                    # subprocess.Popen('killall -9 mplayer', shell=True)
-                    # subprocess.Popen('mplayer' + song['url'] + '>dev/null 2>&1', shell=True)
+                    subprocess.Popen('killall -9 mplayer', shell=True)
+                    subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
             elif c =='b':
                 '不再播放'
                 douban.bye()
@@ -103,6 +105,7 @@ class Win(cli.Cli):
                 self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
                 self.display()
             elif c == 'q':
+                subprocess.Popen('killall -9 mplayer', shell=True)
                 exit()
 
 w = Win(lines)

@@ -21,14 +21,16 @@ class Doubanfm(object):
         self.playingsong = {}
         self.login()
         self.get_channels()
-        # 查看是否是pro用户
         self.is_pro()
 
     def is_pro(self):
+        # 查看是否是pro用户
         self.get_playlist()
         self.get_song()
         if not int(self.playingsong['kbps']) == 64:
             self.pro = 1
+        # 清空列表
+        self.playingsong = {}
 
     def win_login(self):
         '登陆界面'
