@@ -1,12 +1,13 @@
 #-*- encoding: UTF-8 -*-
+'''
+Douban Fm 界面设计
+用print设计的滚动终端界面
+'''
 #---------------------------------import------------------------------------
 import subprocess
-import time
 from termcolor import colored
 import getch
 #---------------------------------------------------------------------------
-lines = [str(i) for i in range(30)]
-
 class Cli(object):
     PREFIX_SELECTED = colored('  > ', 'blue') # 箭头所指行前缀
     PREFIX_DESELECTED = '    '
@@ -22,7 +23,6 @@ class Cli(object):
         self.topline = 0 # lines
         self.displayline = -1 # 歌曲信息
         self.screenline = 15 # 屏幕显示行数
-
         # self.run()
 
     def display(self):
@@ -73,8 +73,11 @@ class Cli(object):
             self.markline -= 1
         elif increment == 1 and self.markline != self.screenline:
             self.markline += 1
+
 def main():
+    lines = [str(i) for i in range(30)]
     c = Cli(lines)
+    c.run()
 
 if __name__ == '__main__':
     main()

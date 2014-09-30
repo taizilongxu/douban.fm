@@ -10,15 +10,6 @@ import time
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
 
-def get_channellines():
-    lines = []
-    for index,channel in enumerate(douban.channels):
-        lines.append(channel['name'])
-    return lines
-
-
-lines = get_channellines()
-
 class Win(cli.Cli):
     def __init__(self, lines):
         if douban.pro == 0:
@@ -26,7 +17,25 @@ class Win(cli.Cli):
         else:
             PRO = colored('PRO', attrs = ['reverse'])
         self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >'
+        p1 = multiprocessing.Process(target=self.protect)
+        p1.start()
+        self.p = 0
         super(Win, self).__init__(lines)
+
+    def protect(self):
+        while True:
+            time.sleep(1)
+            if douban.playingsong and not self.p.wait():
+                douban.get_song()
+                song = douban.playingsong
+                '是否是红心歌曲'
+                if song['like'] == 1:
+                    love = self.love
+                else:
+                    love = ''
+                self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+                self.display()
+                self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
 
     def play(self):
         douban.get_song()
@@ -37,11 +46,9 @@ class Win(cli.Cli):
         else:
             love = ''
         self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+        subprocess.call('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
         self.display()
-        time.sleep(10)
-        # child = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
-        # child.wait()
-        # return self.play()
+        return self.play()
 
     def run(self):
         while True:
@@ -65,15 +72,21 @@ class Win(cli.Cli):
                 if self.markline + self.topline != self.displayline:
                     if douban.playingsong:
                         subprocess.Popen('killall -9 mplayer', shell=True)
-
                     self.displaysong()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
                     douban.set_channel(douban.channels[self.markline + self.topline]['channel_id'])
                     douban.get_playlist()
-                    p = multiprocessing.Process(target=self.play())
-                    p.start()
-                    # p.join()
+                    douban.get_song()
+                    song = douban.playingsong
+                    '是否是红心歌曲'
+                    if song['like'] == 1:
+                        love = self.love
+                    else:
+                        love = ''
+                    self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+                    self.display()
+                    self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
 
             elif c == 'r':
                 '标记红心,取消标记'
@@ -104,29 +117,19 @@ class Win(cli.Cli):
                         love = ''
                     self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
                     self.display()
-                    subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+
             elif c =='b':
                 '不再播放'
                 if douban.playingsong:
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     douban.bye()
-                    douban.get_song()
-                    song = douban.playingsong
-                    '是否是红心歌曲'
-                    if song['like'] == 1:
-                        love = self.love
-                    else:
-                        love = ''
-                    self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-                    self.display()
-                    subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    p = multiprocessing.Process(target=self.play)
+                    p.start()
             elif c == 'q':
                 subprocess.Popen('killall -9 mplayer', shell=True)
                 exit()
 
-w = Win(lines)
+w = Win(douban.lines)
 w.run()
-# pro = multiprocessing.Process(target=w.run())
-# pro.start()
-# pro.join()
 ############################################################################

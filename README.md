@@ -1,10 +1,9 @@
 ##Douban FM v0.1.0
 
-**多进程问题急需解决**
 
 目前只支持linux,其他平台暂时未做测试,但是只要满足python2.7理论上就可以运行
 
-这个版本cli是参考了 node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,因为自己不熟悉node.js,所以做了个python版本,而且python版本需要安装的依赖更少,尚有部分功能还未添加,长期维护中
+这个版本cli是参考了 node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,因为自己不熟悉node.js,不能PR,所以做了这个个python版本,而且python版本需要安装的依赖更少,尚有部分功能还未添加,长期维护中.欢迎PR
 
 
 ![](img/1.png)
@@ -30,24 +29,20 @@
 * n 下一首
 * r 喜欢/取消喜欢
 * b 不再播放
-* space 播放歌曲
+* space 播放
 
 ###已完成功能
 
 * 登陆token
-* PRO 暂时只支持最高128kbps
+* 显示PRO 暂时只支持最高128kbps
 * cli设计
 * 播放,下一首,红心,不再播放
 
 ###TODO
 
 * 歌曲暂停
-* 连续操作会产生字符在终端输出的bug
-* 连续播放歌曲
 * 歌曲结束request
-* 播放歌曲数
-* 红心数
-* 不再播放数
+* 播放歌曲数 红心数 不再播放数
 * 进度条
 * 歌词
 * 终端高度的自动调整

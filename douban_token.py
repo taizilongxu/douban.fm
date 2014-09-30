@@ -10,17 +10,18 @@ class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
         self.channel_id = 0
+        self.lines = [] # 要输出到终端的行
         # 红心兆赫需要手动添加
         self.channels = [{
             'name':'红心兆赫',
             'channel_id' : -3
             }]
-        # pro用户
         self.pro = 0
         self.playlist = []
         self.playingsong = {}
-        self.login()
-        self.get_channels()
+        self.login() # 登陆
+        self.get_channels() # 获取频道列表
+        self.get_channellines() # 重构列表用以显示
         self.is_pro()
 
     def is_pro(self):
@@ -79,6 +80,10 @@ class Doubanfm(object):
         '获取channel,c存入self.channels'
         r = requests.get('http://www.douban.com/j/app/radio/channels')
         self.channels += eval(r.text)['channels']
+
+    def get_channellines(self):
+        for index,channel in enumerate(self.channels):
+            self.lines.append(channel['name'])
 
     # def select_channel(self,num):
     #     self.channel_num = num
@@ -139,19 +144,6 @@ class Doubanfm(object):
         post_data['type'] = 'u'
         post_data['sid'] = self.playingsong['sid']
         s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
-
-# user_id, user_name, expire, token = login()
-# get_channel()
-# channel = 1
-# get_playlist(channel,user_id, expire, token)
-
-def main():
-    douban = Doubanfm('','')
-    print douban.user_name
-
-    # while True:
-    douban.get_playlist()
-    print douban.login_data
 
 if __name__ == '__main__':
     main()
