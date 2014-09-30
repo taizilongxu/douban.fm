@@ -23,7 +23,7 @@ class Cli(object):
         self.displayline = -1 # 歌曲信息
         self.screenline = 15 # 屏幕显示行数
 
-        self.run()
+        # self.run()
 
     def display(self):
         subprocess.call('clear;echo  "\033[?25l"', shell=True) # 取消光标

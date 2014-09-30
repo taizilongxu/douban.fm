@@ -121,8 +121,11 @@ class Doubanfm(object):
             self.get_playlist()
         self.playingsong  = self.playlist.pop(0)
 
-    def play_next(self):
-        post_data = self.login_data.copy()
+
+    def play(self):
+        self.get_playlist()
+        for song in self.playlist:
+            subprocess.call('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
 
     def rate_music(self):
         post_data = self.login_data.copy()
