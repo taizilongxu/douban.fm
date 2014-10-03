@@ -23,11 +23,13 @@ class Cli(object):
         self.topline = 0 # lines
         self.displayline = -1 # 歌曲信息
         self.screenline = 15 # 屏幕显示行数
+        subprocess.call('echo  "\033[?25l"', shell=True) # 取消光标
         # self.run()
 
     def display(self):
-        subprocess.call('clear;echo  "\033[?25l"', shell=True) # 取消光标
-        print self.TITLE
+        subprocess.call('clear', shell=True) # 清屏
+        # print
+        # print self.TITLE
         top = self.topline
         bottom = self.topline + self.screenline + 1
         for index,i in enumerate(self.lines[top:bottom]):
