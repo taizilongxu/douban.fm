@@ -28,8 +28,8 @@ class Cli(object):
 
     def display(self):
         subprocess.call('clear', shell=True) # 清屏
-        # print
-        # print self.TITLE
+        print
+        print self.TITLE
         top = self.topline
         bottom = self.topline + self.screenline + 1
         for index,i in enumerate(self.lines[top:bottom]):

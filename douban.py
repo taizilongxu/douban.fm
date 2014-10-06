@@ -10,7 +10,6 @@ import time
 import threading
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
-
 class Win(cli.Cli):
 
     def __init__(self, lines):
@@ -79,7 +78,7 @@ class Win(cli.Cli):
                 '选择频道,播放歌曲'
                 if self.markline + self.topline != self.displayline:
                     if douban.playingsong:
-                        douban.playingsong = 0
+                        douban.playingsong = {}
                         subprocess.Popen('killall -9 mplayer', shell=True)
                     self.displaysong()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
@@ -116,7 +115,6 @@ class Win(cli.Cli):
             elif c =='n':
                 '下一首'
                 if douban.playingsong:
-                    douban.playingsong = 0
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
@@ -135,7 +133,6 @@ class Win(cli.Cli):
             elif c =='b':
                 '不再播放'
                 if douban.playingsong:
-                    douban.playingsong = 0
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     douban.bye()
                     douban.get_song()
