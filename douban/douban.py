@@ -28,26 +28,26 @@ class Win(cli.Cli):
         # 守护线程
         self.t = threading.Thread(target=self.protect)
         self.t.start()
-        self.t2 = threading.Thread(target=self.display_time)
-        self.t2.start()
+        # self.t2 = threading.Thread(target=self.display_time)
+        # self.t2.start()
         super(Win, self).__init__(lines)
 
-    def display_time(self):
-        "显示时间的线程"
-        length = len(self.TITLE)
-        while True:
-            if self.q == 1:
-                break
-            if self.song_time:
-                minute = int(self.song_time) / 60
-                sec = int(self.song_time) % 60
-                show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
-                self.TITLE = self.TITLE[:length - 1] + '  ' + show_time + '\r'
-                self.display()
-                self.song_time -= 1
-            else:
-                self.TITLE = self.TITLE[:length]
-            time.sleep(1)
+    # def display_time(self):
+    #     "显示时间的线程"
+    #     length = len(self.TITLE)
+    #     while True:
+    #         if self.q == 1:
+    #             break
+    #         if self.song_time:
+    #             minute = int(self.song_time) / 60
+    #             sec = int(self.song_time) % 60
+    #             show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
+    #             self.TITLE = self.TITLE[:length - 1] + '  ' + show_time + '\r'
+    #             self.display()
+    #             self.song_time -= 1
+    #         else:
+    #             self.TITLE = self.TITLE[:length]
+    #         time.sleep(1)
 
 
     def protect(self):
@@ -59,7 +59,7 @@ class Win(cli.Cli):
                 self.p.poll()
                 if self.p.returncode == 0:
                     self.play()
-            time.sleep(1)
+            # time.sleep(1)
 
     def play(self):
         "播放歌曲"
@@ -135,7 +135,7 @@ class Win(cli.Cli):
                     self.play()
             elif c == 'q':
                 self.q = 1
-                subprocess.Popen('killall -9 mplayer;echo -e "/033[?25h" ', shell=True)
+                subprocess.Popen('killall -9 mplayer;echo "/033[?25h" >/dev/null 2>&1', shell=True)
                 exit()
 
 w = Win(douban.lines)
