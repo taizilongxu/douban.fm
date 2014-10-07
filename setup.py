@@ -1,7 +1,17 @@
 #-*- encoding: UTF-8 -*-
-from setuptools import setup, find_packages
+import codecs
+import os
+import sys
 
-VERSION = '0.1.10'
+try:
+  from setuptools import setup
+except:
+  from distutils.core import setup
+"""
+打包的用的setup必须引入，
+"""
+
+VERSION = '0.1.13'
 
 setup(name='douban.fm',
       version=VERSION,
@@ -13,7 +23,7 @@ setup(name='douban.fm',
       author_email='468137306@qq.com',
       url='https://github.com/taizilongxu/douban.fm',
       license='MIT',
-      packages=find_packages(exclude=['examples', 'tests']),
+      packages=['douban'],
       include_package_data=True,
       zip_safe=True,
       install_requires=[
