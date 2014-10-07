@@ -1,4 +1,4 @@
-##Douban FM v0.1.0
+##Douban FM v0.1.7
 
 
 目前只支持linux,其他平台暂时未做测试,但是只要满足python2.7理论上就可以运行
@@ -8,19 +8,21 @@
 
 ![](img/1.png)
 
-###使用
+###安装
 
-    python douban.py
-
-###登陆
-
-第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在.douban_token.txt,下次登陆无需输入密码.
-
-###依赖
+    sudo pip install douban.fm
 
 需要mplayer播放器依赖,如未安装:
 
     sudo apt-get install mplayer
+
+###使用
+
+在终端下直接输入douban.fm
+
+###登陆
+
+第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在.douban_token.txt,下次登陆无需输入密码.
 
 ###按键
 
@@ -54,6 +56,7 @@
 ###BUG
 
 * ~~播放歌曲中有时候会暂停~~
+* ~~退出后终端光标会隐藏~~
 
 ###参考资料
 

@@ -1,7 +1,7 @@
 #-*- encoding: UTF-8 -*-
 from setuptools import setup, find_packages
 
-VERSION = '0.1.1'
+VERSION = '0.1.7'
 
 setup(name='douban.fm',
       version=VERSION,
@@ -15,7 +15,7 @@ setup(name='douban.fm',
       license='MIT',
       packages=find_packages(exclude=['examples', 'tests']),
       include_package_data=True,
-      zip_safe=False,
+      zip_safe=True,
       install_requires=[
         'termcolor',
       ],

@@ -135,7 +135,7 @@ class Win(cli.Cli):
                     self.play()
             elif c == 'q':
                 self.q = 1
-                subprocess.Popen('killall -9 mplayer', shell=True)
+                subprocess.Popen('killall -9 mplayer;echo -e "/033[?25h" ', shell=True)
                 exit()
 
 w = Win(douban.lines)
