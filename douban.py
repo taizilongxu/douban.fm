@@ -16,7 +16,7 @@ class Win(cli.Cli):
         if douban.pro == 0:
             PRO = ''
         else:
-            PRO = colored('PRO', attrs = ['reverse'])
+            PRO = colored(' PRO ', attrs = ['reverse'])
         self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >>\r'
         self.start = 0 # 歌曲播放
         self.q = 0 # 退出
@@ -68,7 +68,7 @@ class Win(cli.Cli):
         else:
             love = ''
         self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-        self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+        self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True)
         self.display()
 
 
@@ -102,7 +102,6 @@ class Win(cli.Cli):
                     douban.get_playlist()
                     self.play()
                     self.start = 1
-
             elif c == 'r':
                 '标记红心,取消标记'
                 if douban.playingsong:
@@ -116,7 +115,6 @@ class Win(cli.Cli):
                         self.display()
                         douban.unrate_music()
                         douban.playingsong['like'] = 0
-
             elif c =='n':
                 '下一首'
                 if douban.playingsong:
@@ -125,14 +123,12 @@ class Win(cli.Cli):
                     self.display()
                     douban.skip_song()
                     self.play()
-
             elif c =='b':
                 '不再播放'
                 if douban.playingsong:
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     douban.bye()
                     self.play()
-
             elif c == 'q':
                 self.q = 1
                 subprocess.Popen('killall -9 mplayer', shell=True)
