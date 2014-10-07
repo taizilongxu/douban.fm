@@ -17,7 +17,7 @@ class Win(cli.Cli):
             PRO = ''
         else:
             PRO = colored('PRO', attrs = ['reverse'])
-        self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >'
+        self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >>\r'
         self.start = 0
         self.q = 0
         self.t = threading.Thread(target=self.protect)
@@ -43,19 +43,6 @@ class Win(cli.Cli):
                     self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
                     self.display()
             time.sleep(1)
-
-    # def play(self):
-    #     douban.get_song()
-    #     song = douban.playingsong
-    #     '是否是红心歌曲'
-    #     if song['like'] == 1:
-    #         love = self.love
-    #     else:
-    #         love = ''
-    #     self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-    #     self.display()
-    #     subprocess.call('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
-
 
     def run(self):
         while True:
@@ -96,7 +83,6 @@ class Win(cli.Cli):
                     self.display()
                     self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
                     self.start = 1
-
 
             elif c == 'r':
                 '标记红心,取消标记'

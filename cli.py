@@ -45,7 +45,7 @@ class Cli(object):
             else:
                 suffix = self.SUFFIX_DESELECTED
             line = '%s %s %s' % (prefix, i, suffix)
-            print line
+            print line + '\r' # 为什么加\r,我不知道,如果不加会出bug
 
     def displaysong(self):
         self.displayline = self.markline + self.topline

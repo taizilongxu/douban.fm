@@ -8,6 +8,10 @@
 
 ![](img/1.png)
 
+###使用
+
+    python douban.py
+
 ###登陆
 
 第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在.douban_token.txt,下次登陆无需输入密码.
