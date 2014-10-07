@@ -13,8 +13,8 @@ class Cli(object):
     PREFIX_DESELECTED = '    '
     SUFFIX_SELECTED = '' # 空格标记行后缀
     SUFFIX_DESELECTED = ''
-    VERSION = ' v0.1.7 '
-    TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + VERSION + ' \ '# 标题
+    # VERSION = ' v0.1.7 '
+    TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + ' \ '# 标题
 
     def __init__(self, lines):
         self.love = colored('♥ ', 'red')

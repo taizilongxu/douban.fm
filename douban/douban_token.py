@@ -136,11 +136,19 @@ class Doubanfm(object):
         post_data['sid'] = self.playingsong['sid']
         s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
 
-
     def unrate_music(self):
         "取消标记喜欢歌曲"
         post_data = self.login_data.copy()
         post_data['type'] = 'u'
         post_data['sid'] = self.playingsong['sid']
         s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
+
+    # def end_music(self):
+    #     "歌曲结束标记"
+    #     post_data = self.login_data.copy()
+    #     post_data['type'] = 'e'
+    #     post_data['sid'] = self.playingsong['sid']
+    #     s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
+    #     with open('tmp.txt', 'w') as F:
+    #         F.write(s.text)
 ############################################################################

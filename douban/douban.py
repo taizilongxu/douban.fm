@@ -25,7 +25,8 @@ class Win(cli.Cli):
         self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >>\r'
         self.start = 0 # 歌曲播放
         self.q = 0 # 退出
-        self.song_time = 0
+        self.song_time = -1 # 歌曲剩余播放时间
+        self.rate = ['★ '*i for i in range(1,6)] # 歌曲评分
         # 守护线程
         self.t = threading.Thread(target=self.protect)
         self.t.start()
@@ -39,15 +40,18 @@ class Win(cli.Cli):
         while True:
             if self.q == 1:
                 break
-            if self.song_time:
+            if self.song_time >= 0 and douban.playingsong:
                 minute = int(self.song_time) / 60
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
-                self.TITLE = self.TITLE[:length - 1] + '  ' + douban.playingsong['kbps'] + 'kbps  ' +colored(show_time, 'cyan') + '\r'
+                self.TITLE = self.TITLE[:length - 1] + '  ' + douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(douban.playingsong['rating_avg'])) - 1], 'red') + '\r'
                 self.display()
                 self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
+                # if self.song_end:
+                #     douban.end_music()
+                #     self.song_end = 0
             time.sleep(1)
 
 
@@ -59,6 +63,7 @@ class Win(cli.Cli):
             if self.start:
                 self.p.poll()
                 if self.p.returncode == 0:
+                    self.song_time = -1
                     self.play()
             time.sleep(1)
 
@@ -127,6 +132,7 @@ class Win(cli.Cli):
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
                     douban.skip_song()
+                    douban.playingsong = {}
                     self.play()
             elif c =='b':
                 "不再播放"
