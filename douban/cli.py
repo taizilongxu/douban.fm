@@ -21,7 +21,7 @@ class Cli(object):
         self.lines = lines
         self.markline = 0 # 箭头行
         self.topline = 0 # lines
-        self.displayline = -1 # 歌曲信息
+        self.displayline = 0 # 歌曲信息
         self.screenline = 15 # 屏幕显示行数
         subprocess.call('echo  "\033[?25l"', shell=True) # 取消光标
         # self.run()

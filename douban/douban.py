@@ -33,6 +33,14 @@ class Win(cli.Cli):
         self.t2 = threading.Thread(target=self.display_time)
         self.t2.start()
         super(Win, self).__init__(lines)
+        # 启动自动播放
+        self.SUFFIX_SELECTED = '正在加载请稍后...'
+        self.display()
+        douban.set_channel(-3)
+        douban.get_playlist()
+        self.play()
+        self.start = 1
+        self.run()
 
     def display_time(self):
         "显示时间的线程"
@@ -148,5 +156,4 @@ class Win(cli.Cli):
                 exit()
 
 w = Win(douban.lines)
-w.run()
 ############################################################################
