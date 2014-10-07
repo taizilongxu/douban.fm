@@ -1,4 +1,7 @@
 #-*- encoding: UTF-8 -*-
+"""
+豆瓣FM主程序
+"""
 #---------------------------------import------------------------------------
 import cli
 import douban_token
@@ -10,6 +13,7 @@ import threading
 import string
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
+
 class Win(cli.Cli):
 
     def __init__(self, lines):
@@ -29,7 +33,7 @@ class Win(cli.Cli):
         super(Win, self).__init__(lines)
 
     def display_time(self):
-        '显示时间的线程'
+        "显示时间的线程"
         length = len(self.TITLE)
         while True:
             if self.q == 1:
@@ -47,7 +51,7 @@ class Win(cli.Cli):
 
 
     def protect(self):
-        '守护线程,检查歌曲是否播放完毕'
+        "守护线程,检查歌曲是否播放完毕"
         while True:
             if self.q == 1:
                 break
@@ -58,11 +62,11 @@ class Win(cli.Cli):
             time.sleep(1)
 
     def play(self):
-        '播放歌曲'
+        "播放歌曲"
         douban.get_song()
         song = douban.playingsong
-        '是否是红心歌曲'
         self.time = song['length']
+        # 是否是红心歌曲
         if song['like'] == 1:
             love = self.love
         else:
@@ -82,15 +86,15 @@ class Win(cli.Cli):
             elif c == 'j':
                 self.updown(1)
             elif c == 'g':
-                'g键返回顶部'
+                "g键返回顶部"
                 self.markline = 0
                 self.topline = 0
             elif c == "G":
-                'G键返回底部'
+                "G键返回底部"
                 self.markline = self.screenline
                 self.topline = len(self.lines) - self.screenline - 1
             elif c == ' ':
-                '选择频道,播放歌曲'
+                "选择频道,播放歌曲"
                 if self.markline + self.topline != self.displayline:
                     if douban.playingsong:
                         douban.playingsong = {}
@@ -103,7 +107,7 @@ class Win(cli.Cli):
                     self.play()
                     self.start = 1
             elif c == 'r':
-                '标记红心,取消标记'
+                "标记红心/取消标记"
                 if douban.playingsong:
                     if not douban.playingsong['like']:
                         self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
@@ -116,7 +120,7 @@ class Win(cli.Cli):
                         douban.unrate_music()
                         douban.playingsong['like'] = 0
             elif c =='n':
-                '下一首'
+                "下一首"
                 if douban.playingsong:
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
@@ -124,7 +128,7 @@ class Win(cli.Cli):
                     douban.skip_song()
                     self.play()
             elif c =='b':
-                '不再播放'
+                "不再播放"
                 if douban.playingsong:
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     douban.bye()
