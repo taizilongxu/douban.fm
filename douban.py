@@ -54,18 +54,23 @@ class Win(cli.Cli):
             if self.start:
                 self.p.poll()
                 if self.p.returncode == 0:
-                    douban.get_song()
-                    song = douban.playingsong
-                    '是否是红心歌曲'
-                    self.time = song['length']
-                    if song['like'] == 1:
-                        love = self.love
-                    else:
-                        love = ''
-                    self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-                    self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
-                    self.display()
+                    self.play()
             time.sleep(1)
+
+    def play(self):
+        '播放歌曲'
+        douban.get_song()
+        song = douban.playingsong
+        '是否是红心歌曲'
+        self.time = song['length']
+        if song['like'] == 1:
+            love = self.love
+        else:
+            love = ''
+        self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+        self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+        self.display()
+
 
     def run(self):
         while True:
@@ -95,17 +100,7 @@ class Win(cli.Cli):
                     self.display()
                     douban.set_channel(douban.channels[self.markline + self.topline]['channel_id'])
                     douban.get_playlist()
-                    douban.get_song()
-                    song = douban.playingsong
-                    self.time = song['length']
-                    '是否是红心歌曲'
-                    if song['like'] == 1:
-                        love = self.love
-                    else:
-                        love = ''
-                    self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-                    self.display()
-                    self.p = subprocess.Popen('mplayer -slave -quiet ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    self.play()
                     self.start = 1
 
             elif c == 'r':
@@ -129,33 +124,14 @@ class Win(cli.Cli):
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
                     douban.skip_song()
-                    douban.get_song()
-                    song = douban.playingsong
-                    self.time = song['length']
-                    '是否是红心歌曲'
-                    if song['like'] == 1:
-                        love = self.love
-                    else:
-                        love = ''
-                    self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-                    self.display()
-                    self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    self.play()
 
             elif c =='b':
                 '不再播放'
                 if douban.playingsong:
                     subprocess.Popen('killall -9 mplayer', shell=True)
                     douban.bye()
-                    douban.get_song()
-                    song = douban.playingsong
-                    '是否是红心歌曲'
-                    if song['like'] == 1:
-                        love = self.love
-                    else:
-                        love = ''
-                    self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-                    self.display()
-                    self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    self.play()
 
             elif c == 'q':
                 self.q = 1
