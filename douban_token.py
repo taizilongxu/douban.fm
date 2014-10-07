@@ -1,4 +1,7 @@
 #-*- encoding: UTF-8 -*-
+"""
+豆瓣FM的网络连接部分
+"""
 #---------------------------------import------------------------------------
 import requests
 import urllib
@@ -25,7 +28,7 @@ class Doubanfm(object):
         self.is_pro()
 
     def is_pro(self):
-        # 查看是否是pro用户
+        "查看是否是pro用户"
         self.get_playlist()
         self.get_song()
         if not int(self.playingsong['kbps']) == 64:
@@ -34,13 +37,13 @@ class Doubanfm(object):
         self.playingsong = {}
 
     def win_login(self):
-        '登陆界面'
+        "登陆界面"
         email = raw_input('email:')
         password = raw_input('password:')
         return email,password
 
     def login(self):
-        '登陆douban.fm获取token'
+        "登陆douban.fm获取token"
         if  os.path.exists('.douban_token.txt'):
             with open('.douban_token.txt', 'r') as f:
                 self.login_data = pickle.load(f)
@@ -77,19 +80,17 @@ class Doubanfm(object):
                     pickle.dump(self.login_data, f)
 
     def get_channels(self):
-        '获取channel,c存入self.channels'
+        "获取channel,c存入self.channels"
         r = requests.get('http://www.douban.com/j/app/radio/channels')
         self.channels += eval(r.text)['channels']
 
     def get_channellines(self):
+        "格式化频道列表,以便display"
         for index,channel in enumerate(self.channels):
             self.lines.append(channel['name'])
 
-    # def select_channel(self,num):
-    #     self.channel_num = num
-
     def get_playlist(self):
-        '当playlist为空,获取播放列表'
+        "当playlist为空,获取播放列表"
         self.login_data['channel'] = self.channel_id
         post_data = self.login_data.copy()
         post_data['type'] = 'n'
@@ -99,7 +100,7 @@ class Doubanfm(object):
         self.playlist = eval(s.text)['song']
 
     def skip_song(self):
-        '下一首'
+        "下一首"
         post_data = self.login_data.copy()
         post_data['type'] = 's'
         post_data['sid'] = self.playingsong['sid']
@@ -109,7 +110,7 @@ class Doubanfm(object):
         self.playlist = eval(s.text)['song']
 
     def bye(self):
-        'bye,不再播放'
+        "bye,不再播放"
         post_data = self.login_data.copy()
         post_data['type'] = 'b'
         post_data['sid'] = self.playingsong['sid']
@@ -119,20 +120,17 @@ class Doubanfm(object):
         self.playlist = eval(s.text)['song']
 
     def set_channel(self, num):
+        "选择频道"
         self.channel_id = num
 
     def get_song(self):
+        "获得歌曲"
         if not self.playlist:
             self.get_playlist()
         self.playingsong  = self.playlist.pop(0)
 
-
-    def play(self):
-        self.get_playlist()
-        for song in self.playlist:
-            subprocess.call('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
-
     def rate_music(self):
+        "标记喜欢歌曲"
         post_data = self.login_data.copy()
         post_data['type'] = 'r'
         post_data['sid'] = self.playingsong['sid']
@@ -140,12 +138,9 @@ class Doubanfm(object):
 
 
     def unrate_music(self):
+        "取消标记喜欢歌曲"
         post_data = self.login_data.copy()
         post_data['type'] = 'u'
         post_data['sid'] = self.playingsong['sid']
         s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
-
-if __name__ == '__main__':
-    main()
-
 ############################################################################
