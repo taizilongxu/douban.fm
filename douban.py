@@ -18,14 +18,33 @@ class Win(cli.Cli):
         else:
             PRO = colored('PRO', attrs = ['reverse'])
         self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >>\r'
-        self.start = 0
-        self.q = 0
+        self.start = 0 # 歌曲播放
+        self.q = 0 # 退出
+        self.time = 0
+        # 守护线程
         self.t = threading.Thread(target=self.protect)
         self.t.start()
+        self.t2 = threading.Thread(target=self.display_time)
+        self.t2.start()
         super(Win, self).__init__(lines)
 
+    def display_time(self):
+        '显示时间的线程'
+        length = len(self.TITLE)
+        while True:
+            if self.q == 1:
+                break
+            if self.time:
+                self.TITLE = self.TITLE[:length - 1] + '  ' + str(self.time) + '\r'
+                self.display()
+                self.time -= 1
+            else:
+                self.TITLE = self.TITLE[:length]
+            time.sleep(1)
+
+
     def protect(self):
-        '守护进程,检查歌曲是否播放完毕'
+        '守护线程,检查歌曲是否播放完毕'
         while True:
             if self.q == 1:
                 break
@@ -35,6 +54,7 @@ class Win(cli.Cli):
                     douban.get_song()
                     song = douban.playingsong
                     '是否是红心歌曲'
+                    self.time = song['length']
                     if song['like'] == 1:
                         love = self.love
                     else:
@@ -74,6 +94,7 @@ class Win(cli.Cli):
                     douban.get_playlist()
                     douban.get_song()
                     song = douban.playingsong
+                    self.time = song['length']
                     '是否是红心歌曲'
                     if song['like'] == 1:
                         love = self.love
@@ -107,6 +128,7 @@ class Win(cli.Cli):
                     douban.skip_song()
                     douban.get_song()
                     song = douban.playingsong
+                    self.time = song['length']
                     '是否是红心歌曲'
                     if song['like'] == 1:
                         love = self.love
