@@ -5,9 +5,9 @@ import douban_token
 import getch
 import subprocess
 from termcolor import colored
-import  multiprocessing
 import time
 import threading
+import string
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
 class Win(cli.Cli):
@@ -35,7 +35,10 @@ class Win(cli.Cli):
             if self.q == 1:
                 break
             if self.time:
-                self.TITLE = self.TITLE[:length - 1] + '  ' + str(self.time) + '\r'
+                minute = int(self.time) / 60
+                sec = int(self.time) % 60
+                show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
+                self.TITLE = self.TITLE[:length - 1] + '  ' + show_time + '\r'
                 self.display()
                 self.time -= 1
             else:
@@ -102,7 +105,7 @@ class Win(cli.Cli):
                         love = ''
                     self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
                     self.display()
-                    self.p = subprocess.Popen('mplayer ' + song['url'] + ' >/dev/null 2>&1', shell=True)
+                    self.p = subprocess.Popen('mplayer -slave -quiet ' + song['url'] + ' >/dev/null 2>&1', shell=True)
                     self.start = 1
 
             elif c == 'r':
