@@ -48,6 +48,7 @@ class Cli(object):
             print line + '\r' # 为什么加\r,我不知道,如果不加会出bug
 
     def displaysong(self):
+        "显示歌曲的行号"
         self.displayline = self.markline + self.topline
 
     def run(self):

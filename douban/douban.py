@@ -43,7 +43,7 @@ class Win(cli.Cli):
                 minute = int(self.song_time) / 60
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
-                self.TITLE = self.TITLE[:length - 1] + '  ' + show_time + '\r'
+                self.TITLE = self.TITLE[:length - 1] + '  ' + douban.playingsong['kbps'] + 'kbps  ' +colored(show_time, 'cyan') + '\r'
                 self.display()
                 self.song_time -= 1
             else:
@@ -72,8 +72,8 @@ class Win(cli.Cli):
             love = self.love
         else:
             love = ''
-        self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' ' + song['kbps'] + 'kbps ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
-        self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True)
+        self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' • ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+        self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
         self.display()
 
 
@@ -136,7 +136,8 @@ class Win(cli.Cli):
                     self.play()
             elif c == 'q':
                 self.q = 1
-                subprocess.Popen('killall -9 mplayer', shell=True)
+                if self.start:
+                    subprocess.Popen('killall -9 mplayer', shell=True)
                 subprocess.call('echo -e "\033[?25h";clear', shell=True)
                 exit()
 
