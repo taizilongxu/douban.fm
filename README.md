@@ -51,6 +51,10 @@
 * 歌词
 * 终端高度的自动调整
 
+###BUG
+
+* 播放歌曲中有时候会暂停
+
 ###参考资料
 
 * node.js版本的[douban.fm](https://github.com/turingou/douban.fm)
