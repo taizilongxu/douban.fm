@@ -24,7 +24,7 @@ class Win(cli.Cli):
         self.TITLE += douban.user_name + ' ' + PRO + ' ' + ' >>\r'
         self.start = 0 # 歌曲播放
         self.q = 0 # 退出
-        self.time = 0
+        self.song_time = 0
         # 守护线程
         self.t = threading.Thread(target=self.protect)
         self.t.start()
@@ -38,13 +38,13 @@ class Win(cli.Cli):
         while True:
             if self.q == 1:
                 break
-            if self.time:
-                minute = int(self.time) / 60
-                sec = int(self.time) % 60
+            if self.song_time:
+                minute = int(self.song_time) / 60
+                sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.TITLE = self.TITLE[:length - 1] + '  ' + show_time + '\r'
                 self.display()
-                self.time -= 1
+                self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
@@ -65,7 +65,7 @@ class Win(cli.Cli):
         "播放歌曲"
         douban.get_song()
         song = douban.playingsong
-        self.time = song['length']
+        self.song_time = song['length']
         # 是否是红心歌曲
         if song['like'] == 1:
             love = self.love
