@@ -1,4 +1,4 @@
-##Douban FM v0.2.0 [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](http://badge.fury.io/py/douban.fm)
+##douban.fm  [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](http://badge.fury.io/py/douban.fm)
 
 
 ubuntu通过测试,其他平台暂时未做测试.
