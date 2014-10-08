@@ -7,7 +7,7 @@ ubuntu通过测试,其他平台暂时未做测试.
 
 Python版本
 
-![screenshot](img/1.png)
+![screenshot](img/2.png)
 
 ###为什么Python版本
 

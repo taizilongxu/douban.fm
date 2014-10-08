@@ -1,17 +1,11 @@
 #-*- encoding: UTF-8 -*-
-import codecs
-import os
-import sys
-
-try:
-  from setuptools import setup
-except:
-  from distutils.core import setup
+from setuptools import setup, find_packages
+import sys, os
 """
 打包的用的setup必须引入，
 """
 
-VERSION = '0.1.13'
+VERSION = '0.2.0'
 
 setup(name='douban.fm',
       version=VERSION,

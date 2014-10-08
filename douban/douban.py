@@ -12,6 +12,7 @@ from termcolor import colored
 import threading
 import string
 import time
+import os
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
 
@@ -88,6 +89,14 @@ class Win(cli.Cli):
         self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' • ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
         self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
         self.display()
+        self.notifySend()
+
+    def notifySend(self):
+        "发送桌面通知"
+        picture = douban.playingsong['picture']
+        title = douban.playingsong['title']
+        content = douban.playingsong['artist']
+        subprocess.call([ 'notify-send', '-i', os.getcwd() + '/' + picture, title, content])
 
 
     def run(self):
@@ -155,5 +164,9 @@ class Win(cli.Cli):
                 subprocess.call('echo -e "\033[?25h";clear', shell=True)
                 exit()
 
-w = Win(douban.lines)
+def main():
+    w = Win(douban.lines)
+
+if __name__ == '__main__':
+    main()
 ############################################################################
