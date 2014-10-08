@@ -1,4 +1,4 @@
-##![](http://ww3.sinaimg.cn/large/61ff0de3gw1e77q7mth9dj200z00z3ya.jpg) Douban FM v0.1.7
+##![](http://ww3.sinaimg.cn/large/61ff0de3gw1e77q7mth9dj200z00z3ya.jpg) Douban FM v0.1.7 [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](http://badge.fury.io/py/douban.fm)
 
 
 ubuntu通过测试,其他平台暂时未做测试.
