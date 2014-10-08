@@ -6,11 +6,13 @@ import sys, os
 """
 
 VERSION = '0.2.0'
+with open('README.rd') as f:
+    long_description = f.read()
 
 setup(name='douban.fm',
       version=VERSION,
       description="a tiny and smart cli player of douban.fm based on Python",
-      long_description="""a tiny and smart cli player of douban.fm based on Python""",
+      long_description=long_description,
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='python douban douban.fm terminal',
       author='taizilongxu',

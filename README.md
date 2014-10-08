@@ -1,13 +1,13 @@
 ##douban.fm  [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](http://badge.fury.io/py/douban.fm)
 
 
-ubuntu通过测试,其他平台暂时未做测试.
+ubuntu 14.04通过测试,其他平台暂时未做测试.
 
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的.
 
 Python版本
 
-![screenshot](img/2.png)
+![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/2.png)
 
 ###为什么Python版本
 
@@ -49,6 +49,7 @@ Python版本
 * cli设计
 * 播放,下一首,红心,不再播放
 * 进度条
+* 终端高度的自动调整
 
 ###TODO
 
@@ -56,7 +57,6 @@ Python版本
 * 歌曲结束request(记录歌曲播放数)
 * 播放歌曲数 红心数 不再播放数
 * 歌词
-* 终端高度的自动调整
 
 ###BUG
 
