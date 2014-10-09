@@ -26,6 +26,8 @@ class Doubanfm(object):
         self.get_channels() # 获取频道列表
         self.get_channellines() # 重构列表用以显示
         self.is_pro()
+        if self.pro == 1:
+            self.login_data['kbps'] = 192 # 128 64 歌曲kbps的选择
 
     def is_pro(self):
         "查看是否是pro用户"

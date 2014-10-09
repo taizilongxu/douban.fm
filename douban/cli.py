@@ -13,7 +13,6 @@ class Cli(object):
     PREFIX_DESELECTED = '    '
     SUFFIX_SELECTED = '' # 空格标记行后缀
     SUFFIX_DESELECTED = ''
-    # VERSION = ' v0.1.7 '
     TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + ' \ '# 标题
 
     def __init__(self, lines):
@@ -24,14 +23,14 @@ class Cli(object):
         self.displayline = 0 # 歌曲信息
         self.screenline = self.linesnum() - 4 # 屏幕显示行数
         subprocess.call('echo  "\033[?25l"', shell=True) # 取消光标
-        # self.run()
 
     def linesnum(self):
+        "测试屏幕显示行数"
         num = subprocess.check_output('stty size', shell=True)
         return int(num.split(' ')[0])
 
-
     def display(self):
+        "展示窗口"
         subprocess.call('clear', shell=True) # 清屏
         print
         print self.TITLE
