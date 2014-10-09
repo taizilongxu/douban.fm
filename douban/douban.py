@@ -58,9 +58,6 @@ class Win(cli.Cli):
                 self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
-                # if self.song_end:
-                #     douban.end_music()
-                #     self.song_end = 0
             time.sleep(1)
 
 
@@ -73,6 +70,7 @@ class Win(cli.Cli):
                 self.p.poll()
                 if self.p.returncode == 0:
                     self.song_time = -1
+                    douban.end_music()
                     self.play()
             time.sleep(1)
 
