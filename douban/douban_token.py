@@ -93,35 +93,30 @@ class Doubanfm(object):
         for index,channel in enumerate(self.channels):
             self.lines.append(channel['name'])
 
+    def requests_url(self, ptype, **data):
+        "发送post_data"
+        post_data = self.login_data.copy()
+        post_data['type'] = ptype
+        for x in data:
+            post_data[x] = data[x]
+        s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
+        return s.text
+
     def get_playlist(self):
         "当playlist为空,获取播放列表"
         self.login_data['channel'] = self.channel_id
-        post_data = self.login_data.copy()
-        post_data['type'] = 'n'
-
-        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data).strip()
-        s = requests.get(url)
-        self.playlist = eval(s.text)['song']
+        s = self.requests_url('n')
+        self.playlist = eval(s)['song']
 
     def skip_song(self):
         "下一首"
-        post_data = self.login_data.copy()
-        post_data['type'] = 's'
-        post_data['sid'] = self.playingsong['sid']
-
-        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data).strip()
-        s = requests.get(url)
-        self.playlist = eval(s.text)['song']
+        s = self.requests_url('s', sid=self.playingsong['sid'])
+        self.playlist = eval(s)['song']
 
     def bye(self):
         "bye,不再播放"
-        post_data = self.login_data.copy()
-        post_data['type'] = 'b'
-        post_data['sid'] = self.playingsong['sid']
-
-        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data).strip()
-        s = requests.get(url)
-        self.playlist = eval(s.text)['song']
+        s = self.requests_url('b', sid=self.playingsong['sid'])
+        self.playlist = eval(s)['song']
 
     def set_channel(self, num):
         "选择频道"
@@ -135,25 +130,16 @@ class Doubanfm(object):
 
     def rate_music(self):
         "标记喜欢歌曲"
-        post_data = self.login_data.copy()
-        post_data['type'] = 'r'
-        post_data['sid'] = self.playingsong['sid']
-        s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
-        self.playlist = eval(s.text)['song']
+        s = self.requests_url('r', sid=self.playingsong['sid'])
+        self.playlist = eval(s)['song']
 
     def unrate_music(self):
         "取消标记喜欢歌曲"
-        post_data = self.login_data.copy()
-        post_data['type'] = 'u'
-        post_data['sid'] = self.playingsong['sid']
-        s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
-        self.playlist = eval(s.text)['song']
+        s = self.requests_url('u', sid=self.playingsong['sid'])
+        self.playlist = eval(s)['song']
 
     def end_music(self):
         "歌曲结束标记"
-        post_data = self.login_data.copy()
-        post_data['type'] = 'e'
-        post_data['sid'] = self.playingsong['sid']
-        post_data['pb'] = '192'
-        s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
+        s = self.requests_url('e', sid=self.playingsong['sid'])
+        # post_data['pb'] = '192'
 ############################################################################
