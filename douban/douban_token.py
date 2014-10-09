@@ -47,6 +47,7 @@ class Doubanfm(object):
     def login(self):
         "登陆douban.fm获取token"
         if  os.path.exists('.douban_token.txt'):
+            # 已登陆
             with open('.douban_token.txt', 'r') as f:
                 self.login_data = pickle.load(f)
                 self.token = self.login_data['token']
@@ -54,6 +55,7 @@ class Doubanfm(object):
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
         else:
+            # 未登陆
             self.email,self.password = self.win_login()
             login_data = {
                     'app_name': 'radio_desktop_win',

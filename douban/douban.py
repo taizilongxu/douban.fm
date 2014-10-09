@@ -127,6 +127,11 @@ class Win(cli.Cli):
                     douban.get_playlist()
                     self.play()
                     self.start = 1
+            elif c == 'l':
+                "打开当前播放歌曲豆瓣页"
+                import webbrowser
+                webbrowser.open("http://music.douban.com" + douban.playingsong['album'])
+                self.display()
             elif c == 'r':
                 "标记红心/取消标记"
                 if douban.playingsong:

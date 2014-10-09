@@ -5,8 +5,8 @@ import sys, os
 打包的用的setup必须引入，
 """
 
-VERSION = '0.2.0'
-with open('README.rd') as f:
+VERSION = '0.2.1'
+with open('README.rst') as f:
     long_description = f.read()
 
 setup(name='douban.fm',
