@@ -33,7 +33,7 @@ class Doubanfm(object):
         "查看是否是pro用户"
         self.get_playlist()
         self.get_song()
-        if not int(self.playingsong['kbps']) == 64:
+        if  int(self.playingsong['kbps']) != 64:
             self.pro = 1
         # 清空列表
         self.playingsong = {}
@@ -141,5 +141,4 @@ class Doubanfm(object):
     def end_music(self):
         "歌曲结束标记"
         s = self.requests_url('e', sid=self.playingsong['sid'])
-        # post_data['pb'] = '192'
 ############################################################################

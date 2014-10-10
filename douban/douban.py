@@ -37,7 +37,7 @@ class Win(cli.Cli):
         # 启动自动播放
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
-        douban.set_channel(-3)
+        douban.set_channel(douban.channels[self.markline]['channel_id']) # 设置默认频率
         douban.get_playlist()
         self.play()
         self.start = 1
