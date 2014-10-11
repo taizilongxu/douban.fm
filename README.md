@@ -9,11 +9,11 @@ Python版本
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/2.png)
 
-###为什么Python版本
+###Do something cool!
 
 其实Node.js版本已经很好了,功能齐全,但是我发现在我的zsh + tmux环境下颜色竟然显示不出来,感觉很蛋疼.
 
-###安装
+###Setup
 
     sudo pip install douban.fm
 
@@ -21,15 +21,15 @@ Python版本
 
     sudo apt-get install mplayer
 
-###使用
+###Usage
 
 在终端下直接输入douban.fm
 
-###登陆
+###Login
 
 第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在.douban_token.txt,下次登陆无需输入密码.
 
-###按键
+###Keys
 
 支持vim按键
 
@@ -44,7 +44,7 @@ Python版本
 * b 不再播放
 * q 退出
 
-###已完成功能
+###Done
 
 * 登陆token
 * 显示PRO

@@ -18,7 +18,7 @@ class Cli(object):
     def __init__(self, lines):
         self.love = colored('♥ ', 'red')
         self.lines = lines
-        self.markline = 2 # 箭头行 初始化设置默认频道
+        self.markline = 0 # 箭头行 初始化设置默认频道
         self.topline = 0 # lines
         self.displayline = self.markline # 初始化歌曲信息显示行
         self.screenline = self.linesnum() - 4 # 屏幕显示行数

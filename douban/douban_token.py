@@ -48,7 +48,7 @@ class Doubanfm(object):
         "登陆douban.fm获取token"
         if  os.path.exists('.douban_token.txt'):
             # 已登陆
-            with open('.douban_token.txt', 'r') as f:
+            with open(os.path.expanduser('~') + '/.douban_token.txt', 'r') as f:
                 self.login_data = pickle.load(f)
                 self.token = self.login_data['token']
                 self.user_name = self.login_data['user_name']

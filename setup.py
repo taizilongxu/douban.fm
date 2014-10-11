@@ -5,14 +5,12 @@ import sys, os
 打包的用的setup必须引入，
 """
 
-VERSION = '0.2.1'
-with open('README.md') as f:
-    long_description = f.read()
+VERSION = '0.2.5'
 
 setup(name='douban.fm',
       version=VERSION,
       description="a tiny and smart cli player of douban.fm based on Python",
-      long_description=long_description,
+      long_description='just do something cool!',
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='python douban douban.fm terminal',
       author='taizilongxu',
@@ -24,7 +22,6 @@ setup(name='douban.fm',
       zip_safe=True,
       install_requires=[
         'termcolor',
-        'requests',
       ],
       entry_points={
         'console_scripts':[
