@@ -64,8 +64,6 @@ class Cli(object):
                 self.updown(-1)
             if c == 'j':
                 self.updown(1)
-            if c == ' ':
-                self.displaysong()
             if c == 'q':
                 exit()
 

@@ -24,6 +24,7 @@ setup(name='douban.fm',
       zip_safe=True,
       install_requires=[
         'termcolor',
+        'requests',
       ],
       entry_points={
         'console_scripts':[

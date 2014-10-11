@@ -89,13 +89,17 @@ class Win(cli.Cli):
         self.display()
         self.notifySend()
 
+    def kill_mplayer(self):
+        "结束mplayer"
+        if subprocess.check_output('ps -a | grep mplayer', shell=True):
+            subprocess.Popen('killall -9 mplayer', shell=True)
+
     def notifySend(self):
         "发送桌面通知"
         picture = douban.playingsong['picture']
         title = douban.playingsong['title']
         content = douban.playingsong['artist']
         subprocess.call([ 'notify-send', '-i', os.getcwd() + '/' + picture, title, content])
-
 
     def run(self):
         while True:
@@ -119,7 +123,7 @@ class Win(cli.Cli):
                 if self.markline + self.topline != self.displayline:
                     if douban.playingsong:
                         douban.playingsong = {}
-                        subprocess.Popen('killall -9 mplayer', shell=True)
+                        self.kill_mplayer()
                     self.displaysong()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
@@ -148,7 +152,7 @@ class Win(cli.Cli):
             elif c =='n':
                 "下一首"
                 if douban.playingsong:
-                    subprocess.Popen('killall -9 mplayer', shell=True)
+                    self.kill_mplayer()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
                     douban.skip_song()
@@ -157,13 +161,13 @@ class Win(cli.Cli):
             elif c =='b':
                 "不再播放"
                 if douban.playingsong:
-                    subprocess.Popen('killall -9 mplayer', shell=True)
+                    self.kill_mplayer()
                     douban.bye()
                     self.play()
             elif c == 'q':
                 self.q = 1
                 if self.start:
-                    subprocess.Popen('killall -9 mplayer', shell=True)
+                    self.kill_mplayer()
                 subprocess.call('echo -e "\033[?25h";clear', shell=True)
                 exit()
 

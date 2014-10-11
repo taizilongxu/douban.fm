@@ -1,9 +1,9 @@
 ##douban.fm  [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](http://badge.fury.io/py/douban.fm)
 
 
-ubuntu 14.04通过测试,其他平台暂时未做测试.
+ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整
 
-这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的.
+这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
 
 Python版本
 
@@ -61,6 +61,8 @@ Python版本
 * 歌曲暂停
 * 播放歌曲数 红心数 不再播放数
 * 歌词
+* config设置
+* 异常处理
 
 ###BUG
 
