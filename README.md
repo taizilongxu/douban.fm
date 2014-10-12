@@ -1,4 +1,4 @@
-##douban.fm  [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](http://badge.fury.io/py/douban.fm)
+##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg)](https://crate.io/packages/douban.fm) [![Supported Python versions](https://pypip.in/py_versions/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm/) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://crate.io/packages/douban.fm)
 
 
 ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整
@@ -13,7 +13,7 @@ Python版本
 
 其实Node.js版本已经很好了,功能齐全,但是我发现在我的zsh + tmux环境下颜色竟然显示不出来,感觉很蛋疼.
 
-###Setup
+###Download
 
     sudo pip install douban.fm
 
@@ -27,7 +27,7 @@ Python版本
 
 ###Login
 
-第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在.douban_token.txt,下次登陆无需输入密码.
+第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在~/.douban_token.txt,下次登陆无需输入密码.
 
 ###Keys
 
@@ -68,6 +68,8 @@ Python版本
 
 * ~~播放歌曲中有时候会暂停~~
 * ~~退出后终端光标会隐藏~~
+
+###License [![License](https://pypip.in/license/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm/)
 
 
 ###参考资料
