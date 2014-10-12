@@ -3,4 +3,6 @@ nguage: python
 python:
     - "2.7"
 script:
-    - python douban.py
+    - python douban/douban.py
+install:
+    - pip install requests
