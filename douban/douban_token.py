@@ -22,6 +22,15 @@ class Doubanfm(object):
         self.pro = 0
         self.playlist = []
         self.playingsong = {}
+        print '''
+        ──╔╗─────╔╗────────╔═╗
+        ──║║─────║║────────║╔╝
+        ╔═╝╠══╦╗╔╣╚═╦══╦═╗╔╝╚╦╗╔╗
+        ║╔╗║╔╗║║║║╔╗║╔╗║╔╗╬╗╔╣╚╝║
+        ║╚╝║╚╝║╚╝║╚╝║╔╗║║║╠╣║║║║║
+        ╚══╩══╩══╩══╩╝╚╩╝╚╩╩╝╚╩╩╝
+
+        '''
         self.login() # 登陆
         self.get_channels() # 获取频道列表
         self.get_channellines() # 重构列表用以显示
