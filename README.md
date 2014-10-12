@@ -1,4 +1,5 @@
-##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg)](https://crate.io/packages/douban.fm) [![Supported Python versions](https://pypip.in/py_versions/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm/) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://crate.io/packages/douban.fm)
+##douban.fm 
+[![version](https://pypip.in/version/douban.fm/badge.svg)](https://crate.io/packages/douban.fm) [![Supported Python versions](https://pypip.in/py_versions/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm/) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://crate.io/packages/douban.fm)
 
 
 ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整
@@ -69,7 +70,7 @@ Python版本
 * ~~播放歌曲中有时候会暂停~~
 * ~~退出后终端光标会隐藏~~
 
-###License [![License](https://pypip.in/license/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm/)
+###License (MIT)
 
 
 ###参考资料
