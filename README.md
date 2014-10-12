@@ -1,5 +1,4 @@
-##douban.fm 
-[![version](https://pypip.in/version/douban.fm/badge.svg)](https://crate.io/packages/douban.fm) [![Supported Python versions](https://pypip.in/py_versions/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm/) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://crate.io/packages/douban.fm)
+##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg)](https://crate.io/packages/douban.fm) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://crate.io/packages/douban.fm)
 
 
 ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整
@@ -71,6 +70,13 @@ Python版本
 * ~~退出后终端光标会隐藏~~
 
 ###License (MIT)
+Copyright (c) 2014 hackerxu <468137306@qq.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 ###参考资料
