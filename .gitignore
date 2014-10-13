@@ -1,6 +1,7 @@
 *.pyc
 *.swp
 *.txt
+.ycm_extra_conf.py
 # Packages
 *.egg
 *.egg-info

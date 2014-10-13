@@ -15,15 +15,15 @@ Python版本
 
 ###Download
 
-    sudo pip install douban.fm
-
-需要mplayer播放器依赖,如未安装:
+    sudo pip install douban.fm 需要mplayer播放器依赖,如未安装:
 
     sudo apt-get install mplayer
 
 ###Usage
 
-在终端下直接输入douban.fm
+在终端下直接输入
+
+    douban.fm
 
 ###Login
 
@@ -60,7 +60,7 @@ Python版本
 
 * 歌曲暂停
 * 播放歌曲数 红心数 不再播放数
-* 歌词
+* 歌词(歌词暂时没有好的API)
 * config设置
 * 异常处理
 
