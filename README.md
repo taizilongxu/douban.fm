@@ -15,7 +15,9 @@ Python版本
 
 ###Download
 
-    sudo pip install douban.fm 需要mplayer播放器依赖,如未安装:
+    sudo pip install douban.fm
+
+需要mplayer播放器依赖,如未安装:
 
     sudo apt-get install mplayer
 
