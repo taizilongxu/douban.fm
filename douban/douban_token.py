@@ -90,7 +90,7 @@ class Doubanfm(object):
                     'token' : self.token,
                     'user_name' : self.user_name
                         }
-                with open('.douban_token.txt','w') as f:
+                with open('~/.douban_token.txt','w') as f:
                     pickle.dump(self.login_data, f)
 
     def get_channels(self):

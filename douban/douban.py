@@ -13,6 +13,7 @@ import threading
 import string
 import time
 import os
+import urllib2
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
 
@@ -85,6 +86,7 @@ class Win(cli.Cli):
         else:
             love = ''
         self.SUFFIX_SELECTED = love + colored(song['title'], 'green') + ' • ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']
+
         self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
         self.display()
         self.notifySend()
@@ -94,12 +96,25 @@ class Win(cli.Cli):
         if subprocess.check_output('ps -a | grep mplayer', shell=True):
             subprocess.Popen('killall -9 mplayer', shell=True)
 
+    def downloadPic(self, path, name, url):
+        with open(path + name, 'w') as pic:
+            pic.write(urllib2.urlopen(url).read())
+
     def notifySend(self):
         "发送桌面通知"
         picture = douban.playingsong['picture']
+
+        "get icon"
+        name = picture[picture.rindex(os.sep)+1:]
+        # /home/xxx/douban.fm works, .. does not work
+        songpath = os.path.abspath(os.path.pardir) + os.sep + 'songpics' + os.sep
+        url =  picture.replace('\\','')
+        if not os.path.exists(songpath + name):
+            self.downloadPic(songpath, name, url)
+
         title = douban.playingsong['title']
         content = douban.playingsong['artist']
-        subprocess.call([ 'notify-send', '-i', os.getcwd() + '/' + picture, title, content])
+        subprocess.call([ 'notify-send', '-i',  songpath + name, title, content])
 
     def run(self):
         while True:

@@ -71,7 +71,7 @@ class Cli(object):
         # paging
         if increment == -1 and self.markline == 0 and self.topline != 0:
             self.topline -= 1
-        elif increment == 1 and self.markline + self.topline != len(self.lines) - 1and self.markline == self.screenline:
+        elif increment == 1 and self.markline + self.topline != len(self.lines) - 1 and self.markline == self.screenline:
             self.topline += 1
         # scroll
         if increment == -1 and self.markline != 0:
