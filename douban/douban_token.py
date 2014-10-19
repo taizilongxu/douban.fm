@@ -5,6 +5,7 @@
 #---------------------------------import------------------------------------
 import requests
 import urllib
+# import urllib2
 import os
 import pickle
 #---------------------------------------------------------------------------
@@ -148,4 +149,12 @@ class Doubanfm(object):
     # 歌曲结束标记
     def end_music(self):
         s = self.requests_url('e', sid=self.playingsong['sid'])
+
+    # 获取专辑封面
+    def get_pic(self):
+        path = os.path.abspath('.') + os.sep + 'tmp.jpg'
+        url = self.playingsong['picture'].replace('\\', '')
+        img = urllib.urlretrieve(url, path)
+        # with open(path, 'w') as F:
+        #     F.write(urllib2.urlopen(url).read())
 ############################################################################
