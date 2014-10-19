@@ -95,22 +95,8 @@ class Win(cli.Cli):
         if subprocess.check_output('ps -a | grep mplayer', shell=True):
             subprocess.Popen('killall -9 mplayer', shell=True)
 
-    # 下载图片
-    # def downloadPic(self, path, name, url):
-    #     with open(path + name, 'w') as pic:
-    #         pic.write(urllib2.urlopen(url).read())
-
     # 发送桌面通知
     def notifySend(self):
-        # picture = douban.playingsong['picture']
-
-        # get icon
-        # name = picture[picture.rindex(os.sep)+1:]
-        # /home/xxx/douban.fm works, .. does not work
-        # songpath = os.path.abspath(os.path.pardir) + os.sep + 'songpics' + os.sep
-        # url =  picture.replace('\\','')
-        # if not os.path.exists(songpath + name):
-            # self.downloadPic(songpath, name, url)
         douban.get_pic() # 获取封面
         path = os.path.abspath('.') + os.sep + 'tmp.jpg'
         title = douban.playingsong['title']

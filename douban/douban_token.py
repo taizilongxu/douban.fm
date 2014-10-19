@@ -5,7 +5,6 @@
 #---------------------------------import------------------------------------
 import requests
 import urllib
-# import urllib2
 import os
 import pickle
 #---------------------------------------------------------------------------
@@ -154,7 +153,5 @@ class Doubanfm(object):
     def get_pic(self):
         path = os.path.abspath('.') + os.sep + 'tmp.jpg'
         url = self.playingsong['picture'].replace('\\', '')
-        img = urllib.urlretrieve(url, path)
-        # with open(path, 'w') as F:
-        #     F.write(urllib2.urlopen(url).read())
+        urllib.urlretrieve(url, path)
 ############################################################################
