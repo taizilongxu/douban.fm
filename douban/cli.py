@@ -1,7 +1,12 @@
 #-*- encoding: UTF-8 -*-
 '''
-Douban Fm 界面设计
 用print设计的滚动终端界面
+
+PREFIX_SELECTED:可以指定当前指向行的前缀
+PREFIX_DESELECTED:暂时没有用,如果想保持选项行一致需要填写和PREFIX_SELECTED一样大小的空格
+SUFFIX_SELECTED:对选中行进行标记
+SUFFIX_DESELECTED:暂时无用
+TITLE:界面标题的设定
 '''
 #---------------------------------import------------------------------------
 import subprocess
@@ -55,6 +60,7 @@ class Cli(object):
     def displaysong(self):
         self.displayline = self.markline + self.topline
 
+    # 界面执行程序
     def run(self):
         while True:
             self.display()
@@ -67,6 +73,7 @@ class Cli(object):
             if c == 'q':
                 exit()
 
+    # 对上下键进行反应,调成page和scroll
     def updown(self, increment):
         # paging
         if increment == -1 and self.markline == 0 and self.topline != 0:
