@@ -24,13 +24,13 @@ class Cli(object):
         self.screenline = self.linesnum() - 4 # 屏幕显示行数
         subprocess.call('echo  "\033[?25l"', shell=True) # 取消光标
 
+    # 测试屏幕显示行数
     def linesnum(self):
-        "测试屏幕显示行数"
         num = subprocess.check_output('stty size', shell=True)
         return int(num.split(' ')[0])
 
+    # 展示窗口
     def display(self):
-        "展示窗口"
         subprocess.call('clear', shell=True) # 清屏
         print
         print self.TITLE
@@ -51,8 +51,8 @@ class Cli(object):
             line = '%s %s %s' % (prefix, i, suffix)
             print line + '\r' # 为什么加\r,我不知道,如果不加会出bug
 
+    # 显示歌曲的行号
     def displaysong(self):
-        "显示歌曲的行号"
         self.displayline = self.markline + self.topline
 
     def run(self):

@@ -44,8 +44,8 @@ class Win(cli.Cli):
         self.start = 1
         self.run()
 
+    # 显示时间的线程
     def display_time(self):
-        "显示时间的线程"
         length = len(self.TITLE)
         while True:
             if self.q == 1:
@@ -61,9 +61,8 @@ class Win(cli.Cli):
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
 
-
+    # 守护线程,检查歌曲是否播放完毕
     def protect(self):
-        "守护线程,检查歌曲是否播放完毕"
         while True:
             if self.q == 1:
                 break
@@ -75,8 +74,8 @@ class Win(cli.Cli):
                     self.play()
             time.sleep(1)
 
+    # 播放歌曲
     def play(self):
-        "播放歌曲"
         douban.get_song()
         song = douban.playingsong
         self.song_time = song['length']
@@ -91,8 +90,8 @@ class Win(cli.Cli):
         self.display()
         self.notifySend()
 
+    # 结束mplayer
     def kill_mplayer(self):
-        "结束mplayer"
         if subprocess.check_output('ps -a | grep mplayer', shell=True):
             subprocess.Popen('killall -9 mplayer', shell=True)
 
@@ -100,11 +99,11 @@ class Win(cli.Cli):
         with open(path + name, 'w') as pic:
             pic.write(urllib2.urlopen(url).read())
 
+    # 发送桌面通知
     def notifySend(self):
-        "发送桌面通知"
         picture = douban.playingsong['picture']
 
-        "get icon"
+        # get icon
         name = picture[picture.rindex(os.sep)+1:]
         # /home/xxx/douban.fm works, .. does not work
         songpath = os.path.abspath(os.path.pardir) + os.sep + 'songpics' + os.sep
@@ -125,16 +124,13 @@ class Win(cli.Cli):
                 self.updown(-1)
             elif c == 'j':
                 self.updown(1)
-            elif c == 'g':
-                "g键返回顶部"
+            elif c == 'g': # g键返回顶部
                 self.markline = 0
                 self.topline = 0
-            elif c == "G":
-                "G键返回底部"
+            elif c == "G": # G键返回底部
                 self.markline = self.screenline
                 self.topline = len(self.lines) - self.screenline - 1
-            elif c == ' ':
-                "选择频道,播放歌曲"
+            elif c == ' ': # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     if douban.playingsong:
                         douban.playingsong = {}
@@ -146,13 +142,11 @@ class Win(cli.Cli):
                     douban.get_playlist()
                     self.play()
                     self.start = 1
-            elif c == 'l':
-                "打开当前播放歌曲豆瓣页"
+            elif c == 'l': # l打开当前播放歌曲豆瓣页
                 import webbrowser
                 webbrowser.open("http://music.douban.com" + douban.playingsong['album'])
                 self.display()
-            elif c == 'r':
-                "标记红心/取消标记"
+            elif c == 'r': # r标记红心/取消标记
                 if douban.playingsong:
                     if not douban.playingsong['like']:
                         self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
@@ -164,8 +158,7 @@ class Win(cli.Cli):
                         self.display()
                         douban.unrate_music()
                         douban.playingsong['like'] = 0
-            elif c =='n':
-                "下一首"
+            elif c =='n': # n下一首
                 if douban.playingsong:
                     self.kill_mplayer()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
@@ -173,8 +166,7 @@ class Win(cli.Cli):
                     douban.skip_song()
                     douban.playingsong = {}
                     self.play()
-            elif c =='b':
-                "不再播放"
+            elif c =='b': # b不再播放
                 if douban.playingsong:
                     self.kill_mplayer()
                     douban.bye()
