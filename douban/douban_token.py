@@ -19,8 +19,8 @@ class Doubanfm(object):
             'channel_id' : -3
             }]
         self.pro = 0
-        self.playlist = []
-        self.playingsong = {}
+        self.playlist = [] # 播放列表
+        self.playingsong = {} # 当前播放歌曲
         print '''
         ──╔╗─────╔╗────────╔═╗
         ──║║─────║║────────║╔╝
@@ -54,9 +54,9 @@ class Doubanfm(object):
 
     # 登陆douban.fm获取token
     def login(self):
-        path = os.path.expanduser('~/.douban_token.txt')
-        if  os.path.exists(path): # 已登陆
-            with open(path, 'r') as f:
+        path_token = os.path.expanduser('~/.douban_token.txt')
+        if  os.path.exists(path_token): # 已登陆
+            with open(path_token, 'r') as f:
                 self.login_data = pickle.load(f)
                 self.token = self.login_data['token']
                 self.user_name = self.login_data['user_name']
@@ -87,8 +87,25 @@ class Doubanfm(object):
                     'token' : self.token,
                     'user_name' : self.user_name
                         }
-                with open(path,'w') as f:
+                with open(path_token, 'w') as f:
                     pickle.dump(self.login_data, f)
+            # 配置文件
+            path_config = os.path.expanduser('~/.doubanfm_config')
+            config ="""
+            [key]
+            UP = k
+            DOWN = j
+            TOP = g
+            BOTTOM = G
+            PLAY = ' '
+            OPENURL = l
+            RATE = r
+            NEXT = n
+            BYE = b
+            QUIT = q
+            """
+            with open(path_config, 'w') as F:
+                F.write(config)
 
     # 获取channel,c存入self.channels
     def get_channels(self):
