@@ -54,7 +54,7 @@ class Doubanfm(object):
 
     # 登陆douban.fm获取token
     def login(self):
-        path = os.path.expanduser('~') + '/.douban_token.txt'
+        path = os.path.expanduser('~/.douban_token.txt')
         if  os.path.exists(path): # 已登陆
             with open(path, 'r') as f:
                 self.login_data = pickle.load(f)
