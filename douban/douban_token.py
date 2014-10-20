@@ -7,6 +7,7 @@ import requests
 import urllib
 import os
 import pickle
+import getpass
 #---------------------------------------------------------------------------
 class Doubanfm(object):
     def __init__(self):
@@ -49,7 +50,7 @@ class Doubanfm(object):
     # 登陆界面
     def win_login(self):
         email = raw_input('email:')
-        password = raw_input('password:')
+        password = getpass.getpass('password:')
         return email,password
 
     # 登陆douban.fm获取token
