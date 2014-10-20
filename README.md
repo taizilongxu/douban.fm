@@ -5,15 +5,15 @@ ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要
 
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
 
-Python版本
+### Screenshots
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/2.png)
 
-###Do something cool!
+### Do something cool!
 
 其实Node.js版本已经很好了,功能齐全,但是我发现在我的zsh + tmux环境下颜色竟然显示不出来,感觉很蛋疼.
 
-###Download
+### Installation
 
     $ sudo pip install douban.fm
 
@@ -21,17 +21,17 @@ Python版本
 
     $ sudo apt-get install mplayer
 
-###Usage
+### Usage
 
 在终端下直接输入
 
     $ douban.fm
 
-###Login
+### Login
 
 第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在~/.douban_token.txt,下次登陆无需输入密码.
 
-###Keys
+### Keys
 
 支持vim按键
 
@@ -48,7 +48,7 @@ Python版本
  [q]     --> 退出
 ```
 
-###Config(v0.2.8)
+### Configuration(v0.2.8)
 
 .doubanfm_config保存在了~/.doubanfm_config,根据需要可以修改按键的映射
 
@@ -65,7 +65,7 @@ BYE = b      # 不再播放
 QUIT = q     # 退出
 ```
 
-###Done
+### Done
 
 * 登陆token
 * 显示PRO
@@ -78,24 +78,31 @@ QUIT = q     # 退出
 * kbps的选择
 * config设置
 
-###TODO
+### TODO
 
 * 歌曲暂停
 * 播放歌曲数 红心数 不再播放数
 * 歌词(歌词暂时没有好的API)
 * 异常处理
 
-###BUG
+### BUG
 
 * ~~播放歌曲中有时候会暂停~~
 * ~~退出后终端光标会隐藏~~
+* ~~.douban_token.txt路径问题~~
+* ~~登陆异常处理~~
 
-###参考资料
+### Authors
+
+* [Fansion](https://github.com/Fansion)
+
+### 参考资料
 
 * Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)
+* [豆瓣FM命令行播放器(pyfm)](https://github.com/skyline75489/pyfm)
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
-###License (MIT)
+### License (MIT)
 Copyright (c) 2014 hackerxu
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
