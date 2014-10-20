@@ -13,7 +13,6 @@ import threading
 import string
 import time
 import os
-import urllib2
 #---------------------------------------------------------------------------
 douban = douban_token.Doubanfm()
 
@@ -133,7 +132,7 @@ class Win(cli.Cli):
                     self.start = 1
             elif c == 'l': # l打开当前播放歌曲豆瓣页
                 import webbrowser
-                webbrowser.open("http://music.douban.com" + douban.playingsong['album'])
+                webbrowser.open("http://music.douban.com" + douban.playingsong['album'].replace('\/', '/'))
                 self.display()
             elif c == 'r': # r标记红心/取消标记
                 if douban.playingsong:
