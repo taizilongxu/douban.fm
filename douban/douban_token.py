@@ -63,32 +63,35 @@ class Doubanfm(object):
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
         else: # 未登陆
-            self.email,self.password = self.win_login()
-            login_data = {
-                    'app_name': 'radio_desktop_win',
-                    'version': '100',
-                    'email': self.email,
-                    'password': self.password
-                    }
-            s = requests.post('http://www.douban.com/j/app/login', login_data)
-            dic = eval(s.text)
-            if dic['r'] == '1':
-                print dic['err']
-            else:
-                self.token = dic['token']
-                self.user_name = dic['user_name']
-                self.user_id = dic['user_id']
-                self.expire = dic['expire']
-                self.login_data = {
-                    'app_name' : 'radio_desktop_win',
-                    'version' : '100',
-                    'user_id' : self.user_id,
-                    'expire' : self.expire,
-                    'token' : self.token,
-                    'user_name' : self.user_name
+            while True:
+                self.email,self.password = self.win_login()
+                login_data = {
+                        'app_name': 'radio_desktop_win',
+                        'version': '100',
+                        'email': self.email,
+                        'password': self.password
                         }
-                with open(path_token, 'w') as f:
-                    pickle.dump(self.login_data, f)
+                s = requests.post('http://www.douban.com/j/app/login', login_data)
+                dic = eval(s.text)
+                if dic['r'] == 1:
+                    print dic['err']
+                    continue
+                else:
+                    self.token = dic['token']
+                    self.user_name = dic['user_name']
+                    self.user_id = dic['user_id']
+                    self.expire = dic['expire']
+                    self.login_data = {
+                        'app_name' : 'radio_desktop_win',
+                        'version' : '100',
+                        'user_id' : self.user_id,
+                        'expire' : self.expire,
+                        'token' : self.token,
+                        'user_name' : self.user_name
+                            }
+                    with open(path_token, 'w') as f:
+                        pickle.dump(self.login_data, f)
+                    break
             # 配置文件
             path_config = os.path.expanduser('~/.doubanfm_config')
             config ='''[key]
