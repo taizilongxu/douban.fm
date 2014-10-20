@@ -48,6 +48,23 @@ Python版本
  [q]     --> 退出
 ```
 
+###Config(v0.2.8)
+
+.doubanfm_config保存在了~/.doubanfm_config,根据需要可以修改按键的映射
+
+```
+[key]
+UP = k       # 上
+DOWN = j     # 下
+TOP = g      # 顶
+BOTTOM = G   # 底
+OPENURL = l  # 打开歌曲主页
+RATE = r     # 标记喜欢/取消喜欢
+NEXT = n     # 下一首
+BYE = b      # 不再播放
+QUIT = q     # 退出
+```
+
 ###Done
 
 * 登陆token
@@ -59,13 +76,13 @@ Python版本
 * pro用户歌曲kbps的选择
 * 歌曲结束request(发送歌曲完成)
 * kbps的选择
+* config设置
 
 ###TODO
 
 * 歌曲暂停
 * 播放歌曲数 红心数 不再播放数
 * 歌词(歌词暂时没有好的API)
-* config设置
 * 异常处理
 
 ###BUG

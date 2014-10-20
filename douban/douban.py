@@ -13,10 +13,12 @@ import threading
 import string
 import time
 import os
+import ConfigParser
 #---------------------------------------------------------------------------
 class Win(cli.Cli):
 
     def __init__(self, douban):
+        self.get_config()
         self.douban = douban
         if self.douban.pro == 0:
             PRO = ''
@@ -41,6 +43,21 @@ class Win(cli.Cli):
         self.play()
         self.start = 1
         self.run()
+
+    # 获取config
+    def get_config(self):
+        config=ConfigParser.ConfigParser()
+        with open(os.path.expanduser('~/.doubanfm_config'),'r') as cfgfile:
+            config.readfp(cfgfile)
+            self.UP = config.get('key','UP')
+            self.DOWN = config.get('key','DOWN')
+            self.TOP = config.get('key','TOP')
+            self.BOTTOM = config.get('key','BOTTOM')
+            self.OPENURL = config.get('key','OPENURL')
+            self.RATE = config.get('key','RATE')
+            self.NEXT = config.get('key','NEXT')
+            self.BYE = config.get('key','BYE')
+            self.QUIT = config.get('key','QUIT')
 
     # 显示时间的线程
     def display_time(self):
@@ -107,14 +124,14 @@ class Win(cli.Cli):
             self.display()
             i = getch._Getch()
             c = i()
-            if c == 'k':
+            if c == self.UP:
                 self.updown(-1)
-            elif c == 'j':
+            elif c == self.DOWN:
                 self.updown(1)
-            elif c == 'g': # g键返回顶部
+            elif c == self.TOP: # g键返回顶部
                 self.markline = 0
                 self.topline = 0
-            elif c == "G": # G键返回底部
+            elif c == self.BOTTOM: # G键返回底部
                 self.markline = self.screenline
                 self.topline = len(self.lines) - self.screenline - 1
             elif c == ' ': # 空格选择频道,播放歌曲
@@ -129,11 +146,11 @@ class Win(cli.Cli):
                     self.douban.get_playlist()
                     self.play()
                     self.start = 1
-            elif c == 'l': # l打开当前播放歌曲豆瓣页
+            elif c == self.OPENURL: # l打开当前播放歌曲豆瓣页
                 import webbrowser
                 webbrowser.open("http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/'))
                 self.display()
-            elif c == 'r': # r标记红心/取消标记
+            elif c == self.RATE: # r标记红心/取消标记
                 if self.douban.playingsong:
                     if not self.douban.playingsong['like']:
                         self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
@@ -145,7 +162,7 @@ class Win(cli.Cli):
                         self.display()
                         self.douban.unrate_music()
                         self.douban.playingsong['like'] = 0
-            elif c =='n': # n下一首
+            elif c == self.NEXT: # n下一首
                 if self.douban.playingsong:
                     self.kill_mplayer()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
@@ -153,12 +170,12 @@ class Win(cli.Cli):
                     self.douban.skip_song()
                     self.douban.playingsong = {}
                     self.play()
-            elif c =='b': # b不再播放
+            elif c == self.BYE: # b不再播放
                 if self.douban.playingsong:
                     self.kill_mplayer()
                     self.douban.bye()
                     self.play()
-            elif c == 'q':
+            elif c == self.QUIT:
                 self.q = 1
                 if self.start:
                     self.kill_mplayer()

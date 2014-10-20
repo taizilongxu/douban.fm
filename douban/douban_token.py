@@ -91,19 +91,16 @@ class Doubanfm(object):
                     pickle.dump(self.login_data, f)
             # 配置文件
             path_config = os.path.expanduser('~/.doubanfm_config')
-            config ="""
-            [key]
-            UP = k
-            DOWN = j
-            TOP = g
-            BOTTOM = G
-            PLAY = ' '
-            OPENURL = l
-            RATE = r
-            NEXT = n
-            BYE = b
-            QUIT = q
-            """
+            config ='''[key]
+UP = k
+DOWN = j
+TOP = g
+BOTTOM = G
+OPENURL = l
+RATE = r
+NEXT = n
+BYE = b
+QUIT = q''' # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)
 
