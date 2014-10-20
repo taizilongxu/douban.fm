@@ -134,7 +134,7 @@ class Win(cli.Cli):
                 import webbrowser
                 webbrowser.open("http://music.douban.com" + douban.playingsong['album'].replace('\/', '/'))
                 self.display()
-            elif c == 'r': # r标记红心/取消标记
+            elif c == 'f': # r标记红心/取消标记
                 if douban.playingsong:
                     if not douban.playingsong['like']:
                         self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED

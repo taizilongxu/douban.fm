@@ -1,7 +1,7 @@
 ##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://pypi.python.org/pypi/douban.fm)
 
 
-ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整
+ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整,欢迎PR.
 
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
 
@@ -15,17 +15,17 @@ Python版本
 
 ###Download
 
-    sudo pip install douban.fm
+    $ sudo pip install douban.fm
 
 需要mplayer播放器依赖,如未安装:
 
-    sudo apt-get install mplayer
+    $ sudo apt-get install mplayer
 
 ###Usage
 
 在终端下直接输入
 
-    douban.fm
+    $ douban.fm
 
 ###Login
 
@@ -35,16 +35,18 @@ Python版本
 
 支持vim按键
 
-* j 下
-* k 上
-* space 播放
-* l 打开歌曲主页
-* g 移到最顶
-* G 移到最底
-* n 下一首
-* r 喜欢/取消喜欢
-* b 不再播放
-* q 退出
+```
+ [j]     --> 下
+ [k]     --> 上
+ [space] --> 播放
+ [l]     --> 打开歌曲主页
+ [g]     --> 移到最顶
+ [G]     --> 移到最底
+ [n]     --> 下一首
+ [f]     --> 喜欢/取消喜欢
+ [b]     --> 不再播放
+ [q]     --> 退出
+```
 
 ###Done
 
@@ -52,7 +54,7 @@ Python版本
 * 显示PRO
 * cli设计
 * 播放,下一首,红心,不再播放
-* 进度条
+* 进度条(时间)
 * 终端高度的自动调整
 * pro用户歌曲kbps的选择
 * 歌曲结束request(发送歌曲完成)
