@@ -7,7 +7,7 @@ ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要
 
 ### Screenshots
 
-![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/2.png)
+![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
 
 ### Do something cool!
 

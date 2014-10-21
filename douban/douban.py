@@ -30,9 +30,9 @@ class Win(cli.Cli):
         self.song_time = -1 # 歌曲剩余播放时间
         self.rate = ['★ '*i for i in range(1,6)] # 歌曲评分
         # 守护线程
-        self.t = threading.Thread(target=self.protect)
+        self.t1 = threading.Thread(target=self.protect)
         self.t2 = threading.Thread(target=self.display_time)
-        self.t.start()
+        self.t1.start()
         self.t2.start()
         super(Win, self).__init__(self.douban.lines)
         # 启动自动播放
