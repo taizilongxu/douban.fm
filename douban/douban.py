@@ -59,7 +59,7 @@ class Win(cli.Cli):
             self.BYE = config.get('key','BYE')
             self.QUIT = config.get('key','QUIT')
 
-    # 显示时间的线程
+    # 显示时间,音量的线程
     def display_time(self):
         length = len(self.TITLE)
         while True:
@@ -69,12 +69,26 @@ class Win(cli.Cli):
                 minute = int(self.song_time) / 60
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
-                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '\r'
+                self.get_volume() # 获取音量
+                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + ' ' + self.volume.strip() + '%' + '\r'
                 self.display()
                 self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
+
+    # 获取音量
+    def get_volume(self):
+        volume = subprocess.check_output('amixer get Master | grep Mono: | cut -d " " -f 6', shell=True)
+        self.volume = volume[1:-3]
+
+    # 调整音量大小
+    def change_volume(self, increment):
+        if increment == 1:
+            volume = int(self.volume) + 5
+        else:
+            volume = int(self.volume) - 5
+        subprocess.Popen('amixer set Master ' + str(volume) + '% >/dev/null 2>&1', shell=True)
 
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
@@ -108,7 +122,7 @@ class Win(cli.Cli):
     # 结束mplayer
     def kill_mplayer(self):
         if subprocess.check_output('ps -a | grep mplayer', shell=True):
-            subprocess.Popen('killall -9 mplayer', shell=True)
+            subprocess.Popen('killall -9 mplayer >/dev/null 2>&1', shell=True)
 
     # 发送桌面通知
     def notifySend(self):
@@ -181,6 +195,10 @@ class Win(cli.Cli):
                     self.kill_mplayer()
                 subprocess.call('echo -e "\033[?25h";clear', shell=True)
                 exit()
+            elif c == '=': # 音量+
+                self.change_volume(1)
+            elif c == '-': # 音量-
+                self.change_volume(-1)
 
 def main():
     douban = douban_token.Doubanfm()
