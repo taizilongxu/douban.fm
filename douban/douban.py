@@ -70,7 +70,7 @@ class Win(cli.Cli):
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.get_volume() # 获取音量
-                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + ' ' + self.volume.strip() + '%' + '\r'
+                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%' + '\r'
                 self.display()
                 self.song_time -= 1
             else:
@@ -195,9 +195,9 @@ class Win(cli.Cli):
                     self.kill_mplayer()
                 subprocess.call('echo -e "\033[?25h";clear', shell=True)
                 exit()
-            elif c == '=': # 音量+
+            elif c == '=':
                 self.change_volume(1)
-            elif c == '-': # 音量-
+            elif c == '-':
                 self.change_volume(-1)
 
 def main():
