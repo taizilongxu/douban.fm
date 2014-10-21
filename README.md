@@ -48,7 +48,7 @@ ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要
  [q]     --> 退出
 ```
 
-### Configuration(v0.2.8)
+### Configuration(>=v0.2.8)
 
 .doubanfm_config保存在了~/.doubanfm_config,根据需要可以修改按键的映射
 
