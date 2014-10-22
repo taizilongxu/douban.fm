@@ -19,7 +19,13 @@ ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要
 
 需要mplayer播放器依赖,如未安装:
 
+Ubuntu:
+
     $ sudo apt-get install mplayer
+
+OS X:
+
+    $ brew install mplayer
 
 ### Usage
 

@@ -14,10 +14,18 @@ import string
 import time
 import os
 import ConfigParser
+import platform
+try:
+    import Foundation
+    import objc
+    import AppKit
+except ImportError:
+    pass
 #---------------------------------------------------------------------------
 class Win(cli.Cli):
 
     def __init__(self, douban):
+        self.platform = platform.system()
         self.get_config()
         self.douban = douban
         if self.douban.pro == 0:
@@ -79,8 +87,14 @@ class Win(cli.Cli):
 
     # 获取音量
     def get_volume(self):
-        volume = subprocess.check_output('amixer get Master | grep Mono: | cut -d " " -f 6', shell=True)
-        self.volume = volume[1:-3]
+        if self.platform == 'Linux':
+            volume = subprocess.check_output('amixer get Master | grep Mono: | cut -d " " -f 6', shell=True)
+            volume = volume[1:-3]
+        elif self.platform == 'Darwin':
+            volume = subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
+        else:
+            volume = ''
+        self.volume = volume
 
     # 调整音量大小
     def change_volume(self, increment):
@@ -88,7 +102,12 @@ class Win(cli.Cli):
             volume = int(self.volume) + 5
         else:
             volume = int(self.volume) - 5
-        subprocess.Popen('amixer set Master ' + str(volume) + '% >/dev/null 2>&1', shell=True)
+        if self.platform == 'Linux':
+            subprocess.Popen('amixer set Master ' + str(volume) + '% >/dev/null 2>&1', shell=True)
+        elif self.platform == 'Darwin':
+            subprocess.Popen('osascript -e "set volume output volume ' + str(volume) + '"', shell=True)
+        else:
+            pass
 
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
@@ -125,13 +144,39 @@ class Win(cli.Cli):
             subprocess.Popen('killall -9 mplayer >/dev/null 2>&1', shell=True)
 
     # 发送桌面通知
-    def notifySend(self):
-        self.douban.get_pic() # 获取封面
-        path = os.path.abspath('.') + os.sep + 'tmp.jpg'
-        title = self.douban.playingsong['title']
-        content = self.douban.playingsong['artist']
-        subprocess.call([ 'notify-send', '-i', path, title, content])
-        os.remove(path) # 删除图片
+    def notifySend(self, title=None, content=None, path=None):
+        if not title and not content:
+            title = self.douban.playingsong['title']
+        elif not title:
+            title = self.douban.playingsong['title'] + ' - ' + self.douban.playingsong['artist']
+        if not path:
+            path = self.douban.get_pic() # 获取封面
+        if not content:
+            content = self.douban.playingsong['artist']
+
+        if self.platform == 'Linux':
+            self.send_Linux_notify(title, content, path)
+        elif self.platform == 'Darwin':
+            self.send_OS_X_notify(title, content, path)
+
+    def send_Linux_notify(self, title, content, img_path):
+        subprocess.call([ 'notify-send', '-i', img_path, title, content])
+
+    def send_OS_X_notify(self, title, content, img_path):
+        NSUserNotification = objc.lookUpClass('NSUserNotification')
+        NSUserNotificationCenter = objc.lookUpClass('NSUserNotificationCenter')
+        NSImage = objc.lookUpClass('NSImage')
+        notification = NSUserNotification.alloc().init()
+        notification.setTitle_(title.decode('utf-8'))
+        notification.setSubtitle_('')
+        notification.setInformativeText_(content.decode('utf-8'))
+        notification.setUserInfo_({})
+        image = NSImage.alloc().initWithContentsOfFile_(img_path)
+        notification.setContentImage_(image)
+        notification.setSoundName_("NSUserNotificationDefaultSoundName")
+        notification.setDeliveryDate_(Foundation.NSDate.dateWithTimeInterval_sinceDate_(0, Foundation.NSDate.date()))
+        NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
+
 
     def run(self):
         while True:
@@ -171,11 +216,13 @@ class Win(cli.Cli):
                         self.display()
                         self.douban.rate_music()
                         self.douban.playingsong['like'] = 1
+                        self.notifySend(content='标记红心')
                     else:
                         self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
                         self.display()
                         self.douban.unrate_music()
                         self.douban.playingsong['like'] = 0
+                        self.notifySend(content='取消标记红心')
             elif c == self.NEXT: # n下一首
                 if self.douban.playingsong:
                     self.kill_mplayer()
