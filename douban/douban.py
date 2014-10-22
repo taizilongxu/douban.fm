@@ -144,10 +144,16 @@ class Win(cli.Cli):
             subprocess.Popen('killall -9 mplayer >/dev/null 2>&1', shell=True)
 
     # 发送桌面通知
-    def notifySend(self):
-        path = self.douban.get_pic() # 获取封面
-        title = self.douban.playingsong['title']
-        content = self.douban.playingsong['artist']
+    def notifySend(self, title=None, content=None, path=None):
+        if not title and not content:
+            title = self.douban.playingsong['title']
+        elif not title:
+            title = self.douban.playingsong['title'] + ' - ' + self.douban.playingsong['artist']
+        if not path:
+            path = self.douban.get_pic() # 获取封面
+        if not content:
+            content = self.douban.playingsong['artist']
+
         if self.platform == 'Linux':
             self.send_Linux_notify(title, content, path)
         elif self.platform == 'Darwin':
@@ -210,11 +216,13 @@ class Win(cli.Cli):
                         self.display()
                         self.douban.rate_music()
                         self.douban.playingsong['like'] = 1
+                        self.notifySend(content='标记红心')
                     else:
                         self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
                         self.display()
                         self.douban.unrate_music()
                         self.douban.playingsong['like'] = 0
+                        self.notifySend(content='取消标记红心')
             elif c == self.NEXT: # n下一首
                 if self.douban.playingsong:
                     self.kill_mplayer()
