@@ -93,8 +93,9 @@ class Doubanfm(object):
                     with open(path_token, 'w') as f:
                         pickle.dump(self.login_data, f)
                     break
-            # 配置文件
-            path_config = os.path.expanduser('~/.doubanfm_config')
+        # 配置文件
+        path_config = os.path.expanduser('~/.doubanfm_config')
+        if not os.path.exists(path_config):
             config ='''[key]
 UP = k
 DOWN = j
