@@ -145,15 +145,13 @@ class Win(cli.Cli):
 
     # 发送桌面通知
     def notifySend(self):
-        self.douban.get_pic() # 获取封面
-        path = os.path.abspath('.') + os.sep + 'tmp.jpg'
+        path = self.douban.get_pic() # 获取封面
         title = self.douban.playingsong['title']
         content = self.douban.playingsong['artist']
         if self.platform == 'Linux':
             self.send_Linux_notify(title, content, path)
         elif self.platform == 'Darwin':
             self.send_OS_X_notify(title, content, path)
-        os.remove(path) # 删除图片
 
     def send_Linux_notify(self, title, content, img_path):
         subprocess.call([ 'notify-send', '-i', img_path, title, content])

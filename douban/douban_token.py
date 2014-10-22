@@ -8,6 +8,7 @@ import urllib
 import os
 import pickle
 import getpass
+import tempfile
 #---------------------------------------------------------------------------
 class Doubanfm(object):
     def __init__(self):
@@ -170,7 +171,8 @@ QUIT = q''' # 这个很丑,怎么办
 
     # 获取专辑封面
     def get_pic(self):
-        path = os.path.abspath('.') + os.sep + 'tmp.jpg'
+        path = os.path.join(tempfile.gettempdir(), 'tmp.jpg')
         url = self.playingsong['picture'].replace('\\', '')
         urllib.urlretrieve(url, path)
+        return path
 ############################################################################
