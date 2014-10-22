@@ -186,6 +186,8 @@ class Win(cli.Cli):
                     self.play()
             elif c == self.BYE: # b不再播放
                 if self.douban.playingsong:
+                    self.SUFFIX_SELECTED = '不再播放,切换下一首...'
+                    self.display()
                     self.kill_mplayer()
                     self.douban.bye()
                     self.play()
