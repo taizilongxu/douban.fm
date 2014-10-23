@@ -5,7 +5,7 @@ import sys, os
 打包的用的setup必须引入，
 """
 
-VERSION = '0.2.8'
+VERSION = '0.2.9'
 
 setup(name='douban.fm',
       version=VERSION,

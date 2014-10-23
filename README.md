@@ -1,13 +1,18 @@
 ##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://pypi.python.org/pypi/douban.fm)
 
 
-ubuntu 14.04通过测试,其他平台暂时未做测试.其他平台可能需要在字符输入上做调整,欢迎PR.
-
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
+
+
+感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持os(V>=0.2.9)
 
 ### Screenshots
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
+
+### Support
+
+Linux/Mac OS X
 
 ### Do something cool!
 
@@ -57,6 +62,9 @@ OS X:
 音量(>=V0.2.9)
  [=]     --> 增
  [-]     --> 减
+歌词(>=v0.2.9)
+ [o]     --> 显示歌词(歌词还支持不太好,没有反应就是没找到歌词)
+ [q]     --> 退出歌词
 ```
 
 ### Configuration(>=v0.2.8)
@@ -106,11 +114,12 @@ QUIT = q     # 退出
 * ~~.douban_token.txt路径问题~~
 * ~~登陆异常处理~~
 
-### 感谢
+### Authors
 
 * [Fansion](https://github.com/Fansion)
+* [Cloverstd](https://github.com/cloverstd)
 
-### 参考资料
+### Reference
 
 * Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)
 * [豆瓣FM命令行播放器(pyfm)](https://github.com/skyline75489/pyfm)
