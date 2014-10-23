@@ -4,7 +4,7 @@
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
 
 
-感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持os(V>=0.2.9)
+感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持Mac OS X(>=V0.2.9)
 
 ### Screenshots
 
@@ -63,7 +63,7 @@ OS X:
  [=]     --> 增
  [-]     --> 减
 歌词(>=v0.2.9)
- [o]     --> 显示歌词(歌词还支持不太好,没有反应就是没找到歌词)
+ [o]     --> 显示歌词(Bug很多,先别用,没有反应就是没找到歌词)
  [q]     --> 退出歌词
 ```
 
@@ -97,6 +97,7 @@ QUIT = q     # 退出
 * kbps的选择
 * config设置
 * 调节音量(amixer) + 标题中显示音量
+* 歌词
 
 ### TODO
 
@@ -104,7 +105,6 @@ QUIT = q     # 退出
 * 单曲播放
 * 默认频道
 * 播放歌曲数 红心数 不再播放数
-* 歌词(歌词暂时没有好的API)
 * 异常处理
 
 ### BUG
@@ -128,6 +128,7 @@ QUIT = q     # 退出
 ###Log
 
 V0.2.9 支持歌词,支持Mac OS X
+V0.2.8 增加config
 
 ### License (MIT)
 Copyright (c) 2014 hackerxu

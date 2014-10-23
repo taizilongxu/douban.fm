@@ -7,7 +7,6 @@
 import cli # UI
 import douban_token # network
 import getch # get char
-import lrc2dic # lrc
 import subprocess
 from termcolor import colored
 import threading
@@ -255,14 +254,15 @@ class Win(cli.Cli):
                 self.lrc_display = 1
                 lrc_dic = self.douban.get_lrc()
                 if lrc_dic:
-                    lrc_cli = Lrc(lrc_dic, int(self.douban.playingsong['length']) , self.song_time, self.screenline)
+                    lrc_cli = Lrc(lrc_dic, int(self.douban.playingsong['length']) , self.song_time, self.screenline, self.screenline_char)
                 self.lrc_display = 0
 
 class Lrc(cli.Cli):
-    def __init__(self, lrc_dic, length, song_time,screenline):
+    def __init__(self, lrc_dic, length, song_time, screenline, screenline_char):
         self.lrc_dic = lrc_dic
-        self.length = length
-        self.song_time = length - song_time
+        self.length = length # 歌曲总长度
+        self.song_time = length - song_time # 歌曲播放秒数
+        self.screenline_char = screenline_char # shell每行字符数
         self.sort_lrc_dic = sorted(lrc_dic.iteritems(), key=lambda x : x[0])
         lrc_lines = [line[1] for line in self.sort_lrc_dic]
         # super(Lrc, self).__init__(lrc_lines)
@@ -301,13 +301,15 @@ class Lrc(cli.Cli):
 
     def display(self):
         subprocess.call('clear', shell=True)
-        print
+        print '\r'
         top = self.topline
         bottom = self.topline + self.screenline + 1
         for index,i in enumerate(self.lines[top:bottom]):
             if index == self.markline:
                 i = colored(i, 'blue')
-            print i + '\r'
+                print i.center(self.screenline_char) + '\r'
+            else:
+                print i.center(self.screenline_char - 9) + '\r'
 
     def run(self):
         while True:
@@ -317,6 +319,9 @@ class Lrc(cli.Cli):
             if c == 'q':
                 self.q = 1
                 break
+
+    # def down(self):
+    #     if self
 
 def main():
     douban = douban_token.Doubanfm()

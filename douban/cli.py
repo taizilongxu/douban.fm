@@ -26,13 +26,14 @@ class Cli(object):
         self.markline = 0 # 箭头行 初始化设置默认频道
         self.topline = 0 # lines
         self.displayline = self.markline # 初始化歌曲信息显示行
-        self.screenline = self.linesnum() - 4 # 屏幕显示行数
+        self.screenline ,self.screenline_char= self.linesnum() # 屏幕显示行数
         subprocess.call('echo  "\033[?25l"', shell=True) # 取消光标
 
-    # 测试屏幕显示行数
+    # 测试屏幕显示行数,每行字符数
     def linesnum(self):
         num = subprocess.check_output('stty size', shell=True)
-        return int(num.split(' ')[0])
+        tmp = num.split(' ')
+        return int(tmp[0]) - 4,int(tmp[1]) # -4上下空余
 
     # 展示窗口
     def display(self):
