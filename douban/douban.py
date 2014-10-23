@@ -269,6 +269,7 @@ class Lrc(cli.Cli):
         self.lines = lrc_lines
         self.screenline = screenline
         subprocess.call('echo  "\033[?25l"', shell=True)
+
         self.markline = self.locate_line()
         # print self.markline
         self.topline = self.markline
@@ -304,12 +305,16 @@ class Lrc(cli.Cli):
         print '\r'
         top = self.topline
         bottom = self.topline + self.screenline + 1
-        for index,i in enumerate(self.lines[top:bottom]):
-            if index == self.markline:
-                i = colored(i, 'blue')
-                print i.center(self.screenline_char) + '\r'
-            else:
-                print i.center(self.screenline_char - 9) + '\r'
+        for linenum in range(self.screenline):
+            if self.markline - self.topline < self.screenline/2:
+                print
+            elif self.markline - self.topline == self.screenline/2
+        # for index,i in enumerate(self.lines[top:bottom]):
+        #     if index == self.markline:
+        #         i = colored(i, 'blue')
+        #         print i.center(self.screenline_char) + '\r'
+        #     else:
+        #         print i.center(self.screenline_char - 9) + '\r'
 
     def run(self):
         while True:
