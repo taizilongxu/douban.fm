@@ -125,6 +125,10 @@ QUIT = q     # 退出
 * [豆瓣FM命令行播放器(pyfm)](https://github.com/skyline75489/pyfm)
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
+###Log
+
+V0.2.9 支持歌词,支持Mac OS X
+
 ### License (MIT)
 Copyright (c) 2014 hackerxu
 
