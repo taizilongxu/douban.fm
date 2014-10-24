@@ -35,14 +35,17 @@ class Win(cli.Cli):
         self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
         self.start = 0 # 歌曲播放
         self.q = 0 # 退出
+        self.lrc_dict = {} # 歌词
         self.song_time = -1 # 歌曲剩余播放时间
         self.rate = ['★ '*i for i in range(1,6)] # 歌曲评分
         self.lrc_display = 0 # 是否显示歌词
         # 守护线程
         self.t1 = threading.Thread(target=self.protect)
         self.t2 = threading.Thread(target=self.display_time)
+        self.t3 = threading.Thread(target=self.display_lrc)
         self.t1.start()
         self.t2.start()
+        self.t3.start()
         super(Win, self).__init__(self.douban.lines)
         # 启动自动播放
         self.SUFFIX_SELECTED = '正在加载请稍后...'
@@ -67,6 +70,17 @@ class Win(cli.Cli):
             self.NEXT = config.get('key','NEXT')
             self.BYE = config.get('key','BYE')
             self.QUIT = config.get('key','QUIT')
+
+    # 歌词线程
+    def display_lrc(self):
+        while True:
+            if self.q == 1:
+                break
+            if self.lrc_display and self.lrc_dic:
+                lrc_cli = Lrc(self.lrc_dic, self)
+            else:
+                self.lrc_display = 0
+            time.sleep(1)
 
     # 显示时间,音量的线程
     def display_time(self):
@@ -143,6 +157,9 @@ class Win(cli.Cli):
         self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
         self.display()
         self.notifySend()
+        if self.lrc_display:
+            self.lrc_dic = self.douban.get_lrc()
+
 
     # 结束mplayer
     def kill_mplayer(self):
@@ -247,26 +264,29 @@ class Win(cli.Cli):
                     self.douban.bye()
                     self.play()
             elif c == self.QUIT:
-                self.q = 1
-                if self.start:
-                    self.kill_mplayer()
-                subprocess.call('echo -e "\033[?25h";clear', shell=True)
-                exit()
+                if self.lrc_display: # 退出歌词界面
+                    self.lrc_display = 0
+                else: # 退出主界面
+                    self.q = 1
+                    if self.start:
+                        self.kill_mplayer()
+                    subprocess.call('echo -e "\033[?25h";clear', shell=True)
+                    exit()
             elif c == '=':
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
             elif c == 'o':
-                self.lrc_display = 1
-                lrc_dic = self.douban.get_lrc()
-                if lrc_dic:
-                    # lrc_cli = Lrc(lrc_dic, int(self.douban.playingsong['length']) , self.song_time, self.screenline, self.screenline_char)
-                    lrc_cli = Lrc(lrc_dic, self)
-                self.lrc_display = 0
+                self.lrc_dic = self.douban.get_lrc()
+                if self.lrc_dic:
+                    self.lrc_display = 1
+                # lrc_dic = self.douban.get_lrc()
+                # if lrc_dic:
+                #     lrc_cli = Lrc(lrc_dic, self)
+                # self.lrc_display = 0
 
 class Lrc(cli.Cli):
     def __init__(self, lrc_dic, win):
-    # def __init__(self, lrc_dic, length, song_time, screenline, screenline_char):
         self.win = win
         self.lrc_dic = lrc_dic
         self.length = int(win.douban.playingsong['length']) # 歌曲总长度
@@ -282,14 +302,15 @@ class Lrc(cli.Cli):
         self.topline = 0
         self.q = 0
         self.display()
-        t = threading.Thread(target=self.display_line)
-        t.start()
-        self.run()
+        # t = threading.Thread(target=self.display_line)
+        self.display_line()
+        # t.start()
+        # self.run()
 
-    # 显示歌词线程
+    # 显示歌词
     def display_line(self):
         while True:
-            if self.q:
+            if not self.win.lrc_display:
                 break
             if self.song_time < self.length:
                 self.song_time += 1
@@ -300,7 +321,7 @@ class Lrc(cli.Cli):
                 time.sleep(1)
             else:
                 break
-
+    # 输出界面
     def display(self):
         subprocess.call('clear', shell=True)
         print '\r'
@@ -316,15 +337,6 @@ class Lrc(cli.Cli):
                     print i.center(self.screenline_char - 1) + '\r'
                 else:
                     print line.center(self.screenline_char - 9) + '\r'
-
-    def run(self):
-        while True:
-            self.display()
-            i = getch._Getch()
-            c = i()
-            if c == 'q':
-                self.q = 1
-                break
 
 def main():
     douban = douban_token.Doubanfm()
