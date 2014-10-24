@@ -37,6 +37,7 @@ class Win(cli.Cli):
         self.q = 0 # 退出
         self.song_time = -1 # 歌曲剩余播放时间
         self.rate = ['★ '*i for i in range(1,6)] # 歌曲评分
+        self.lrc_display = 0 # 是否显示歌词
         # 守护线程
         self.t1 = threading.Thread(target=self.protect)
         self.t2 = threading.Thread(target=self.display_time)
@@ -79,7 +80,8 @@ class Win(cli.Cli):
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.get_volume() # 获取音量
                 self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%' + '\r'
-                self.display()
+                if not self.lrc_display:
+                    self.display()
                 self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
@@ -248,6 +250,83 @@ class Win(cli.Cli):
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
+            elif c == 'o':
+                self.lrc_display = 1
+                lrc_dic = self.douban.get_lrc()
+                if lrc_dic:
+                    lrc_cli = Lrc(lrc_dic, int(self.douban.playingsong['length']) , self.song_time, self.screenline, self.screenline_char)
+                self.lrc_display = 0
+
+class Lrc(cli.Cli):
+    def __init__(self, lrc_dic, length, song_time, screenline, screenline_char):
+        self.lrc_dic = lrc_dic
+        self.length = length # 歌曲总长度
+        self.song_time = length - song_time # 歌曲播放秒数
+        self.screenline_char = screenline_char # shell每行字符数
+        self.sort_lrc_dic = sorted(lrc_dic.iteritems(), key=lambda x : x[0])
+        lrc_lines = [line[1] for line in self.sort_lrc_dic]
+        # super(Lrc, self).__init__(lrc_lines)
+        self.lines = lrc_lines
+        self.screenline = screenline
+        subprocess.call('echo  "\033[?25l"', shell=True)
+
+        self.markline = self.locate_line()
+        # print self.markline
+        self.topline = self.markline
+        # print self.topline
+        self.q = 0
+        t = threading.Thread(target=self.display_line)
+        t.start()
+        self.run()
+
+    # 根据song_time定位self.markline
+    def locate_line(self):
+        tmp = range(self.song_time)
+        for i in tmp[::-1]:
+            if self.lrc_dic.has_key(i):
+                return self.lines.index(self.lrc_dic[i])
+        return 0
+
+    def display_line(self):
+        while True:
+            if self.q:
+                break
+            if self.song_time < self.length:
+                self.song_time += 1
+                if self.lrc_dic.has_key(self.song_time):
+                    self.updown(1)
+                self.display()
+                time.sleep(1)
+            else:
+                break
+
+    def display(self):
+        subprocess.call('clear', shell=True)
+        print '\r'
+        top = self.topline
+        bottom = self.topline + self.screenline + 1
+        for linenum in range(self.screenline):
+            if self.markline - self.topline < self.screenline/2:
+                print
+            elif self.markline - self.topline == self.screenline/2
+        # for index,i in enumerate(self.lines[top:bottom]):
+        #     if index == self.markline:
+        #         i = colored(i, 'blue')
+        #         print i.center(self.screenline_char) + '\r'
+        #     else:
+        #         print i.center(self.screenline_char - 9) + '\r'
+
+    def run(self):
+        while True:
+            self.display()
+            i = getch._Getch()
+            c = i()
+            if c == 'q':
+                self.q = 1
+                break
+
+    # def down(self):
+    #     if self
 
 def main():
     douban = douban_token.Doubanfm()

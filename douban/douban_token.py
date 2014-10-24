@@ -9,6 +9,7 @@ import os
 import pickle
 import getpass
 import tempfile
+import lrc2dic
 #---------------------------------------------------------------------------
 class Doubanfm(object):
     def __init__(self):
@@ -175,4 +176,21 @@ QUIT = q''' # 这个很丑,怎么办
         url = self.playingsong['picture'].replace('\\', '')
         urllib.urlretrieve(url, path)
         return path
+
+    def get_lrc(self):
+        try:
+            lrc_path = eval(requests.get('http://geci.me/api/lyric/' + self.playingsong['title'] + '/' + self.playingsong['artist']).text)
+            lrc = requests.get(lrc_path['result'][0]['lrc']).text
+            lrc_dic = lrc2dic.lrc2dict(lrc)
+            return lrc_dic
+        except:
+            pass
+
+        try:
+            lrc_path = eval(requests.get('http://geci.me/api/lyric/' + self.playingsong['title']).text)
+            lrc = requests.get(lrc_path['result'][0]['lrc']).text
+            lrc_dic = lrc2dic.lrc2dict(lrc)
+            return lrc_dic
+        except:
+            return 0
 ############################################################################
