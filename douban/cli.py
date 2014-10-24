@@ -72,7 +72,7 @@ class Cli(object):
             if c == 'j':
                 self.updown(1)
             if c == 'q':
-                exit()
+                break
 
     # 对上下键进行反应,调成page和scroll
     def updown(self, increment):
