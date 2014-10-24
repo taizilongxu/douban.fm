@@ -271,7 +271,7 @@ class Lrc(cli.Cli):
         # super(Lrc, self).__init__(lrc_lines)
         self.lines = lrc_lines
         self.screenline = screenline
-        subprocess.call('echo  "\033[?25l"', shell=True)
+        subprocess.call('clear', shell=True)
 
         self.markline = self.locate_line()
         # print self.markline
@@ -297,7 +297,7 @@ class Lrc(cli.Cli):
             if self.song_time < self.length:
                 self.song_time += 1
                 if self.lrc_dic.has_key(self.song_time):
-                    self.updown(1)
+                    self.markline += 1
                 self.display()
                 time.sleep(1)
             else:
@@ -309,15 +309,15 @@ class Lrc(cli.Cli):
         top = self.topline
         bottom = self.topline + self.screenline + 1
         for linenum in range(self.screenline):
-            if self.markline - self.topline < self.screenline/2:
+            if self.screenline/2 - linenum > self.markline - self.topline or linenum - self.screenline/2 >= len(self.lines) - self.markline:
                 print
-            elif self.markline - self.topline == self.screenline/2
-        # for index,i in enumerate(self.lines[top:bottom]):
-        #     if index == self.markline:
-        #         i = colored(i, 'blue')
-        #         print i.center(self.screenline_char) + '\r'
-        #     else:
-        #         print i.center(self.screenline_char - 9) + '\r'
+            else:
+                line = self.lines[self.markline - (self.screenline/2 - linenum)]
+                if linenum == self.screenline/2:
+                    i = colored(line, 'blue')
+                    print i.center(self.screenline_char) + '\r'
+                else:
+                    print line.center(self.screenline_char - 9) + '\r'
 
     def run(self):
         while True:
