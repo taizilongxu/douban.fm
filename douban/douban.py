@@ -13,6 +13,7 @@ import threading
 import string
 import time
 import os
+import tempfile
 import ConfigParser
 import platform
 try:
@@ -39,6 +40,11 @@ class Win(cli.Cli):
         self.song_time = -1 # 歌曲剩余播放时间
         self.rate = ['★ '*i for i in range(1,6)] # 歌曲评分
         self.lrc_display = 0 # 是否显示歌词
+        self.pause = True
+        self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
+        self.loop = False
+        self.is_muted = False # 是否静音
+        os.mkfifo(self.mplayer_controller)
         # 守护线程
         self.t1 = threading.Thread(target=self.protect)
         self.t2 = threading.Thread(target=self.display_time)
@@ -70,6 +76,9 @@ class Win(cli.Cli):
             self.NEXT = config.get('key','NEXT')
             self.BYE = config.get('key','BYE')
             self.QUIT = config.get('key','QUIT')
+            self.PAUSE = config.get('key', 'PAUSE')
+            self.LOOP = config.get('key', 'LOOP')
+            self.MUTE = config.get('key', 'MUTE')
 
     # 歌词线程
     def display_lrc(self):
@@ -91,9 +100,19 @@ class Win(cli.Cli):
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.get_volume() # 获取音量
-                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%' + '\r'
+                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
+                if self.is_muted:
+                    self.TITLE += '✖'
+                else:
+                    self.TITLE += self.volume.strip() + '%'
+                if self.loop:
+                    self.TITLE += '  ' + colored('◎', 'red')
+                else:
+                    self.TITLE += '  ' + colored('→', 'red')
+                self.TITLE += '\r'
                 self.display()
-                self.song_time -= 1
+                if not self.pause:
+                    self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
@@ -127,6 +146,16 @@ class Win(cli.Cli):
         else:
             pass
 
+    # 静音
+    def mute(self):
+        if self.is_muted:
+            self.is_muted = False
+            mute = 0
+        else:
+            self.is_muted = True
+            mute = 1
+        subprocess.Popen('echo "mute {mute}" > {fifo}'.format(fifo=self.mplayer_controller, mute=mute), shell=True, stdin=subprocess.PIPE)
+
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
         while True:
@@ -136,14 +165,16 @@ class Win(cli.Cli):
                 self.p.poll()
                 if self.p.returncode == 0:
                     self.song_time = -1
-                    self.douban.end_music()
+                    if not self.loop:
+                        self.douban.end_music()
                     self.play()
             time.sleep(1)
 
     # 播放歌曲
     def play(self):
         self.lrc_dict = {} # 歌词清空
-        self.douban.get_song()
+        if not self.loop:
+            self.douban.get_song()
         song = self.douban.playingsong
         self.song_time = song['length']
         # 是否是红心歌曲
@@ -153,7 +184,9 @@ class Win(cli.Cli):
             love = ''
         self.SUFFIX_SELECTED = (love + colored(song['title'], 'green') + ' • ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']).replace('\\', '')
 
-        self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
+        cmd = 'mplayer -slave -input file={fifo} {song_url} >/dev/null 2>&1'
+        self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
+        self.pause = False
         self.display()
         self.notifySend()
         if self.lrc_display: # 获取歌词
@@ -161,11 +194,19 @@ class Win(cli.Cli):
             if not self.lrc_dict: # 歌词获取失败,关闭歌词界面
                 self.lrc_display = 0
 
+    # 暂停歌曲
+    def pause_play(self):
+        subprocess.Popen('echo "pause" > {fifo}'.format(fifo=self.mplayer_controller), shell=True, stdin=subprocess.PIPE)
+        if self.pause:
+            self.pause = False
+            self.notifySend(content='开始播放')
+        else:
+            self.notifySend(content='暂停播放')
+            self.pause = True
 
     # 结束mplayer
     def kill_mplayer(self):
-        if subprocess.check_output('ps -a | grep mplayer', shell=True):
-            subprocess.Popen('killall -9 mplayer >/dev/null 2>&1', shell=True)
+        subprocess.Popen('echo "quit" > {fifo}'.format(fifo=self.mplayer_controller), shell=True, stdin=subprocess.PIPE)
 
     # 发送桌面通知
     def notifySend(self, title=None, content=None, path=None):
@@ -270,6 +311,17 @@ class Win(cli.Cli):
                     self.kill_mplayer()
                     self.douban.bye()
                     self.play()
+            elif c == self.PAUSE:
+                self.pause_play()
+            elif c == self.MUTE:
+                self.mute()
+            elif c == self.LOOP:
+                if self.loop:
+                    self.notifySend(content='停止单曲循环')
+                    self.loop = False
+                else:
+                    self.notifySend(content='单曲循环')
+                    self.loop = True
             elif c == self.QUIT:
                 self.q = 1
                 if self.start:
@@ -348,4 +400,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 ############################################################################
