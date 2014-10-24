@@ -156,10 +156,13 @@ class Win(cli.Cli):
         if not content:
             content = self.douban.playingsong['artist']
 
-        if self.platform == 'Linux':
-            self.send_Linux_notify(title, content, path)
-        elif self.platform == 'Darwin':
-            self.send_OS_X_notify(title, content, path)
+        try:
+            if self.platform == 'Linux':
+                self.send_Linux_notify(title, content, path)
+            elif self.platform == 'Darwin':
+                self.send_OS_X_notify(title, content, path)
+        except:
+            pass
 
     def send_Linux_notify(self, title, content, img_path):
         subprocess.call([ 'notify-send', '-i', img_path, title, content])
