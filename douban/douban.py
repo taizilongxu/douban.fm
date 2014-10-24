@@ -78,8 +78,6 @@ class Win(cli.Cli):
                 break
             if self.lrc_display and self.lrc_dict:
                 lrc_cli = Lrc(self.lrc_dict, self)
-            # else:
-            #     self.lrc_display = 0
             time.sleep(1)
 
     # 显示时间,音量的线程
@@ -144,7 +142,7 @@ class Win(cli.Cli):
 
     # 播放歌曲
     def play(self):
-        self.lrc_dict = {}
+        self.lrc_dict = {} # 歌词清空
         self.douban.get_song()
         song = self.douban.playingsong
         self.song_time = song['length']
@@ -273,9 +271,6 @@ class Win(cli.Cli):
                     self.douban.bye()
                     self.play()
             elif c == self.QUIT:
-                # if self.lrc_display: # 退出歌词界面
-                #     self.lrc_display = 0
-                # else: # 退出主界面
                 self.q = 1
                 if self.start:
                     self.kill_mplayer()
@@ -302,8 +297,8 @@ class Lrc(cli.Cli):
         self.win = win
         self.lrc_dict = lrc_dict
         self.length = int(win.douban.playingsong['length']) # 歌曲总长度
-        self.song_time = self.length - win.song_time # 歌曲播放秒数
-        self.screenline_char = win.screenline_char # shell每行字符数
+        self.song_time = self.length - win.song_time - 1 # 歌曲播放秒数
+        self.screenline_char = win.screenline_char # shell每行字符数,居中用
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x : x[0])
         lrc_lines = [line[1] for line in self.sort_lrc_dict if line[1]]
         self.lines = lrc_lines
@@ -329,7 +324,6 @@ class Lrc(cli.Cli):
                     self.display()
                 time.sleep(1)
             else:
-                self.sort_lrc_dict = {}
                 break
     # 输出界面
     def display(self):
