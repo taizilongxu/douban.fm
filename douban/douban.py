@@ -267,17 +267,15 @@ class Lrc(cli.Cli):
         self.song_time = length - song_time # 歌曲播放秒数
         self.screenline_char = screenline_char # shell每行字符数
         self.sort_lrc_dic = sorted(lrc_dic.iteritems(), key=lambda x : x[0])
-        lrc_lines = [line[1] for line in self.sort_lrc_dic]
-        # super(Lrc, self).__init__(lrc_lines)
+        lrc_lines = [line[1] for line in self.sort_lrc_dic if line[1]]
         self.lines = lrc_lines
         self.screenline = screenline
         subprocess.call('clear', shell=True)
 
         self.markline = self.locate_line()
-        # print self.markline
-        self.topline = self.markline
-        # print self.topline
+        self.topline = 0
         self.q = 0
+        self.display()
         t = threading.Thread(target=self.display_line)
         t.start()
         self.run()
@@ -296,9 +294,10 @@ class Lrc(cli.Cli):
                 break
             if self.song_time < self.length:
                 self.song_time += 1
-                if self.lrc_dic.has_key(self.song_time):
-                    self.markline += 1
-                self.display()
+                s = [index for index,i in enumerate(self.sort_lrc_dic) if i[0] == self.song_time] # 查找歌词在self.sort_lrc_dic中的位置
+                if s:
+                    self.markline = s[0]
+                    self.display()
                 time.sleep(1)
             else:
                 break
@@ -327,9 +326,6 @@ class Lrc(cli.Cli):
             if c == 'q':
                 self.q = 1
                 break
-
-    # def down(self):
-    #     if self
 
 def main():
     douban = douban_token.Doubanfm()

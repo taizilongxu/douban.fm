@@ -128,6 +128,7 @@ QUIT = q     # 退出
 ###Log
 
 V0.2.9 支持歌词,支持Mac OS X
+
 V0.2.8 增加config
 
 ### License (MIT)
