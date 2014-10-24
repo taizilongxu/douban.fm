@@ -10,10 +10,6 @@
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
 
-新增滚动歌词(>=0.2.10)
-
-![screenshot](img/3.png)
-
 ### Support
 
 Linux/Mac OS X
@@ -136,6 +132,8 @@ MUTE = m     # 静音
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.2.10 滚动歌词
 
 V0.2.9 支持歌词,支持Mac OS X
 
