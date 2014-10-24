@@ -107,7 +107,8 @@ OPENURL = l
 RATE = r
 NEXT = n
 BYE = b
-QUIT = q''' # 这个很丑,怎么办
+QUIT = q
+PAUSE = p''' # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)
 
