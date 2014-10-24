@@ -76,10 +76,10 @@ class Win(cli.Cli):
         while True:
             if self.q == 1:
                 break
-            if self.lrc_display and self.lrc_dic:
-                lrc_cli = Lrc(self.lrc_dic, self)
-            else:
-                self.lrc_display = 0
+            if self.lrc_display and self.lrc_dict:
+                lrc_cli = Lrc(self.lrc_dict, self)
+            # else:
+            #     self.lrc_display = 0
             time.sleep(1)
 
     # 显示时间,音量的线程
@@ -144,6 +144,7 @@ class Win(cli.Cli):
 
     # 播放歌曲
     def play(self):
+        self.lrc_dict = {}
         self.douban.get_song()
         song = self.douban.playingsong
         self.song_time = song['length']
@@ -157,8 +158,8 @@ class Win(cli.Cli):
         self.p = subprocess.Popen('mplayer ' + song['url'] + ' -slave  >/dev/null 2>&1', shell=True, stdin=subprocess.PIPE) # subprocess.PIPE防止继承父进程
         self.display()
         self.notifySend()
-        if self.lrc_display:
-            self.lrc_dic = self.douban.get_lrc()
+        if self.lrc_display: # 获取歌词
+            self.lrc_dict = self.douban.get_lrc()
 
 
     # 结束mplayer
@@ -277,8 +278,8 @@ class Win(cli.Cli):
             elif c == '-':
                 self.change_volume(-1)
             elif c == 'o':
-                self.lrc_dic = self.douban.get_lrc()
-                if self.lrc_dic:
+                self.lrc_dict = self.douban.get_lrc()
+                if self.lrc_dict:
                     self.lrc_display = 1
                 # lrc_dic = self.douban.get_lrc()
                 # if lrc_dic:
@@ -286,14 +287,14 @@ class Win(cli.Cli):
                 # self.lrc_display = 0
 
 class Lrc(cli.Cli):
-    def __init__(self, lrc_dic, win):
+    def __init__(self, lrc_dict, win):
         self.win = win
-        self.lrc_dic = lrc_dic
+        self.lrc_dict = lrc_dict
         self.length = int(win.douban.playingsong['length']) # 歌曲总长度
         self.song_time = self.length - win.song_time # 歌曲播放秒数
         self.screenline_char = win.screenline_char # shell每行字符数
-        self.sort_lrc_dic = sorted(lrc_dic.iteritems(), key=lambda x : x[0])
-        lrc_lines = [line[1] for line in self.sort_lrc_dic if line[1]]
+        self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x : x[0])
+        lrc_lines = [line[1] for line in self.sort_lrc_dict if line[1]]
         self.lines = lrc_lines
         self.screenline = win.screenline
         subprocess.call('clear', shell=True)
@@ -314,7 +315,7 @@ class Lrc(cli.Cli):
                 break
             if self.song_time < self.length:
                 self.song_time += 1
-                s = [index for index,i in enumerate(self.sort_lrc_dic) if i[0] == self.song_time] # 查找歌词在self.sort_lrc_dic中的位置
+                s = [index for index,i in enumerate(self.sort_lrc_dict) if i[0] == self.song_time] # 查找歌词在self.sort_lrc_dict中的位置
                 if s:
                     self.markline = s[0]
                     self.display()

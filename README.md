@@ -10,6 +10,10 @@
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
 
+新增滚动歌词(>=0.2.10)
+
+![screenshot](img/3.png)
+
 ### Support
 
 Linux/Mac OS X
