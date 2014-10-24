@@ -110,6 +110,7 @@ BYE = b
 QUIT = q
 PAUSE = p
 LOOP = l
+MUTE = m
 ''' # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)

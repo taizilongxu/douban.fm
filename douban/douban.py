@@ -43,6 +43,7 @@ class Win(cli.Cli):
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         self.loop = False
+        self.is_muted = False # 是否静音
         os.mkfifo(self.mplayer_controller)
         # 守护线程
         self.t1 = threading.Thread(target=self.protect)
@@ -77,6 +78,7 @@ class Win(cli.Cli):
             self.QUIT = config.get('key','QUIT')
             self.PAUSE = config.get('key', 'PAUSE')
             self.LOOP = config.get('key', 'LOOP')
+            self.MUTE = config.get('key', 'MUTE')
 
     # 歌词线程
     def display_lrc(self):
@@ -100,7 +102,11 @@ class Win(cli.Cli):
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.get_volume() # 获取音量
-                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%'
+                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
+                if self.is_muted:
+                    self.TITLE += '✖'
+                else:
+                    self.TITLE += self.volume.strip() + '%'
                 if self.loop:
                     self.TITLE += '  ' + colored('◎', 'red')
                 else:
@@ -140,6 +146,16 @@ class Win(cli.Cli):
             subprocess.Popen('osascript -e "set volume output volume ' + str(volume) + '"', shell=True)
         else:
             pass
+
+    # 静音
+    def mute(self):
+        if self.is_muted:
+            self.is_muted = False
+            mute = 0
+        else:
+            self.is_muted = True
+            mute = 1
+        subprocess.Popen('echo "mute {mute}" > {fifo}'.format(fifo=self.mplayer_controller, mute=mute), shell=True, stdin=subprocess.PIPE)
 
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
@@ -290,6 +306,8 @@ class Win(cli.Cli):
                     self.play()
             elif c == self.PAUSE:
                 self.pause_play()
+            elif c == self.MUTE:
+                self.mute()
             elif c == self.LOOP:
                 if self.loop:
                     self.notifySend(content='停止单曲循环')
