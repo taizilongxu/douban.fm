@@ -103,12 +103,14 @@ UP = k
 DOWN = j
 TOP = g
 BOTTOM = G
-OPENURL = l
+OPENURL = w
 RATE = r
 NEXT = n
 BYE = b
 QUIT = q
-PAUSE = p''' # 这个很丑,怎么办
+PAUSE = p
+LOOP = l
+''' # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)
 

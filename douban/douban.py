@@ -42,6 +42,7 @@ class Win(cli.Cli):
         self.lrc_display = 0 # 是否显示歌词
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
+        self.loop = False
         os.mkfifo(self.mplayer_controller)
         # 守护线程
         self.t1 = threading.Thread(target=self.protect)
@@ -75,6 +76,7 @@ class Win(cli.Cli):
             self.BYE = config.get('key','BYE')
             self.QUIT = config.get('key','QUIT')
             self.PAUSE = config.get('key', 'PAUSE')
+            self.LOOP = config.get('key', 'LOOP')
 
     # 歌词线程
     def display_lrc(self):
@@ -98,7 +100,12 @@ class Win(cli.Cli):
                 sec = int(self.song_time) % 60
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.get_volume() # 获取音量
-                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%' + '\r'
+                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%'
+                if self.loop:
+                    self.TITLE += '  ' + colored('◎', 'red')
+                else:
+                    self.TITLE += '  ' + colored('→', 'red')
+                self.TITLE += '\r'
                 self.display()
                 self.song_time -= 1
             else:
@@ -143,14 +150,16 @@ class Win(cli.Cli):
                 self.p.poll()
                 if self.p.returncode == 0:
                     self.song_time = -1
-                    self.douban.end_music()
+                    if not self.loop:
+                        self.douban.end_music()
                     self.play()
             time.sleep(1)
 
     # 播放歌曲
     def play(self):
         self.lrc_dict = {}
-        self.douban.get_song()
+        if not self.loop:
+            self.douban.get_song()
         song = self.douban.playingsong
         self.song_time = song['length']
         # 是否是红心歌曲
@@ -281,6 +290,13 @@ class Win(cli.Cli):
                     self.play()
             elif c == self.PAUSE:
                 self.pause_play()
+            elif c == self.LOOP:
+                if self.loop:
+                    self.notifySend(content='停止单曲循环')
+                    self.loop = False
+                else:
+                    self.notifySend(content='单曲循环')
+                    self.loop = True
             elif c == self.QUIT:
                 if self.lrc_display: # 退出歌词界面
                     self.lrc_display = 0
