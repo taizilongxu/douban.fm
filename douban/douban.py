@@ -113,7 +113,8 @@ class Win(cli.Cli):
                     self.TITLE += '  ' + colored('→', 'red')
                 self.TITLE += '\r'
                 self.display()
-                self.song_time -= 1
+                if not self.pause:
+                    self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
