@@ -80,12 +80,16 @@ class Win(cli.Cli):
                 show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
                 self.get_volume() # 获取音量
                 self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: ' + self.volume.strip() + '%' + '\r'
-                if not self.lrc_display:
-                    self.display()
+                self.display()
                 self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
+
+    # 增加一个歌词界面的判断
+    def display(self):
+        if not self.lrc_display:
+            cli.Cli.display(self)
 
     # 获取音量
     def get_volume(self):
@@ -182,7 +186,6 @@ class Win(cli.Cli):
         notification.setDeliveryDate_(Foundation.NSDate.dateWithTimeInterval_sinceDate_(0, Foundation.NSDate.date()))
         NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
 
-
     def run(self):
         while True:
             self.display()
@@ -257,22 +260,25 @@ class Win(cli.Cli):
                 self.lrc_display = 1
                 lrc_dic = self.douban.get_lrc()
                 if lrc_dic:
-                    lrc_cli = Lrc(lrc_dic, int(self.douban.playingsong['length']) , self.song_time, self.screenline, self.screenline_char)
+                    # lrc_cli = Lrc(lrc_dic, int(self.douban.playingsong['length']) , self.song_time, self.screenline, self.screenline_char)
+                    lrc_cli = Lrc(lrc_dic, self)
                 self.lrc_display = 0
 
 class Lrc(cli.Cli):
-    def __init__(self, lrc_dic, length, song_time, screenline, screenline_char):
+    def __init__(self, lrc_dic, win):
+    # def __init__(self, lrc_dic, length, song_time, screenline, screenline_char):
+        self.win = win
         self.lrc_dic = lrc_dic
-        self.length = length # 歌曲总长度
-        self.song_time = length - song_time # 歌曲播放秒数
-        self.screenline_char = screenline_char # shell每行字符数
+        self.length = int(win.douban.playingsong['length']) # 歌曲总长度
+        self.song_time = self.length - win.song_time # 歌曲播放秒数
+        self.screenline_char = win.screenline_char # shell每行字符数
         self.sort_lrc_dic = sorted(lrc_dic.iteritems(), key=lambda x : x[0])
         lrc_lines = [line[1] for line in self.sort_lrc_dic if line[1]]
         self.lines = lrc_lines
-        self.screenline = screenline
+        self.screenline = win.screenline
         subprocess.call('clear', shell=True)
 
-        self.markline = self.locate_line()
+        self.markline = 0
         self.topline = 0
         self.q = 0
         self.display()
@@ -280,14 +286,7 @@ class Lrc(cli.Cli):
         t.start()
         self.run()
 
-    # 根据song_time定位self.markline
-    def locate_line(self):
-        tmp = range(self.song_time)
-        for i in tmp[::-1]:
-            if self.lrc_dic.has_key(i):
-                return self.lines.index(self.lrc_dic[i])
-        return 0
-
+    # 显示歌词线程
     def display_line(self):
         while True:
             if self.q:
@@ -314,7 +313,7 @@ class Lrc(cli.Cli):
                 line = self.lines[self.markline - (self.screenline/2 - linenum)]
                 if linenum == self.screenline/2:
                     i = colored(line, 'blue')
-                    print i.center(self.screenline_char) + '\r'
+                    print i.center(self.screenline_char - 1) + '\r'
                 else:
                     print line.center(self.screenline_char - 9) + '\r'
 
