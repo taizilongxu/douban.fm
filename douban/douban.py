@@ -250,7 +250,7 @@ class Win(cli.Cli):
             self.display()
             i = getch._Getch()
             c = i()
-            if self.lrc_display:
+            if self.lrc_display: # 歌词界面截断
                 if c == self.QUIT:
                     self.lrc_display = 0
                     continue
@@ -298,12 +298,14 @@ class Win(cli.Cli):
                         self.notifySend(content='取消标记红心')
             elif c == self.NEXT: # n下一首
                 if self.douban.playingsong:
+                    self.start = 0
                     self.kill_mplayer()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
                     self.display()
                     self.douban.skip_song()
                     self.douban.playingsong = {}
                     self.play()
+                    self.start = 1
             elif c == self.BYE: # b不再播放
                 if self.douban.playingsong:
                     self.SUFFIX_SELECTED = '不再播放,切换下一首...'
