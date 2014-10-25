@@ -34,7 +34,7 @@ class Win(cli.Cli):
         else:
             PRO = colored(' PRO ', attrs=['reverse'])
         self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
-        self.start = 0 # 播放锁
+        self.start = 0 # 播放锁,play之前需要加
         self.q = 0 # 退出
         self.lrc_dict = {} # 歌词
         self.song_time = -1 # 歌曲剩余播放时间
@@ -175,6 +175,8 @@ class Win(cli.Cli):
         self.lrc_dict = {} # 歌词清空
         if not self.loop:
             self.douban.get_song()
+        if self.is_muted: # 静音状态
+            subprocess.Popen('echo "mute {mute}" > {fifo}'.format(fifo=self.mplayer_controller, mute=1), shell=True, stdin=subprocess.PIPE)
         song = self.douban.playingsong
         self.song_time = song['length']
         # 是否是红心歌曲
