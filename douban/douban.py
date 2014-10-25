@@ -56,9 +56,15 @@ class Win(cli.Cli):
         # 启动自动播放
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
-        self.douban.set_channel(self.douban.channels[self.markline]['channel_id']) # 设置默认频率
-        self.douban.get_playlist()
-        self.play()
+        while True: # 无红心兆赫进入下一个频道
+            try:
+                self.douban.set_channel(self.douban.channels[self.markline]['channel_id']) # 设置默认频率
+                self.douban.get_playlist()
+                self.play()
+                break
+            except:
+                self.markline += 1
+                self.displayline += 1
         self.run()
 
     # 获取config
@@ -401,7 +407,7 @@ class Lrc(cli.Cli):
 
 def main():
     douban = douban_token.Doubanfm()
-    w = Win(douban)
+    Win(douban)
 
 if __name__ == '__main__':
     main()
