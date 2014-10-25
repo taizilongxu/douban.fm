@@ -26,6 +26,21 @@ except ImportError:
 class Win(cli.Cli):
 
     def __init__(self, douban):
+        self.KEYS = {
+                'UP':'k',
+                'DOWN':'j',
+                'TOP':'g',
+                'BOTTOM':'G',
+                'OPENURL':'w',
+                'RATE':'r',
+                'NEXT':'n',
+                'BYE':'b',
+                'QUIT':'q',
+                'PAUSE':'p',
+                'LOOP':'l',
+                'MUTE':'m',
+                'LRC':'o'
+                }
         self.platform = platform.system()
         self.get_config()
         self.douban = douban
@@ -72,19 +87,10 @@ class Win(cli.Cli):
         config = ConfigParser.ConfigParser()
         with open(os.path.expanduser('~/.doubanfm_config'), 'r') as cfgfile:
             config.readfp(cfgfile)
-            self.UP = config.get('key', 'UP')
-            self.DOWN = config.get('key', 'DOWN')
-            self.TOP = config.get('key', 'TOP')
-            self.BOTTOM = config.get('key', 'BOTTOM')
-            self.OPENURL = config.get('key', 'OPENURL')
-            self.RATE = config.get('key', 'RATE')
-            self.NEXT = config.get('key', 'NEXT')
-            self.BYE = config.get('key', 'BYE')
-            self.QUIT = config.get('key', 'QUIT')
-            self.PAUSE = config.get('key', 'PAUSE')
-            self.LOOP = config.get('key', 'LOOP')
-            self.MUTE = config.get('key', 'MUTE')
-            self.LRC = config.get('key', 'LRC')
+            options = config.options('key')
+            for option in options:
+                if self.KEYS.has_key(option):
+                    self.KEYS[option] = config.get('key', option)
 
     # 歌词线程
     def display_lrc(self):
@@ -260,19 +266,19 @@ class Win(cli.Cli):
             i = getch._Getch()
             c = i()
             if self.lrc_display: # 歌词界面截断
-                if c == self.QUIT:
+                if c == self.KEYS['QUIT']:
                     self.lrc_display = 0
                     continue
                 else:
                     continue
-            if c == self.UP:
+            if c == self.KEYS['UP']:
                 self.updown(-1)
-            elif c == self.DOWN:
+            elif c == self.KEYS['DOWN']:
                 self.updown(1)
-            elif c == self.TOP: # g键返回顶部
+            elif c == self.KEYS['TOP']: # g键返回顶部
                 self.markline = 0
                 self.topline = 0
-            elif c == self.BOTTOM: # G键返回底部
+            elif c == self.KEYS['BOTTOM']: # G键返回底部
                 self.markline = self.screenline
                 self.topline = len(self.lines) - self.screenline - 1
             elif c == ' ': # 空格选择频道,播放歌曲
@@ -287,12 +293,12 @@ class Win(cli.Cli):
                     self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
                     self.douban.get_playlist()
                     self.play()
-            elif c == self.OPENURL: # l打开当前播放歌曲豆瓣页
+            elif c == self.KEYS['OPENURL']: # l打开当前播放歌曲豆瓣页
                 import webbrowser
                 url = "http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/')
                 webbrowser.open(url)
                 self.display()
-            elif c == self.RATE: # r标记红心/取消标记
+            elif c == self.KEYS['RATE']: # r标记红心/取消标记
                 if self.douban.playingsong:
                     if not self.douban.playingsong['like']:
                         self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
@@ -306,7 +312,7 @@ class Win(cli.Cli):
                         self.douban.unrate_music()
                         self.douban.playingsong['like'] = 0
                         self.notifySend(content='取消标记红心')
-            elif c == self.NEXT: # n下一首
+            elif c == self.KEYS['NEXT']: # n下一首
                 if self.douban.playingsong:
                     self.loop = False
                     self.start = 0
@@ -316,25 +322,25 @@ class Win(cli.Cli):
                     self.douban.skip_song()
                     self.douban.playingsong = {}
                     self.play()
-            elif c == self.BYE: # b不再播放
+            elif c == self.KEYS['BYE']: # b不再播放
                 if self.douban.playingsong:
                     self.SUFFIX_SELECTED = '不再播放,切换下一首...'
                     self.display()
                     self.kill_mplayer()
                     self.douban.bye()
                     self.play()
-            elif c == self.PAUSE:
+            elif c == self.KEYS['PAUSE']:
                 self.pause_play()
-            elif c == self.MUTE:
+            elif c == self.KEYS['MUTE']:
                 self.mute()
-            elif c == self.LOOP:
+            elif c == self.KEYS['LOOP']:
                 if self.loop:
                     self.notifySend(content='停止单曲循环')
                     self.loop = False
                 else:
                     self.notifySend(content='单曲循环')
                     self.loop = True
-            elif c == self.QUIT:
+            elif c == self.KEYS['QUIT']:
                 self.q = 1
                 if self.start:
                     self.kill_mplayer()
@@ -344,7 +350,7 @@ class Win(cli.Cli):
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
-            elif c == self.LRC:
+            elif c == self.KEYS['LRC']:
                 tmp = self.SUFFIX_SELECTED
                 self.SUFFIX_SELECTED = '正在加载歌词'
                 self.display()
