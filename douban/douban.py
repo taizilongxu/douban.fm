@@ -298,6 +298,7 @@ class Win(cli.Cli):
                         self.notifySend(content='取消标记红心')
             elif c == self.NEXT: # n下一首
                 if self.douban.playingsong:
+                    self.loop = False
                     self.start = 0
                     self.kill_mplayer()
                     self.SUFFIX_SELECTED = '正在加载请稍后...'
