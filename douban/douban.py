@@ -32,13 +32,13 @@ class Win(cli.Cli):
         if self.douban.pro == 0:
             PRO = ''
         else:
-            PRO = colored(' PRO ', attrs = ['reverse'])
+            PRO = colored(' PRO ', attrs=['reverse'])
         self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
-        self.start = 0 # 歌曲播放
+        self.start = 0 # 播放锁
         self.q = 0 # 退出
         self.lrc_dict = {} # 歌词
         self.song_time = -1 # 歌曲剩余播放时间
-        self.rate = ['★ '*i for i in range(1,6)] # 歌曲评分
+        self.rate = ['★ '*i for i in range(1, 6)] # 歌曲评分
         self.lrc_display = 0 # 是否显示歌词
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
@@ -59,23 +59,22 @@ class Win(cli.Cli):
         self.douban.set_channel(self.douban.channels[self.markline]['channel_id']) # 设置默认频率
         self.douban.get_playlist()
         self.play()
-        self.start = 1
         self.run()
 
     # 获取config
     def get_config(self):
-        config=ConfigParser.ConfigParser()
-        with open(os.path.expanduser('~/.doubanfm_config'),'r') as cfgfile:
+        config = ConfigParser.ConfigParser()
+        with open(os.path.expanduser('~/.doubanfm_config'), 'r') as cfgfile:
             config.readfp(cfgfile)
-            self.UP = config.get('key','UP')
-            self.DOWN = config.get('key','DOWN')
-            self.TOP = config.get('key','TOP')
-            self.BOTTOM = config.get('key','BOTTOM')
-            self.OPENURL = config.get('key','OPENURL')
-            self.RATE = config.get('key','RATE')
-            self.NEXT = config.get('key','NEXT')
-            self.BYE = config.get('key','BYE')
-            self.QUIT = config.get('key','QUIT')
+            self.UP = config.get('key', 'UP')
+            self.DOWN = config.get('key', 'DOWN')
+            self.TOP = config.get('key', 'TOP')
+            self.BOTTOM = config.get('key', 'BOTTOM')
+            self.OPENURL = config.get('key', 'OPENURL')
+            self.RATE = config.get('key', 'RATE')
+            self.NEXT = config.get('key', 'NEXT')
+            self.BYE = config.get('key', 'BYE')
+            self.QUIT = config.get('key', 'QUIT')
             self.PAUSE = config.get('key', 'PAUSE')
             self.LOOP = config.get('key', 'LOOP')
             self.MUTE = config.get('key', 'MUTE')
@@ -93,7 +92,7 @@ class Win(cli.Cli):
     def display_time(self):
         length = len(self.TITLE)
         while True:
-            if self.q == 1:
+            if self.q == 1: # 退出
                 break
             if self.song_time >= 0 and self.douban.playingsong:
                 minute = int(self.song_time) / 60
@@ -106,7 +105,7 @@ class Win(cli.Cli):
                 else:
                     self.TITLE += self.volume.strip() + '%'
                 if self.loop:
-                    self.TITLE += '  ' + colored('◎', 'red')
+                    self.TITLE += '  ' + colored('↺', 'red')
                 else:
                     self.TITLE += '  ' + colored('→', 'red')
                 self.TITLE += '\r'
@@ -193,6 +192,7 @@ class Win(cli.Cli):
             self.lrc_dict = self.douban.get_lrc()
             if not self.lrc_dict: # 歌词获取失败,关闭歌词界面
                 self.lrc_display = 0
+        self.start = 1
 
     # 暂停歌曲
     def pause_play(self):
@@ -228,7 +228,7 @@ class Win(cli.Cli):
             pass
 
     def send_Linux_notify(self, title, content, img_path):
-        subprocess.call([ 'notify-send', '-i', img_path, title, content])
+        subprocess.call(['notify-send', '-i', img_path, title, content])
 
     def send_OS_X_notify(self, title, content, img_path):
         NSUserNotification = objc.lookUpClass('NSUserNotification')
@@ -277,7 +277,6 @@ class Win(cli.Cli):
                     self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
                     self.douban.get_playlist()
                     self.play()
-                    self.start = 1
             elif c == self.OPENURL: # l打开当前播放歌曲豆瓣页
                 import webbrowser
                 webbrowser.open("http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/'))
@@ -306,7 +305,6 @@ class Win(cli.Cli):
                     self.douban.skip_song()
                     self.douban.playingsong = {}
                     self.play()
-                    self.start = 1
             elif c == self.BYE: # b不再播放
                 if self.douban.playingsong:
                     self.SUFFIX_SELECTED = '不再播放,切换下一首...'
@@ -354,7 +352,7 @@ class Lrc(cli.Cli):
         self.length = int(win.douban.playingsong['length']) # 歌曲总长度
         self.song_time = self.length - win.song_time - 1 # 歌曲播放秒数
         self.screenline_char = win.screenline_char # shell每行字符数,居中用
-        self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x : x[0])
+        self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x:x[0])
         lrc_lines = [line[1] for line in self.sort_lrc_dict if line[1]]
         self.lines = lrc_lines
         self.screenline = win.screenline
@@ -362,7 +360,6 @@ class Lrc(cli.Cli):
 
         self.markline = 0
         self.topline = 0
-        self.q = 0
         self.display()
         self.display_line()
 
@@ -374,9 +371,9 @@ class Lrc(cli.Cli):
             self.display()
             if self.song_time < self.length:
                 self.song_time += 1
-                s = [index for index,i in enumerate(self.sort_lrc_dict) if i[0] == self.song_time] # 查找歌词在self.sort_lrc_dict中的位置
-                if s:
-                    self.markline = s[0]
+                locate = [index for index,i in enumerate(self.sort_lrc_dict) if i[0] == self.song_time] # 查找歌词在self.sort_lrc_dict中的位置
+                if locate:
+                    self.markline = locate[0]
                     self.display()
                 time.sleep(1)
             else:
@@ -386,8 +383,8 @@ class Lrc(cli.Cli):
         subprocess.call('clear', shell=True)
         print
         print self.win.TITLE
-        top = self.topline
-        bottom = self.topline + self.screenline + 1
+        # top = self.topline
+        # bottom = self.topline + self.screenline + 1
         for linenum in range(self.screenline):
             if self.screenline/2 - linenum > self.markline - self.topline or linenum - self.screenline/2 >= len(self.lines) - self.markline:
                 print

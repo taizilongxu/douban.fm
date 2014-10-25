@@ -53,7 +53,7 @@ class Doubanfm(object):
     def win_login(self):
         email = raw_input('email:')
         password = getpass.getpass('password:')
-        return email,password
+        return email, password
 
     # 登陆douban.fm获取token
     def login(self):
@@ -67,7 +67,7 @@ class Doubanfm(object):
                 self.expire = self.login_data['expire']
         else: # 未登陆
             while True:
-                self.email,self.password = self.win_login()
+                self.email, self.password = self.win_login()
                 login_data = {
                         'app_name': 'radio_desktop_win',
                         'version': '100',
@@ -98,7 +98,7 @@ class Doubanfm(object):
         # 配置文件
         path_config = os.path.expanduser('~/.doubanfm_config')
         if not os.path.exists(path_config):
-            config ='''[key]
+            config = '''[key]
 UP = k
 DOWN = j
 TOP = g
@@ -122,7 +122,7 @@ MUTE = m
 
     # 格式化频道列表,以便display
     def get_channellines(self):
-        for index,channel in enumerate(self.channels):
+        for index, channel in enumerate(self.channels):
             self.lines.append(channel['name'])
 
     # 发送post_data
@@ -158,7 +158,7 @@ MUTE = m
     def get_song(self):
         if not self.playlist:
             self.get_playlist()
-        self.playingsong  = self.playlist.pop(0)
+        self.playingsong = self.playlist.pop(0)
 
     # 标记喜欢歌曲
     def rate_music(self):
