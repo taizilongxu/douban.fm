@@ -316,6 +316,7 @@ class Lrc(cli.Cli):
         while True:
             if not self.win.lrc_display:
                 break
+            self.display()
             if self.song_time < self.length:
                 self.song_time += 1
                 s = [index for index,i in enumerate(self.sort_lrc_dict) if i[0] == self.song_time] # 查找歌词在self.sort_lrc_dict中的位置
@@ -328,7 +329,8 @@ class Lrc(cli.Cli):
     # 输出界面
     def display(self):
         subprocess.call('clear', shell=True)
-        print '\r'
+        print
+        print self.win.TITLE
         top = self.topline
         bottom = self.topline + self.screenline + 1
         for linenum in range(self.screenline):
