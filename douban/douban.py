@@ -89,6 +89,7 @@ class Win(cli.Cli):
             config.readfp(cfgfile)
             options = config.options('key')
             for option in options:
+                option = option.upper()
                 if self.KEYS.has_key(option):
                     self.KEYS[option] = config.get('key', option)
 
