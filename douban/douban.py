@@ -78,6 +78,7 @@ class Win(cli.Cli):
             self.PAUSE = config.get('key', 'PAUSE')
             self.LOOP = config.get('key', 'LOOP')
             self.MUTE = config.get('key', 'MUTE')
+            self.LRC = config.get('key', 'LRC')
 
     # 歌词线程
     def display_lrc(self):
@@ -164,7 +165,7 @@ class Win(cli.Cli):
                 self.p.poll()
                 if self.p.returncode == 0:
                     self.song_time = -1
-                    if not self.loop:
+                    if not self.loop and self.douban.playingsong:
                         self.douban.end_music()
                     self.play()
             time.sleep(1)
@@ -268,6 +269,7 @@ class Win(cli.Cli):
                 self.topline = len(self.lines) - self.screenline - 1
             elif c == ' ': # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
+                    self.start = 0
                     if self.douban.playingsong:
                         self.douban.playingsong = {}
                         self.kill_mplayer()
@@ -279,7 +281,8 @@ class Win(cli.Cli):
                     self.play()
             elif c == self.OPENURL: # l打开当前播放歌曲豆瓣页
                 import webbrowser
-                webbrowser.open("http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/'))
+                url = "http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/')
+                webbrowser.open(url)
                 self.display()
             elif c == self.RATE: # r标记红心/取消标记
                 if self.douban.playingsong:
@@ -333,7 +336,7 @@ class Win(cli.Cli):
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
-            elif c == 'o':
+            elif c == self.LRC:
                 tmp = self.SUFFIX_SELECTED
                 self.SUFFIX_SELECTED = '正在加载歌词'
                 self.display()
@@ -383,8 +386,6 @@ class Lrc(cli.Cli):
         subprocess.call('clear', shell=True)
         print
         print self.win.TITLE
-        # top = self.topline
-        # bottom = self.topline + self.screenline + 1
         for linenum in range(self.screenline):
             if self.screenline/2 - linenum > self.markline - self.topline or linenum - self.screenline/2 >= len(self.lines) - self.markline:
                 print

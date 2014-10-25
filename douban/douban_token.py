@@ -46,8 +46,7 @@ class Doubanfm(object):
         self.get_song()
         if  int(self.playingsong['kbps']) != 64:
             self.pro = 1
-        # 清空列表
-        self.playingsong = {}
+        self.playingsong = {} # 清空列表
 
     # 登陆界面
     def win_login(self):
@@ -111,6 +110,7 @@ QUIT = q
 PAUSE = p
 LOOP = l
 MUTE = m
+LRC = o
 ''' # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)
