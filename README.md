@@ -6,6 +6,8 @@
 
 感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持Mac OS X(>=V0.2.9)
 
+PS:如果喜欢请加Star(*^__^*)……
+
 ### Screenshots
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
@@ -88,6 +90,7 @@ QUIT = q     # 退出
 PAUSE = p    # 暂停
 LOOP = l     # 单曲循环
 MUTE = m     # 静音
+LRC = o      # 歌词
 ```
 
 ### Done
@@ -132,6 +135,8 @@ MUTE = m     # 静音
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.2.11 config兼容问题
 
 V0.2.10 滚动歌词,单曲循环,暂停,静音
 
