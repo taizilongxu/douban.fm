@@ -3,6 +3,8 @@
 #---------------------------------import------------------------------------
 import re
 #---------------------------------------------------------------------------
+
+
 def lrc2dict(lrc):
     lrc_dict = {}
     remove = lambda x: x.strip('[|]')
@@ -26,12 +28,13 @@ def lrc2dict(lrc):
                 lrc_dict[time_lrc] = lyric
     return lrc_dict
 
+
 def main():
     with open('3443588.lrc', 'r') as F:
         lrc = F.read()
     lrc_dict = lrc2dict(lrc)
     for key in lrc_dict:
-        print key,lrc_dict[key]
+        print key, lrc_dict[key]
 
 if __name__ == '__main__':
     main()

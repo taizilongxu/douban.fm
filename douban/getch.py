@@ -5,6 +5,7 @@ Copyright (c) 2006-2014 sqlmap developers (http://sqlmap.org/)
 See the file 'doc/COPYING' for copying permission
 """
 
+
 class _Getch(object):
     """
     Gets a single character from standard input.  Does not echo to

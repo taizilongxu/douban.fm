@@ -13,36 +13,38 @@ import subprocess
 from termcolor import colored
 import getch
 #---------------------------------------------------------------------------
+
+
 class Cli(object):
-    PREFIX_SELECTED = colored('  > ', 'blue') # 箭头所指行前缀
+    PREFIX_SELECTED = colored('  > ', 'blue')  # 箭头所指行前缀
     PREFIX_DESELECTED = '    '
-    SUFFIX_SELECTED = '' # 空格标记行后缀
+    SUFFIX_SELECTED = ''  # 空格标记行后缀
     SUFFIX_DESELECTED = ''
-    TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + ' \ '# 标题
+    TITLE = PREFIX_DESELECTED + colored(' Douban Fm', 'yellow') + ' \ '  # 标题
 
     def __init__(self, lines):
         self.love = colored('♥ ', 'red')
         self.lines = lines
-        self.markline = 0 # 箭头行 初始化设置默认频道
-        self.topline = 0 # lines
-        self.displayline = self.markline # 初始化歌曲信息显示行
-        self.screenline ,self.screenline_char= self.linesnum() # 屏幕显示行数
-        subprocess.call('echo  "\033[?25l"', shell=True) # 取消光标
+        self.markline = 0  # 箭头行 初始化设置默认频道
+        self.topline = 0  # lines
+        self.displayline = self.markline  # 初始化歌曲信息显示行
+        self.screenline, self.screenline_char = self.linesnum()  # 屏幕显示行数
+        subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
 
     # 测试屏幕显示行数,每行字符数
     def linesnum(self):
         num = subprocess.check_output('stty size', shell=True)
         tmp = num.split(' ')
-        return int(tmp[0]) - 4,int(tmp[1]) # -4上下空余
+        return int(tmp[0]) - 4, int(tmp[1])  # -4上下空余
 
     # 展示窗口
     def display(self):
-        subprocess.call('clear', shell=True) # 清屏
+        subprocess.call('clear', shell=True)  # 清屏
         print
         print self.TITLE
         top = self.topline
         bottom = self.topline + self.screenline + 1
-        for index,i in enumerate(self.lines[top:bottom]):
+        for index, i in enumerate(self.lines[top:bottom]):
             '箭头指向'
             if index == self.markline:
                 prefix = self.PREFIX_SELECTED
@@ -55,7 +57,7 @@ class Cli(object):
             else:
                 suffix = self.SUFFIX_DESELECTED
             line = '%s %s %s' % (prefix, i, suffix)
-            print line + '\r' # 为什么加\r,我不知道,如果不加会出bug
+            print line + '\r'  # 为什么加\r,我不知道,如果不加会出bug
 
     # 显示歌曲的行号
     def displaysong(self):
@@ -87,6 +89,7 @@ class Cli(object):
         elif increment == 1 and self.markline != self.screenline:
             self.markline += 1
 
+
 def main():
     lines = [str(i) for i in range(30)]
     c = Cli(lines)
@@ -94,5 +97,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
