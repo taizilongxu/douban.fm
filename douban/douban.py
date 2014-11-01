@@ -406,16 +406,21 @@ class Lrc(cli.Cli):
         subprocess.call('clear', shell=True)
         print
         print self.win.TITLE
-        for linenum in range(self.screenline):
+        print
+        for linenum in range(self.screenline - 2):
             if self.screenline/2 - linenum > self.markline - self.topline or linenum - self.screenline/2 >= len(self.lines) - self.markline:
                 print
             else:
                 line = self.lines[self.markline - (self.screenline/2 - linenum)]
                 if linenum == self.screenline/2:
                     i = colored(line, 'blue')
-                    print i.center(self.screenline_char - 1) + '\r'
+                    print i.center(self.screenline_char) + '\r'
                 else:
-                    print line.center(self.screenline_char - 9) + '\r'
+                    print line.center(self.screenline_char - 8) + '\r'
+        print
+        s = len(self.win.SUFFIX_SELECTED)
+        num = (s - self.screenline_char) / 2
+        print self.win.SUFFIX_SELECTED.center(self.screenline_char + 46, '-')
 
 
 def main():
