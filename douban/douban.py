@@ -418,9 +418,11 @@ class Lrc(cli.Cli):
                 else:
                     print line.center(self.screenline_char - 8) + '\r'
         print
-        s = len(self.win.SUFFIX_SELECTED)
-        num = (s - self.screenline_char) / 2
-        print self.win.SUFFIX_SELECTED.center(self.screenline_char + 46, '-')
+        if self.win.douban.playingsong['like']:
+            num = self.screenline_char + 36
+        else:
+            num = self.screenline_char + 32
+        print self.win.SUFFIX_SELECTED.center(num, '-')
 
 
 def main():

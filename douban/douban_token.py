@@ -4,12 +4,12 @@
 """
 #---------------------------------import------------------------------------
 import requests
-import urllib
-import os
-import pickle
-import getpass
 import tempfile
 import lrc2dic
+import getpass
+import pickle
+import urllib
+import os
 #---------------------------------------------------------------------------
 class Doubanfm(object):
     def __init__(self):
