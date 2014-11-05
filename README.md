@@ -34,6 +34,10 @@ OS X:
 
     $ brew install mplayer
 
+### Update
+
+    $ sudo pip install --upgrade douban.fm
+
 ### Usage
 
 在终端下直接输入
@@ -106,8 +110,11 @@ LRC = o      # 歌词
 * config设置
 * 调节音量(amixer) + 标题中显示音量
 * 歌词
-* 歌曲暂停
-* 单曲播放
+* Ubuntu桌面通知 by [Fansion](https://github.com/Fansion)
+* 支持MAC OS by [Cloverstd](https://github.com/cloverstd)
+* MAC OS 桌面通知 by [Cloverstd](https://github.com/cloverstd)
+* 歌曲暂停 by [Cloverstd](https://github.com/cloverstd)
+* 单曲播放 by [Cloverstd](https://github.com/cloverstd)
 
 ### TODO
 
