@@ -199,7 +199,10 @@ class Win(cli.Cli):
             love = self.love
         else:
             love = ''
-        self.SUFFIX_SELECTED = (love + colored(song['title'], 'green') + ' • ' + colored(song['albumtitle'], 'yellow') + ' • ' + colored(song['artist'], 'white') + ' ' + song['public_time']).replace('\\', '')
+        title = colored(song['title'], 'green')
+        albumtitle = colored(song['albumtitle'], 'yellow')
+        artist = colored(song['artist'], 'white')
+        self.SUFFIX_SELECTED = (love + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
         cmd = 'mplayer -slave -input file={fifo} {song_url} >/dev/null 2>&1'
         self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
@@ -401,6 +404,9 @@ class Lrc(cli.Cli):
             else:
                 break
 
+    def is_cn_char(self, i):
+            return 0x4e00<=ord(i)<0x9fa6
+
     # 输出界面
     def display(self):
         subprocess.call('clear', shell=True)
@@ -418,11 +424,21 @@ class Lrc(cli.Cli):
                 else:
                     print line.center(self.screenline_char - 8) + '\r'
         print
-        if self.win.douban.playingsong['like']:
-            num = self.screenline_char + 36
-        else:
-            num = self.screenline_char + 32
-        print self.win.SUFFIX_SELECTED.center(num, '-')
+        song = self.win.douban.playingsong
+        tmp = song['title'] + song['albumtitle'] + song['artist'] + song['public_time']
+        tmp = tmp.replace('\\', '').strip()
+        l = 0
+        for i in tmp:
+            if self.is_cn_char(i):
+                l += 2
+            elif ord(i) < 127:
+                l += 1
+        print str(l), tmp + '\r'
+        # l =  len(unicode((song['title'] + ' • ' + song['albumtitle'] + ' • ' + song['artist'] + ' ' + song['public_time']).replace('\\', ''), 'utf-8'))  # 计算中文或英文字符串长度
+        if song['like']:
+            l += 2
+        flag_num = (self.screenline_char - l) / 2
+        print '-' * flag_num + self.win.SUFFIX_SELECTED + '-' * flag_num
 
 
 def main():
