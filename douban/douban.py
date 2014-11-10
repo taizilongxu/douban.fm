@@ -425,16 +425,15 @@ class Lrc(cli.Cli):
                     print line.center(self.screenline_char - 8) + '\r'
         print
         song = self.win.douban.playingsong
+        # 歌词界面歌曲信息居中
         tmp = song['title'] + song['albumtitle'] + song['artist'] + song['public_time']
-        tmp = tmp.replace('\\', '').strip()
-        l = 0
+        tmp = unicode(tmp.replace('\\', '').strip(), 'utf-8')
+        l = 7  # 7个固定字符
         for i in tmp:
             if self.is_cn_char(i):
                 l += 2
-            elif ord(i) < 127:
+            else:
                 l += 1
-        print str(l), tmp + '\r'
-        # l =  len(unicode((song['title'] + ' • ' + song['albumtitle'] + ' • ' + song['artist'] + ' ' + song['public_time']).replace('\\', ''), 'utf-8'))  # 计算中文或英文字符串长度
         if song['like']:
             l += 2
         flag_num = (self.screenline_char - l) / 2

@@ -12,6 +12,12 @@ PS:如果喜欢请加Star(*^__^*)……
 
 ![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
 
+### Lyric
+
+新增歌词界面
+
+![Lyric](img/4.png)
+
 ### Support
 
 Linux/Mac OS X
@@ -152,10 +158,5 @@ V0.2.9 支持歌词,支持Mac OS X
 V0.2.8 增加config
 
 ### License (MIT)
+
 Copyright (c) 2014 hackerxu
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
