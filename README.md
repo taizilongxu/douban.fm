@@ -16,7 +16,7 @@ PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
 
 新增歌词界面
 
-![Lyric](img/4.png)
+![Lyric](img/5.png)
 
 ### Support
 
