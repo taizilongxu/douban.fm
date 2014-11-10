@@ -6,7 +6,7 @@
 
 感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持Mac OS X(>=V0.2.9)
 
-PS:如果喜欢请加Star(*^__^*)……
+PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
 
 ### Screenshots
 
