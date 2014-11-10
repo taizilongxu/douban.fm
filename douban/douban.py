@@ -202,7 +202,7 @@ class Win(cli.Cli):
         title = colored(song['title'], 'green')
         albumtitle = colored(song['albumtitle'], 'yellow')
         artist = colored(song['artist'], 'white')
-        self.SUFFIX_SELECTED = (love + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
+        self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
         cmd = 'mplayer -slave -input file={fifo} {song_url} >/dev/null 2>&1'
         self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
@@ -417,27 +417,36 @@ class Lrc(cli.Cli):
             if self.screenline/2 - linenum > self.markline - self.topline or linenum - self.screenline/2 >= len(self.lines) - self.markline:
                 print
             else:
-                line = self.lines[self.markline - (self.screenline/2 - linenum)]
+                line = self.lines[self.markline - (self.screenline/2 - linenum)].strip()
+                l = self.center_num(line)
+                flag_num = (self.screenline_char - l) / 2
                 if linenum == self.screenline/2:
                     i = colored(line, 'blue')
-                    print i.center(self.screenline_char) + '\r'
+                    print ' ' * flag_num + i + ' ' * flag_num + '\r'
                 else:
-                    print line.center(self.screenline_char - 8) + '\r'
+                    print ' ' * flag_num + line + ' ' * flag_num + '\r'
         print
+        # 歌曲信息居中
         song = self.win.douban.playingsong
-        # 歌词界面歌曲信息居中
-        tmp = song['title'] + song['albumtitle'] + song['artist'] + song['public_time']
-        tmp = unicode(tmp.replace('\\', '').strip(), 'utf-8')
-        l = 7  # 7个固定字符
+        tmp = (song['title'] + song['albumtitle'] + song['artist'] + song['public_time']).replace('\\', '').strip()
+        tmp = unicode(tmp, 'utf-8')
+        l = self.center_num(tmp) + 7  # 7个固定字符
+        if song['like']:
+            l += 2
+        flag_num = (self.screenline_char - l) / 2
+        print ' ' * flag_num + self.win.SUFFIX_SELECTED + ' ' * flag_num + '\r'
+
+    # 需要考虑中文和英文的居中
+    def center_num(self, tmp):
+        l = 0
         for i in tmp:
             if self.is_cn_char(i):
                 l += 2
             else:
                 l += 1
-        if song['like']:
-            l += 2
-        flag_num = (self.screenline_char - l) / 2
-        print '-' * flag_num + self.win.SUFFIX_SELECTED + '-' * flag_num
+        return l
+
+
 
 
 def main():
