@@ -378,15 +378,22 @@ class Lrc(cli.Cli):
         self.song_time = self.length - win.song_time - 1  # 歌曲播放秒数
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x: x[0])
-        lrc_lines = [line[1] for line in self.sort_lrc_dict if line[1]]
-        self.lines = lrc_lines
+        self.lines = [line[1] for line in self.sort_lrc_dict if line[1]]
         self.screenline = win.screenline
         subprocess.call('clear', shell=True)
 
-        self.markline = 0
+        self.markline = self.find_line()
         self.topline = 0
         self.display()
         self.display_line()
+
+    # 第一次载入时查找歌词
+    def find_line(self):
+        for time in reversed(range(self.song_time)):
+            locate = [index for index, i in enumerate(self.sort_lrc_dict) if i[0] == time]  # 查找歌词在self.sort_lrc_dict中的位置
+            if locate:
+                return locate[0]
+        return 0
 
     # 显示歌词
     def display_line(self):
@@ -404,6 +411,7 @@ class Lrc(cli.Cli):
             else:
                 break
 
+    # 中文字符
     def is_cn_char(self, i):
             return 0x4e00<=ord(i)<0x9fa6
 
@@ -422,9 +430,9 @@ class Lrc(cli.Cli):
                 flag_num = (self.screenline_char - l) / 2
                 if linenum == self.screenline/2:
                     i = colored(line, 'blue')
-                    print ' ' * flag_num + i + ' ' * flag_num + '\r'
+                    print ' ' * flag_num + i + '\r'
                 else:
-                    print ' ' * flag_num + line + ' ' * flag_num + '\r'
+                    print ' ' * flag_num + line + '\r'
         print
         # 歌曲信息居中
         song = self.win.douban.playingsong
@@ -434,7 +442,7 @@ class Lrc(cli.Cli):
         if song['like']:
             l += 2
         flag_num = (self.screenline_char - l) / 2
-        print ' ' * flag_num + self.win.SUFFIX_SELECTED + ' ' * flag_num + '\r'
+        print ' ' * flag_num + self.win.SUFFIX_SELECTED + '\r'
 
     # 需要考虑中文和英文的居中
     def center_num(self, tmp):
@@ -445,8 +453,6 @@ class Lrc(cli.Cli):
             else:
                 l += 1
         return l
-
-
 
 
 def main():
