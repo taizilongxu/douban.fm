@@ -10,7 +10,6 @@ import getch  # get char
 import subprocess
 from termcolor import colored
 import threading
-import string
 import time
 import os
 import tempfile
@@ -113,7 +112,7 @@ class Win(cli.Cli):
             if self.song_time >= 0 and self.douban.playingsong:
                 minute = int(self.song_time) / 60
                 sec = int(self.song_time) % 60
-                show_time = string.zfill(str(minute), 2) + ':' + string.zfill(str(sec), 2)
+                show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
                 self.get_volume()  # 获取音量
                 self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
                 if self.is_muted:
