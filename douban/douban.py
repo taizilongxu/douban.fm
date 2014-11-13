@@ -22,6 +22,12 @@ try:
 except ImportError:
     pass
 #---------------------------------------------------------------------------
+def thread(func):
+    t = threading.Thread(target=func)
+    t.start()
+    return func
+
+
 
 
 class Win(cli.Cli):
@@ -113,7 +119,8 @@ class Win(cli.Cli):
                 minute = int(self.song_time) / 60
                 sec = int(self.song_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
-                self.get_volume()  # 获取音量
+
+                self.volume = self.get_volume()  # 获取音量
                 self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
                 if self.is_muted:
                     self.TITLE += '✖'
@@ -133,7 +140,7 @@ class Win(cli.Cli):
 
     # 增加一个歌词界面的判断
     def display(self):
-        if not self.lrc_display:
+        if not self.lrc_display and self.start:
             cli.Cli.display(self)
 
     # 获取音量
@@ -145,7 +152,7 @@ class Win(cli.Cli):
             volume = subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
         else:
             volume = ''
-        self.volume = volume
+        return volume
 
     # 调整音量大小
     def change_volume(self, increment):
@@ -180,7 +187,7 @@ class Win(cli.Cli):
                 if self.p.returncode == 0:
                     self.song_time = -1
                     if not self.loop and self.douban.playingsong:
-                        self.douban.end_music()
+                        self.douban.end_music()  # 发送完成
                     self.play()
             time.sleep(1)
 
@@ -268,14 +275,10 @@ class Win(cli.Cli):
     def run(self):
         while True:
             self.display()
-            i = getch._Getch()
-            c = i()
-            if self.lrc_display:  # 歌词界面截断
-                if c == self.KEYS['QUIT']:
-                    self.lrc_display = 0
-                    continue
-                else:
-                    continue
+            c = getch._Getch()()
+            if self.lrc_display and c == self.KEYS['QUIT']:  # 歌词界面截断
+                self.lrc_display = 0
+                continue
             if c == self.KEYS['UP']:
                 self.updown(-1)
             elif c == self.KEYS['DOWN']:
@@ -288,98 +291,135 @@ class Win(cli.Cli):
                 self.topline = len(self.lines) - self.screenline - 1
             elif c == ' ':  # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
-                    self.start = 0
-                    if self.douban.playingsong:
-                        self.douban.playingsong = {}
-                        self.kill_mplayer()
                     self.displaysong()
-                    self.SUFFIX_SELECTED = '正在加载请稍后...'
-                    self.display()
-                    self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
-                    self.douban.get_playlist()
-                    self.play()
+                    self.set_play()
             elif c == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
-                import webbrowser
-                url = "http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/')
-                webbrowser.open(url)
-                self.display()
+                self.set_url()
             elif c == self.KEYS['RATE']:  # r标记红心/取消标记
-                if self.douban.playingsong:
-                    if not self.douban.playingsong['like']:
-                        self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
-                        self.display()
-                        self.douban.rate_music()
-                        self.douban.playingsong['like'] = 1
-                        self.notifySend(content='标记红心')
-                    else:
-                        self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
-                        self.display()
-                        self.douban.unrate_music()
-                        self.douban.playingsong['like'] = 0
-                        self.notifySend(content='取消标记红心')
+                self.set_rate()
             elif c == self.KEYS['NEXT']:  # n下一首
-                if self.douban.playingsong:
-                    self.loop = False
-                    self.start = 0
-                    self.kill_mplayer()
-                    self.SUFFIX_SELECTED = '正在加载请稍后...'
-                    self.display()
-                    self.douban.skip_song()
-                    self.douban.playingsong = {}
-                    self.play()
+                self.set_next()
             elif c == self.KEYS['BYE']:  # b不再播放
-                if self.douban.playingsong:
-                    self.start = 0  # 每个play前需self.start置0
-                    self.SUFFIX_SELECTED = '不再播放,切换下一首...'
-                    self.display()
-                    self.kill_mplayer()
-                    self.douban.bye()
-                    self.play()
-            elif c == self.KEYS['PAUSE']:
+                self.set_bye()
+            elif c == self.KEYS['PAUSE']:  # p暂停
                 self.pause_play()
-            elif c == self.KEYS['MUTE']:
+            elif c == self.KEYS['MUTE']:  # m静音
                 self.mute()
-            elif c == self.KEYS['LOOP']:
-                if self.loop:
-                    self.notifySend(content='停止单曲循环')
-                    self.loop = False
-                else:
-                    self.notifySend(content='单曲循环')
-                    self.loop = True
-            elif c == self.KEYS['QUIT']:
-                self.q = 1
-                if self.start:
-                    self.kill_mplayer()
-                subprocess.call('echo -e "\033[?25h";clear', shell=True)
-                exit()
+            elif c == self.KEYS['LOOP']:  # l单曲循环
+                self.set_loop()
+            elif c == self.KEYS['QUIT']:  # q退出程序
+                self.set_quit()
             elif c == '=':
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
-            elif c == self.KEYS['LRC']:
+            elif c == self.KEYS['LRC']:  # o歌词
+                self.set_lrc()
+
+    def info(args):
+        """
+        装饰器,用来改变SUFFIX_SELECTED并在界面输出
+        """
+        def _deco(func):
+            def _func(self):
                 tmp = self.SUFFIX_SELECTED
-                self.SUFFIX_SELECTED = '正在加载歌词'
+                self.SUFFIX_SELECTED = args
                 self.display()
-                self.lrc_display = 1
                 self.SUFFIX_SELECTED = tmp
-                self.lrc_dict = self.douban.get_lrc()
-                if self.lrc_dict:
-                    self.lrc_display = 1
-                else:
-                    self.lrc_display = 0
+                func(self)
+            return _func
+        return _deco
+
+    def set_rate(self):
+        if self.douban.playingsong:
+            if not self.douban.playingsong['like']:
+                self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
+                self.display()
+                self.douban.rate_music()
+                self.douban.playingsong['like'] = 1
+                self.notifySend(content='标记红心')
+            else:
+                self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
+                self.display()
+                self.douban.unrate_music()
+                self.douban.playingsong['like'] = 0
+                self.notifySend(content='取消标记红心')
+
+
+    def set_loop(self):
+        if self.loop:
+            self.notifySend(content='停止单曲循环')
+            self.loop = False
+        else:
+            self.notifySend(content='单曲循环')
+            self.loop = True
+
+    def set_url(self):
+        import webbrowser
+        url = "http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/')
+        webbrowser.open(url)
+        self.display()
+
+    def set_quit(self):
+        self.q = 1
+        if self.start:
+            self.kill_mplayer()
+        subprocess.call('echo -e "\033[?25h";clear', shell=True)
+        exit()
+
+    @info('正在加载请稍后...')
+    def set_play(self):
+        self.start = 0
+        if self.douban.playingsong:
+            self.douban.playingsong = {}
+            self.kill_mplayer()
+        self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
+        self.douban.get_playlist()
+        self.play()
+
+    @info('正在加载请稍后...')
+    def set_next(self):
+        if self.douban.playingsong:
+            self.loop = False
+            self.start = 0
+            self.kill_mplayer()
+            self.douban.skip_song()
+            self.douban.playingsong = {}
+            self.play()
+
+    @info('不再播放,切换下一首...')
+    def set_bye(self):
+        if self.douban.playingsong:
+            self.start = 0  # 每个play前需self.start置0
+            self.kill_mplayer()
+            self.douban.bye()
+            self.play()
+
+    @info('正在加载歌词...')
+    def set_lrc(self):
+        self.lrc_display = 1
+        self.lrc_dict = self.douban.get_lrc()
+        if self.lrc_dict:
+            self.lrc_display = 1
+        else:
+            self.lrc_display = 0
 
 
 class Lrc(cli.Cli):
     def __init__(self, lrc_dict, win):
         self.win = win
         self.lrc_dict = lrc_dict
+
         self.length = int(win.douban.playingsong['length'])  # 歌曲总长度
         self.song_time = self.length - win.song_time - 1  # 歌曲播放秒数
+
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
+        self.screenline = win.screenline  # shell高度
+
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x: x[0])
         self.lines = [line[1] for line in self.sort_lrc_dict if line[1]]
-        self.screenline = win.screenline
-        subprocess.call('clear', shell=True)
+
+        subprocess.call('clear', shell=True) # 清屏
 
         self.markline = self.find_line()
         self.topline = 0
