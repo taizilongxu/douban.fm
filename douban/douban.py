@@ -22,14 +22,6 @@ try:
 except ImportError:
     pass
 #---------------------------------------------------------------------------
-def thread(func):
-    t = threading.Thread(target=func)
-    t.start()
-    return func
-
-
-
-
 class Win(cli.Cli):
 
     def __init__(self, douban):
@@ -56,7 +48,7 @@ class Win(cli.Cli):
         else:
             PRO = colored(' PRO ', attrs=['reverse'])
         self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
-        self.start = 0  # 播放锁,play之前需要加
+        self.start = 1  # 播放锁,play之前需要加
         self.q = 0  # 退出
         self.lrc_dict = {}  # 歌词
         self.song_time = -1  # 歌曲剩余播放时间
