@@ -48,7 +48,7 @@ class Win(cli.Cli):
         else:
             PRO = colored(' PRO ', attrs=['reverse'])
         self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
-        self.start = 1  # 播放锁,play之前需要加
+        self.start = 0  # 播放锁,play之前需要加
         self.q = 0  # 退出
         self.lrc_dict = {}  # 歌词
         self.song_time = -1  # 歌曲剩余播放时间
@@ -68,8 +68,10 @@ class Win(cli.Cli):
         self.t3.start()
         super(Win, self).__init__(self.douban.lines)
         # 启动自动播放
+        self.start = 1
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
+        self.start = 0
         while True:  # 无红心兆赫进入下一个频道
             try:
                 self.douban.set_channel(self.douban.channels[self.markline]['channel_id'])  # 设置默认频率
@@ -336,7 +338,6 @@ class Win(cli.Cli):
                 self.douban.unrate_music()
                 self.douban.playingsong['like'] = 0
                 self.notifySend(content='取消标记红心')
-
 
     def set_loop(self):
         if self.loop:

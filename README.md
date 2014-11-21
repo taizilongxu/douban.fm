@@ -103,6 +103,10 @@ MUTE = m     # 静音
 LRC = o      # 歌词
 ```
 
+### Developer
+
+[Wiki](https://github.com/taizilongxu/douban.fm/wiki)
+
 ### Done
 
 * 登陆token
@@ -116,9 +120,8 @@ LRC = o      # 歌词
 * config设置
 * 调节音量(amixer) + 标题中显示音量
 * 歌词
-* Ubuntu桌面通知 by [Fansion](https://github.com/Fansion)
+* Ubuntu桌面通知 by [Fansion](https://github.com/Fansion) | MAC OS 桌面通知 by [Cloverstd](https://github.com/cloverstd)
 * 支持MAC OS by [Cloverstd](https://github.com/cloverstd)
-* MAC OS 桌面通知 by [Cloverstd](https://github.com/cloverstd)
 * 歌曲暂停 by [Cloverstd](https://github.com/cloverstd)
 * 单曲播放 by [Cloverstd](https://github.com/cloverstd)
 
@@ -150,6 +153,8 @@ LRC = o      # 歌词
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.02.12 歌词界面美化
 
 V0.2.11 config兼容问题
 
