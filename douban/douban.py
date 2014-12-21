@@ -55,6 +55,7 @@ class Win(cli.Cli):
         self.rate = ['★ '*i for i in range(1, 6)]  # 歌曲评分
         self.lrc_display = 0  # 是否显示歌词
         self.lock_rate = 0  # 加心锁
+        self.lock_next = 0
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         self.loop = False
@@ -385,13 +386,15 @@ class Win(cli.Cli):
 
     @info('正在加载请稍后...')
     def set_next(self):
-        if self.douban.playingsong:
+        if self.douban.playingsong and self.lock_rate == 0:
+            self.lock_rate = 1
             self.loop = False
             self.start = 0
             self.kill_mplayer()
             self.douban.skip_song()
             self.douban.playingsong = {}
             self.play()
+            self.lock_rate = 0
 
     @info('不再播放,切换下一首...')
     def set_bye(self):
