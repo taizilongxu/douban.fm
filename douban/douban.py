@@ -293,12 +293,12 @@ class Win(cli.Cli):
                     self.displaysong()
                     self.set_play()
             elif c == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
-                self.thread(self.set_url)
+                self.set_url()
             elif c == self.KEYS['RATE']:  # r标记红心/取消标记
                 self.thread(self.set_rate)
-
             elif c == self.KEYS['NEXT']:  # n下一首
-                self.thread(self.set_next)
+                self.set_next()
+
             elif c == self.KEYS['BYE']:  # b不再播放
                 self.thread(self.set_bye)
             elif c == self.KEYS['PAUSE']:  # p暂停
@@ -391,7 +391,7 @@ class Win(cli.Cli):
             self.loop = False
             self.start = 0
             self.kill_mplayer()
-            self.douban.skip_song()
+            self.thread(self.douban.skip_song)
             self.douban.playingsong = {}
             self.play()
             self.lock_rate = 0
