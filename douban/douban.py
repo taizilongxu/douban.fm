@@ -274,8 +274,9 @@ class Win(cli.Cli):
         while True:
             self.display()
             c = getch._Getch()()
-            if self.lrc_display and c == self.KEYS['QUIT']:  # 歌词界面截断
-                self.lrc_display = 0
+            if self.lrc_display:  # 歌词界面截断
+                if c == self.KEYS['QUIT']:
+                    self.lrc_display = 0
                 continue
             if c == self.KEYS['UP']:
                 self.updown(-1)
@@ -298,9 +299,9 @@ class Win(cli.Cli):
                 self.thread(self.set_rate)
             elif c == self.KEYS['NEXT']:  # n下一首
                 self.set_next()
-
             elif c == self.KEYS['BYE']:  # b不再播放
-                self.thread(self.set_bye)
+                self.set_bye()
+
             elif c == self.KEYS['PAUSE']:  # p暂停
                 self.pause_play()
             elif c == self.KEYS['MUTE']:  # m静音
@@ -314,7 +315,7 @@ class Win(cli.Cli):
             elif c == '-':
                 self.change_volume(-1)
             elif c == self.KEYS['LRC']:  # o歌词
-                self.thread(self.set_lrc)
+                self.set_lrc()
 
     def info(args):
         """
@@ -386,15 +387,13 @@ class Win(cli.Cli):
 
     @info('正在加载请稍后...')
     def set_next(self):
-        if self.douban.playingsong and self.lock_rate == 0:
-            self.lock_rate = 1
+        if self.douban.playingsong:
             self.loop = False
             self.start = 0
             self.kill_mplayer()
-            self.thread(self.douban.skip_song)
+            self.thread(self.douban.skip_song)  # 线程处理网络请求
             self.douban.playingsong = {}
             self.play()
-            self.lock_rate = 0
 
     @info('不再播放,切换下一首...')
     def set_bye(self):
@@ -402,6 +401,7 @@ class Win(cli.Cli):
             self.start = 0  # 每个play前需self.start置0
             self.kill_mplayer()
             self.douban.bye()
+            self.douban.playingsong = {}
             self.play()
 
     @info('正在加载歌词...')
