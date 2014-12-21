@@ -54,15 +54,19 @@ class Win(cli.Cli):
         self.song_time = -1  # 歌曲剩余播放时间
         self.rate = ['★ '*i for i in range(1, 6)]  # 歌曲评分
         self.lrc_display = 0  # 是否显示歌词
+        self.lock_rate = 0  # 加心锁
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         self.loop = False
         self.is_muted = False  # 是否静音
         os.mkfifo(self.mplayer_controller)
         # 守护线程
-        threading.Thread(target=self.protect).start()
-        threading.Thread(target=self.display_time).start()
-        threading.Thread(target=self.display_lrc).start()
+        self.thread(self.protect)
+        self.thread(self.display_time)
+        self.thread(self.display_lrc)
+        # threading.Thread(target=self.protect).start()
+        # threading.Thread(target=self.display_time).start()
+        # threading.Thread(target=self.display_lrc).start()
         super(Win, self).__init__(self.douban.lines)
         # 启动自动播放
         self.start = 1
@@ -79,6 +83,9 @@ class Win(cli.Cli):
                 self.markline += 1
                 self.displayline += 1
         self.run()
+
+    def thread(self,target):
+        threading.Thread(target=target).start()
 
     # 获取config
     def get_config(self):
@@ -285,19 +292,20 @@ class Win(cli.Cli):
                     self.displaysong()
                     self.set_play()
             elif c == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
-                self.set_url()
+                self.thread(self.set_url)
             elif c == self.KEYS['RATE']:  # r标记红心/取消标记
-                self.set_rate()
+                self.thread(self.set_rate)
+
             elif c == self.KEYS['NEXT']:  # n下一首
-                self.set_next()
+                self.thread(self.set_next)
             elif c == self.KEYS['BYE']:  # b不再播放
-                self.set_bye()
+                self.thread(self.set_bye)
             elif c == self.KEYS['PAUSE']:  # p暂停
                 self.pause_play()
             elif c == self.KEYS['MUTE']:  # m静音
-                self.mute()
+                self.thread(self.mute)
             elif c == self.KEYS['LOOP']:  # l单曲循环
-                self.set_loop()
+                self.thread(self.set_loop)
             elif c == self.KEYS['QUIT']:  # q退出程序
                 self.set_quit()
             elif c == '=':
@@ -305,7 +313,7 @@ class Win(cli.Cli):
             elif c == '-':
                 self.change_volume(-1)
             elif c == self.KEYS['LRC']:  # o歌词
-                self.set_lrc()
+                self.thread(self.set_lrc)
 
     def info(args):
         """
@@ -322,6 +330,13 @@ class Win(cli.Cli):
         return _deco
 
     def set_rate(self):
+        """
+        歌曲加心，去心
+        """
+        while(self.lock_rate):
+            if self.q == 1:
+                return
+        self.lock_rate = 1
         if self.douban.playingsong:
             if not self.douban.playingsong['like']:
                 self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
@@ -335,6 +350,7 @@ class Win(cli.Cli):
                 self.douban.unrate_music()
                 self.douban.playingsong['like'] = 0
                 self.notifySend(content='取消标记红心')
+        self.lock_rate = 0
 
     def set_loop(self):
         if self.loop:
