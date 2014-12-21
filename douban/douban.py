@@ -55,7 +55,6 @@ class Win(cli.Cli):
         self.rate = ['★ '*i for i in range(1, 6)]  # 歌曲评分
         self.lrc_display = 0  # 是否显示歌词
         self.lock_rate = 0  # 加心锁
-        self.lock_next = 0
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         self.loop = False
@@ -104,8 +103,13 @@ class Win(cli.Cli):
         while True:
             if self.q == 1:  # 退出
                 break
-            if self.lrc_display and self.lrc_dict:
-                lrc_cli = Lrc(self.lrc_dict, self)
+            if self.lrc_display:
+                self.lrc_dict = self.douban.get_lrc()
+                if self.lrc_dict:
+                    lrc_cli = Lrc(self.lrc_dict, self)
+                else:
+                    self.lrc_display = 0
+
             time.sleep(1)
 
     # 显示时间,音量的线程
@@ -305,9 +309,9 @@ class Win(cli.Cli):
             elif c == self.KEYS['PAUSE']:  # p暂停
                 self.pause_play()
             elif c == self.KEYS['MUTE']:  # m静音
-                self.thread(self.mute)
+                self.mute()
             elif c == self.KEYS['LOOP']:  # l单曲循环
-                self.thread(self.set_loop)
+                self.set_loop()
             elif c == self.KEYS['QUIT']:  # q退出程序
                 self.set_quit()
             elif c == '=':
@@ -316,6 +320,7 @@ class Win(cli.Cli):
                 self.change_volume(-1)
             elif c == self.KEYS['LRC']:  # o歌词
                 self.set_lrc()
+
 
     def info(args):
         """
@@ -404,15 +409,9 @@ class Win(cli.Cli):
             self.douban.playingsong = {}
             self.play()
 
-    @info('正在加载歌词...')
+    @info('正在查找歌词...')
     def set_lrc(self):
         self.lrc_display = 1
-        self.lrc_dict = self.douban.get_lrc()
-        if self.lrc_dict:
-            self.lrc_display = 1
-        else:
-            self.lrc_display = 0
-
 
 class Lrc(cli.Cli):
     def __init__(self, lrc_dict, win):
