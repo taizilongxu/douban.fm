@@ -60,12 +60,9 @@ class Win(cli.Cli):
         self.is_muted = False  # 是否静音
         os.mkfifo(self.mplayer_controller)
         # 守护线程
-        self.t1 = threading.Thread(target=self.protect)
-        self.t2 = threading.Thread(target=self.display_time)
-        self.t3 = threading.Thread(target=self.display_lrc)
-        self.t1.start()
-        self.t2.start()
-        self.t3.start()
+        threading.Thread(target=self.protect).start()
+        threading.Thread(target=self.display_time).start()
+        threading.Thread(target=self.display_lrc).start()
         super(Win, self).__init__(self.douban.lines)
         # 启动自动播放
         self.start = 1
@@ -141,12 +138,11 @@ class Win(cli.Cli):
     def get_volume(self):
         if self.platform == 'Linux':
             volume = subprocess.check_output('amixer get Master | grep Mono: | cut -d " " -f 6', shell=True)
-            volume = volume[1:-3]
+            return volume[1:-3]
         elif self.platform == 'Darwin':
-            volume = subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
+            return subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
         else:
-            volume = ''
-        return volume
+            return
 
     # 调整音量大小
     def change_volume(self, increment):
@@ -283,6 +279,7 @@ class Win(cli.Cli):
             elif c == self.KEYS['BOTTOM']:  # G键返回底部
                 self.markline = self.screenline
                 self.topline = len(self.lines) - self.screenline - 1
+
             elif c == ' ':  # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     self.displaysong()
