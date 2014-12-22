@@ -38,7 +38,9 @@ class Win(cli.Cli):
             'PAUSE': 'p',
             'LOOP': 'l',
             'MUTE': 'm',
-            'LRC': 'o'
+            'LRC': 'o',
+            'HELP': 'h'
+
             }
         self.platform = platform.system()
         self.get_config()
@@ -282,7 +284,7 @@ class Win(cli.Cli):
                 self.updown(-1)
             elif c == self.KEYS['DOWN']:
                 self.updown(1)
-            elif c == '1':
+            elif c == self.KEYS['HELP']:
                 Help(self)
             elif c == self.KEYS['LRC']:  # o歌词
                 self.set_lrc()
@@ -497,6 +499,9 @@ class Lrc(cli.Cli):
         return l
 
 class Help(cli.Cli):
+    """
+    帮助界面,查看快捷键
+    """
     def __init__(self, win):
         self.win = win
         self.win.lock_help = 1
@@ -509,11 +514,27 @@ class Help(cli.Cli):
         self.win.lock_help = 0
 
     def display(self):
+        keys = self.win.KEYS
         subprocess.call('clear', shell=True)
         print
         print self.win.TITLE
         print
-        print "haha"
+        print ' '*5 + colored('移动', 'green') + ' '*17 + colored('音乐', 'green') + '\r'
+        print ' '*5 + '[%(DOWN)s] ---> 下          [space] ---> 播放' % keys + '\r'
+        print ' '*5 + '[%(UP)s] ---> 上          [%(OPENURL)s] ---> 打开歌曲主页' % keys + '\r'
+        print ' '*5 + '[%(TOP)s] ---> 移到最顶    [%(NEXT)s] ---> 下一首' % keys + '\r'
+        print ' '*5 + '[%(BOTTOM)s] ---> 移到最底    [%(RATE)s] ---> 喜欢/取消喜欢' % keys + '\r'
+        print ' '*26 + '[%(BYE)s] ---> 不再播放' % keys + '\r'
+
+        print ' '*5 + colored('音量', 'green') + ' '*17 + '[%(PAUSE)s] ---> 暂停' % keys + '\r'
+        print ' '*5 + '[=] ---> 增          [%(QUIT)s] ---> 退出' % keys + '\r'
+        print ' '*5 + '[-] ---> 减          [%(LOOP)s] ---> 单曲循环' % keys + '\r'
+        print ' '*5 + '[%(MUTE)s] ---> 静音' % keys + '\r'
+        print
+        print ' '*5 + colored('歌词', 'green') + '\r'
+        print ' '*5 + '[%(LRC)s] ---> 静音' % keys + '\r'
+
+
 
 def main():
     douban = douban_token.Doubanfm()
