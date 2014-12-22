@@ -56,6 +56,7 @@ class Win(cli.Cli):
         self.lrc_display = 0  # 是否显示歌词
 
         self.lock_rate = 0  # 加心锁
+        self.lock_help = 0
 
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
@@ -137,7 +138,7 @@ class Win(cli.Cli):
 
     # 增加一个歌词界面的判断
     def display(self):
-        if not self.lrc_display and self.start:
+        if not self.lrc_display and self.start and not self.lock_help:
             cli.Cli.display(self)
 
     # 获取音量
@@ -272,14 +273,17 @@ class Win(cli.Cli):
         while True:
             self.display()
             c = getch._Getch()()
-            if self.lrc_display:  # 歌词界面截断
+            if self.lrc_display or self.lock_help:  # 歌词界面截断
                 if c == self.KEYS['QUIT']:
                     self.lrc_display = 0
+                    self.lock_help = 0
                 continue
             if c == self.KEYS['UP']:
                 self.updown(-1)
             elif c == self.KEYS['DOWN']:
                 self.updown(1)
+            elif c == '1':
+                Help(self)
             elif c == self.KEYS['LRC']:  # o歌词
                 self.set_lrc()
                 self.thread(self.display_lrc)
@@ -495,6 +499,14 @@ class Lrc(cli.Cli):
 class Help(cli.Cli):
     def __init__(self, win):
         self.win = win
+        self.win.lock_help = 1
+        self.win.thread(self.display_help)
+
+    def display_help(self):
+        while self.win.lock_help:
+            self.display()
+            time.sleep(1)
+        self.win.lock_help = 0
 
     def display(self):
         subprocess.call('clear', shell=True)
