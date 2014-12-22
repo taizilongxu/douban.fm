@@ -99,11 +99,12 @@ class Win(cli.Cli):
 
     # 歌词线程
     def display_lrc(self):
-        self.lrc_dict = self.douban.get_lrc()
-        if self.lrc_dict:
-            lrc_cli = Lrc(self.lrc_dict, self)
-        else:
-            self.lrc_display = 0
+        while self.lrc_display:
+            self.lrc_dict = self.douban.get_lrc()
+            if self.lrc_dict:
+                Lrc(self.lrc_dict, self)
+            else:
+                self.lrc_display = 0
 
     # 显示时间,音量的线程
     def display_time(self):
@@ -436,9 +437,7 @@ class Lrc(cli.Cli):
 
     # 显示歌词
     def display_line(self):
-        while True:
-            if not self.win.lrc_display:
-                break
+        while self.win.lrc_display:
             self.display()
             if self.song_time < self.length:
                 self.song_time += 1
@@ -493,7 +492,7 @@ class Lrc(cli.Cli):
                 l += 1
         return l
 
-class help(cli.Cli):
+class Help(cli.Cli):
     def __init__(self, win):
         self.win = win
 
