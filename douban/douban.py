@@ -54,7 +54,9 @@ class Win(cli.Cli):
         self.song_time = -1  # 歌曲剩余播放时间
         self.rate = ['★ '*i for i in range(1, 6)]  # 歌曲评分
         self.lrc_display = 0  # 是否显示歌词
+
         self.lock_rate = 0  # 加心锁
+
         self.pause = True
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         self.loop = False
@@ -63,10 +65,7 @@ class Win(cli.Cli):
         # 守护线程
         self.thread(self.protect)
         self.thread(self.display_time)
-        self.thread(self.display_lrc)
-        # threading.Thread(target=self.protect).start()
-        # threading.Thread(target=self.display_time).start()
-        # threading.Thread(target=self.display_lrc).start()
+        # self.thread(self.display_lrc)
         super(Win, self).__init__(self.douban.lines)
         # 启动自动播放
         self.start = 1
@@ -82,7 +81,7 @@ class Win(cli.Cli):
             except:
                 self.markline += 1
                 self.displayline += 1
-        self.run()
+        self.thread(self.run)
 
     def thread(self,target):
         threading.Thread(target=target).start()
@@ -100,17 +99,11 @@ class Win(cli.Cli):
 
     # 歌词线程
     def display_lrc(self):
-        while True:
-            if self.q == 1:  # 退出
-                break
-            if self.lrc_display:
-                self.lrc_dict = self.douban.get_lrc()
-                if self.lrc_dict:
-                    lrc_cli = Lrc(self.lrc_dict, self)
-                else:
-                    self.lrc_display = 0
-
-            time.sleep(1)
+        self.lrc_dict = self.douban.get_lrc()
+        if self.lrc_dict:
+            lrc_cli = Lrc(self.lrc_dict, self)
+        else:
+            self.lrc_display = 0
 
     # 显示时间,音量的线程
     def display_time(self):
@@ -286,26 +279,27 @@ class Win(cli.Cli):
                 self.updown(-1)
             elif c == self.KEYS['DOWN']:
                 self.updown(1)
+            elif c == self.KEYS['LRC']:  # o歌词
+                self.set_lrc()
+                self.thread(self.display_lrc)
+            elif c == self.KEYS['RATE']:  # r标记红心/取消标记
+                self.thread(self.set_rate)
+            elif c == self.KEYS['NEXT']:  # n下一首
+                self.set_next()
             elif c == self.KEYS['TOP']:  # g键返回顶部
                 self.markline = 0
                 self.topline = 0
             elif c == self.KEYS['BOTTOM']:  # G键返回底部
                 self.markline = self.screenline
                 self.topline = len(self.lines) - self.screenline - 1
-
             elif c == ' ':  # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     self.displaysong()
                     self.set_play()
             elif c == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
                 self.set_url()
-            elif c == self.KEYS['RATE']:  # r标记红心/取消标记
-                self.thread(self.set_rate)
-            elif c == self.KEYS['NEXT']:  # n下一首
-                self.set_next()
             elif c == self.KEYS['BYE']:  # b不再播放
                 self.set_bye()
-
             elif c == self.KEYS['PAUSE']:  # p暂停
                 self.pause_play()
             elif c == self.KEYS['MUTE']:  # m静音
@@ -318,8 +312,6 @@ class Win(cli.Cli):
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
-            elif c == self.KEYS['LRC']:  # o歌词
-                self.set_lrc()
 
 
     def info(args):
@@ -501,6 +493,16 @@ class Lrc(cli.Cli):
                 l += 1
         return l
 
+class help(cli.Cli):
+    def __init__(self, win):
+        self.win = win
+
+    def display(self):
+        subprocess.call('clear', shell=True)
+        print
+        print self.win.TITLE
+        print
+        print "haha"
 
 def main():
     douban = douban_token.Doubanfm()
