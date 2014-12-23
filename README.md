@@ -105,6 +105,7 @@ PAUSE = p    # 暂停
 LOOP = l     # 单曲循环
 MUTE = m     # 静音
 LRC = o      # 歌词
+HELP = h     # 查看帮助
 ```
 
 ### Developer
