@@ -3,6 +3,10 @@
 
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> a54f195081e9fe4ac39c0f2c83ec01c57773e872
 感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持Mac OS X(>=V0.2.9)
 
 PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
