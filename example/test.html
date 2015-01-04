@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+
+	<link rel="stylesheet" type="text/css" href="../jquery.fullPage.css" />
+
+    <script src="../jquery-1.11.2.min.js"></script>
+	<script src="../jquery-ui.min.js"></script>
+
+	<script type="text/javascript" src="../vendors/jquery.slimscroll.min.js"></script>
+
+	<script type="text/javascript" src="../jquery.fullPage.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('#fullpage').fullpage({
+				//anchors: ['firstPage', 'secondPage', '3rdPage'],
+				// sectionsColor: ['#FFFFFF', '#1BBC9B', '#7E8F7C'],
+				navigation: true,
+				navigationPosition: 'right',
+				//navigationTooltips: ['First page', 'Second page', 'Third and last page']
+			});
+		});
+	</script>
+	<style>
+
+	/* Style for our header texts
+	* --------------------------------------- */
+	h1{
+		font-size: 2.7em;
+		font-family: arial,helvetica;
+		color: #6AD579;
+		margin:0;
+	}
+
+	.intro p{
+		color: #000;
+	}
+
+	/* Centered texts in each section
+	* --------------------------------------- */
+	.section{
+		text-align:center;
+	}
+
+	/* Overwriting styles for conl arrows for slides
+	* --------------------------------------- */
+	.controlArrow.prev {
+		left: 50px;
+	}
+	.controlArrow.next{
+		right: 50px;
+	}
+
+
+	/* Bottom menu
+	* --------------------------------------- */
+	#infoMenu li a {
+		color: #fff;
+	}
+
+
+	.layright {
+		float: right;
+		/*text-align: right;*/
+        height: auto;
+        width: 50%;
+	}
+
+	.layleft {
+		display: table-cell;
+		float: none;
+		vertical-align: middle;
+		/*text-align: left;*/
+        height: auto;
+        width: 50%;
+	}
+
+	.feature {
+		display: table;
+	}
+
+	.columns {
+		overflow: hidden;
+		/*width: 100%;*/
+		padding-left: 10%;
+		padding-right: 10%;
+	}
+
+	</style>
+</head>
+<body>
+<div id="fullpage">
+	<div class="section " id="section0">
+		<div class="intro">
+			<h1>douban.fm</h1>
+			<img id="img1" src="../douban.png" width="650" height="500">
+		</div>
+	</div>
+	<div class="section" id="section1">
+		<div class="feature columns">
+			<div class="layleft">
+				<p>同步滚动歌词</p>
+			</div>
+			<div class="layleft">
+				<img id="img1" src="../lry.png" width="650" height="500">
+			</div>
+		</div>
+			
+	</div>
+	<div class="section" id="section2">
+		<div class="feature columns">
+			<div class="layleft">
+				<img id="img1" src="../help.png" width="650" height="500">
+			</div>
+			<div class="layleft">
+				<p>帮助页面快捷键</p>
+			</div>
+		</div>
+	</div>
+	<div class="section " id="section3">
+		<div class="intro">
+			<h2>安装</h2>
+			<p>$ sudo pip install douban.fm</p>
+		</div>
+	</div>
+</div>
+
+
+</body>
+</html>
