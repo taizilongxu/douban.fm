@@ -180,7 +180,7 @@ class Win(cli.Cli):
         while True:
             if self.q == True:
                 break
-            if self.start:
+            if self.lock_start:
                 self.p.poll()
                 if self.p.returncode == 0:
                     self.song_time = -1
