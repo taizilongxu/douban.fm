@@ -182,19 +182,14 @@ LRC = o
         return path
 
     def get_lrc(self):
-        try:
-            lrc_path = eval(requests.get('http://geci.me/api/lyric/' + self.playingsong['title'] + '/' + self.playingsong['artist']).text)
-            lrc = requests.get(lrc_path['result'][0]['lrc']).text
-            lrc_dic = lrc2dic.lrc2dict(lrc)
-            return lrc_dic
-        except:
-            pass
-
-        try:
-            lrc_path = eval(requests.get('http://geci.me/api/lyric/' + self.playingsong['title']).text)
-            lrc = requests.get(lrc_path['result'][0]['lrc']).text
-            lrc_dic = lrc2dic.lrc2dict(lrc)
-            return lrc_dic
-        except:
-            return 0
+        url = "http://api.douban.com/v2/fm/lyric"
+        postdata = {
+                'sid':self.playingsong['sid'],
+                'ssid':self.playingsong['ssid'],
+                }
+        s = requests.session()
+        response = s.post(url, data = postdata)
+        lyric = eval(response.text)
+        lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
+        return lrc_dic
 ############################################################################
