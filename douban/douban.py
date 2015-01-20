@@ -40,7 +40,12 @@ class Win(cli.Cli):
         'HELP': 'h'
         }
     platform = platform.system()
-    sound_card = 'Master' if subprocess.check_output('amixer | grep Master', shell=True) else 'PCM'
+    # sound_card = 'PCM' if subprocess.check_output('amixer | grep Master', shell=True) else 'Master'
+    try:
+        if subprocess.check_output('amixer | grep PCM', stderr=subprocess.STDOUT, shell=True):
+            sound_card = "PCM"
+    except:
+        sound_card = "Master"
     rate = ['★ '*i for i in range(1, 6)]  # 歌曲评分
 
     def __init__(self, douban):
