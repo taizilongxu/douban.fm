@@ -126,6 +126,9 @@ class Win(cli.Cli):
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
                 self.volume = self.get_volume()  # 获取音量
+                # self.get_time_pos()
+                # f = open('test', 'w')
+                # f.write(str(self.time_pos))
                 self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
                 if self.lock_muted:
                     self.TITLE += '✖'
@@ -179,7 +182,7 @@ class Win(cli.Cli):
         else:
             self.lock_muted= True
             mute = 1
-        subprocess.Popen('echo "mute {mute}" > {fifo}'.format(fifo=self.mplayer_controller, mute=mute), shell=True, stdin=subprocess.PIPE)
+        self.p.stdin.write('mute {mute}'.format(mute=mute))
 
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
@@ -201,7 +204,7 @@ class Win(cli.Cli):
         if not self.lock_loop:
             self.douban.get_song()
         if self.lock_muted:  # 静音状态
-            subprocess.Popen('echo "mute {mute}" > {fifo}'.format(fifo=self.mplayer_controller, mute=1), shell=True, stdin=subprocess.PIPE)
+            self.p.stdin.write('mute 1'.format(mute=mute))
         song = self.douban.playingsong
         self.song_time = song['length']
         # 是否是红心歌曲
@@ -215,7 +218,7 @@ class Win(cli.Cli):
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
         cmd = 'mplayer -cache 1024 -slave -input file={fifo} {song_url} >/dev/null 2>&1'
-        self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
+        self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
         self.lock_pause= False
         self.display()
         self.notifySend()
@@ -227,7 +230,7 @@ class Win(cli.Cli):
 
     # 暂停歌曲
     def pause_play(self):
-        subprocess.Popen('echo "pause" > {fifo}'.format(fifo=self.mplayer_controller), shell=True, stdin=subprocess.PIPE)
+        self.p.stdin.write('pause')
         if self.lock_pause:
             self.lock_pause= False
             self.notifySend(content='开始播放')
@@ -235,9 +238,12 @@ class Win(cli.Cli):
             self.notifySend(content='暂停播放')
             self.lock_pause= True
 
+    # def get_time_pos(self):
+    #     self.time_pos = subprocess.check_output('echo "get_time_pos" > {fifo}'.format(fifo=self.mplayer_controller), shell=True)
+
     # 结束mplayer
     def kill_mplayer(self):
-        subprocess.Popen('echo "quit" > {fifo}'.format(fifo=self.mplayer_controller), shell=True, stdin=subprocess.PIPE)
+        self.p.stdin.write('quit')
 
     # 发送桌面通知
     def notifySend(self, title=None, content=None, path=None):
