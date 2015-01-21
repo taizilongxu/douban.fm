@@ -272,7 +272,7 @@ class Win(cli.Cli):
         notification.setUserInfo_({})
         image = NSImage.alloc().initWithContentsOfFile_(img_path)
         notification.setContentImage_(image)
-        notification.setSoundName_("NSUserNotificationDefaultSoundName")
+        # notification.setSoundName_("NSUserNotificationDefaultSoundName")
         notification.setDeliveryDate_(Foundation.NSDate.dateWithTimeInterval_sinceDate_(0, Foundation.NSDate.date()))
         NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
 
