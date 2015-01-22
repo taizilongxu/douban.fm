@@ -41,7 +41,7 @@ class Win(cli.Cli):
         }
     platform = platform.system()
     try:
-        if subprocess.check_output('amixer | grep PCM', stderr=subprocess.STDOUT, shell=True):
+        if subprocess.check_output('amixer | grep PCM'):
             sound_card = "PCM"
     except:
         sound_card = "Master"
@@ -422,16 +422,15 @@ class Lrc(cli.Cli):
         self.lrc_dict = lrc_dict
 
         self.length = int(win.douban.playingsong['length'])  # 歌曲总长度
-        self.song_time = self.length - win.song_time - 1  # 歌曲播放秒数
+        self.song_time = self.length - self.win.song_time - 1 # 歌曲播放秒数
 
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
         self.screenline = win.screenline  # shell高度
 
-
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x: x[0])
         self.lines = [line[1] for line in self.sort_lrc_dict if line[1]]
 
-        subprocess.call('clear', shell=True) # 清屏
+        subprocess.call('clear') # 清屏
 
         self.markline = self.find_line()
         self.topline = 0

@@ -191,8 +191,6 @@ LRC = o
             s = requests.session()
             response = s.post(url, data = postdata)
             lyric = eval(response.text)
-            f = open('test', 'w')
-            f.write(str(lyric))
             lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
             for key, value in lrc_dic.iteritems():
                 lrc_dic[key] = value.decode('utf-8')  # 原歌词用的unicode,为了兼容
