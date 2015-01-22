@@ -427,8 +427,6 @@ class Lrc(cli.Cli):
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
         self.screenline = win.screenline  # shell高度
 
-        flag_num = self.flag_num()
-        self.title = ' ' * flag_num + self.win.SUFFIX_SELECTED + '\r'  # 歌词页面标题
 
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x: x[0])
         self.lines = [line[1] for line in self.sort_lrc_dict if line[1]]
@@ -468,7 +466,7 @@ class Lrc(cli.Cli):
 
     # 输出界面
     def display(self):
-        subprocess.call('clear', shell=True)
+        subprocess.call('clear')
         print
         print self.win.TITLE
         print
@@ -487,9 +485,6 @@ class Lrc(cli.Cli):
         print '\r'
 
         # 歌曲信息居中
-        print self.title
-
-    def flag_num(self):
         song = self.win.douban.playingsong
         tmp = (song['title'] + song['albumtitle'] + song['artist'] + song['public_time']).replace('\\', '').strip()
         tmp = unicode(tmp, 'utf-8')
@@ -497,8 +492,8 @@ class Lrc(cli.Cli):
         if song['like']:
             l += 2
         flag_num = (self.screenline_char - l) / 2
-        return flag_num
-
+        self.title = ' ' * flag_num + self.win.SUFFIX_SELECTED + '\r'  # 歌词页面标题
+        print self.title
 
     # 需要考虑中文和英文的居中
     def center_num(self, tmp):
