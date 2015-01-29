@@ -106,12 +106,11 @@ class Win(cli.Cli):
 
     # 歌词线程
     def display_lrc(self):
-        while self.lock_lrc:
-            self.lrc_dict = self.douban.get_lrc()
-            if self.lrc_dict:
-                Lrc(self.lrc_dict, self)
-            else:
-                self.lock_lrc = False
+        self.lrc_dict = self.douban.get_lrc()
+        if self.lrc_dict:
+            Lrc(self.lrc_dict, self)
+        else:
+            self.lock_lrc = False
 
     # 显示时间,音量的线程
     def display_time(self):
@@ -199,8 +198,6 @@ class Win(cli.Cli):
         self.lrc_dict = {}  # 歌词清空
         if not self.lock_loop:
             self.douban.get_song()
-        if self.lock_muted:  # 静音状态
-            self.p.stdin.write('mute 1\n')
         song = self.douban.playingsong
         self.song_time = song['length']
         # 是否是红心歌曲
@@ -213,15 +210,15 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -cache 1024 -slave -input file={fifo} {song_url} >/dev/null 2>&1'
+        cmd = 'mplayer -slave -input file={fifo} {song_url} >/dev/null 2>&1'
         self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
         self.lock_pause= False
         self.display()
         self.notifySend()
         if self.lock_lrc:  # 获取歌词
-            self.lrc_dict = self.douban.get_lrc()
-            if not self.lrc_dict:  # 歌词获取失败,关闭歌词界面
-                self.lock_lrc = False
+            self.thread(self.display_lrc)
+        if self.lock_muted:  # 静音状态
+            self.p.stdin.write('mute 1\n')
         self.lock_start = True
 
     # 暂停歌曲
@@ -236,7 +233,7 @@ class Win(cli.Cli):
 
     # 结束mplayer
     def kill_mplayer(self):
-        self.p.stdin.write('quit\n')
+        self.p.stdin.write('quit 0\n')
 
     # 发送桌面通知
     def notifySend(self, title=None, content=None, path=None):
