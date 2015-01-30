@@ -55,6 +55,7 @@ class Win(cli.Cli):
 
         self.lrc_dict = {}  # 歌词
         self.unix_songtime = -1  # unix 时间戳,歌词同步用
+        self.pause_time = -1
 
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         os.mkfifo(self.mplayer_controller)
@@ -119,7 +120,7 @@ class Win(cli.Cli):
             if self.q == True:  # 退出
                 break
             if self.douban.playingsong:
-                rest_time = int(self.douban.playingsong['length']) - int(time.time() - self.unix_songtime)
+                rest_time = int(self.douban.playingsong['length']) - int(time.time() - self.unix_songtime) if not self.lock_pause else rest_time
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
@@ -138,7 +139,7 @@ class Win(cli.Cli):
                 self.display()
             else:
                 self.TITLE = self.TITLE[:length]
-            time.sleep(1)
+            time.sleep(0.5)
 
     # 增加一个歌词界面的判断
     def display(self):
@@ -223,9 +224,11 @@ class Win(cli.Cli):
     def pause_play(self):
         self.p.stdin.write('pause\n')
         if self.lock_pause:
+            self.unix_songtime += time.time() - self.pause_time
             self.lock_pause= False
             self.notifySend(content='开始播放')
         else:
+            self.pause_time = time.time()
             self.notifySend(content='暂停播放')
             self.lock_pause= True
 
