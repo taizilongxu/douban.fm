@@ -54,7 +54,7 @@ class Win(cli.Cli):
         self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
 
         self.lrc_dict = {}  # 歌词
-        self.song_time = -1  # 歌曲剩余播放时间
+        self.unix_songtime = -1  # unix 时间戳,歌词同步用
 
         self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
         os.mkfifo(self.mplayer_controller)
@@ -118,9 +118,10 @@ class Win(cli.Cli):
         while True:
             if self.q == True:  # 退出
                 break
-            if self.song_time >= 0 and self.douban.playingsong:
-                minute = int(self.song_time) / 60
-                sec = int(self.song_time) % 60
+            if self.douban.playingsong:
+                rest_time = int(self.douban.playingsong['length']) - int(time.time() - self.unix_songtime)
+                minute = int(rest_time) / 60
+                sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
                 self.volume = self.get_volume()  # 获取音量
@@ -135,8 +136,6 @@ class Win(cli.Cli):
                     self.TITLE += '  ' + colored('→', 'red')
                 self.TITLE += '\r'
                 self.display()
-                if not self.lock_pause:
-                    self.song_time -= 1
             else:
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
@@ -187,7 +186,6 @@ class Win(cli.Cli):
             if self.lock_start:
                 self.p.poll()
                 if self.p.returncode == 0:
-                    self.song_time = -1
                     if not self.lock_loop and self.douban.playingsong:
                         self.douban.end_music()  # 发送完成
                     self.play()
@@ -199,7 +197,7 @@ class Win(cli.Cli):
         if not self.lock_loop:
             self.douban.get_song()
         song = self.douban.playingsong
-        self.song_time = int(song['length'])
+        self.unix_songtime = time.time()
         # 是否是红心歌曲
         if song['like'] == 1:
             love = self.love
@@ -424,7 +422,7 @@ class Lrc(cli.Cli):
         self.playingsong = win.douban.playingsong
 
         self.length = int(win.douban.playingsong['length'])  # 歌曲总长度
-        self.song_time = self.length - self.win.song_time - 1 # 歌曲播放秒数
+        self.song_time = int(time.time() - self.win.unix_songtime) # 歌曲播放秒数
 
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
         self.screenline = win.screenline  # shell高度
@@ -453,8 +451,8 @@ class Lrc(cli.Cli):
             if self.playingsong != self.win.douban.playingsong:
                 break
             self.display()
+            self.song_time = int(time.time() - self.win.unix_songtime) # 歌曲播放秒数
             if self.song_time < self.length:
-                self.song_time += 1
                 locate = [index for index, i in enumerate(self.sort_lrc_dict) if i[0] == self.song_time]  # 查找歌词在self.sort_lrc_dict中的位置
                 if locate:
                     self.markline = locate[0]
