@@ -199,7 +199,7 @@ class Win(cli.Cli):
         if not self.lock_loop:
             self.douban.get_song()
         song = self.douban.playingsong
-        self.song_time = song['length']
+        self.song_time = int(song['length'])
         # 是否是红心歌曲
         if song['like'] == 1:
             love = self.love
@@ -414,9 +414,14 @@ class Win(cli.Cli):
         self.lock_lrc = True
 
 class Lrc(cli.Cli):
+    """
+    显示歌词的界面
+    """
     def __init__(self, lrc_dict, win):
         self.win = win
         self.lrc_dict = lrc_dict
+
+        self.playingsong = win.douban.playingsong
 
         self.length = int(win.douban.playingsong['length'])  # 歌曲总长度
         self.song_time = self.length - self.win.song_time - 1 # 歌曲播放秒数
@@ -445,6 +450,8 @@ class Lrc(cli.Cli):
     # 显示歌词
     def display_line(self):
         while self.win.lock_lrc:
+            if self.playingsong != self.win.douban.playingsong:
+                break
             self.display()
             if self.song_time < self.length:
                 self.song_time += 1
@@ -495,10 +502,7 @@ class Lrc(cli.Cli):
     def center_num(self, tmp):
         l = 0
         for i in tmp:
-            if self.is_cn_char(i):
-                l += 2
-            else:
-                l += 1
+            l += 2 if self.is_cn_char(i) else 1
         return l
 
 class Help(cli.Cli):
