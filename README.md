@@ -13,13 +13,8 @@ PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
 
 ### Screenshots
 
-![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/out.gif)
+![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/doubanfm.gif)
 
-### Lyric
-
-新增歌词界面
-
-![Lyric](img/5.png)
 
 ### Support
 
