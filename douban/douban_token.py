@@ -24,6 +24,8 @@ class Doubanfm(object):
         self.pro = 0
         self.playlist = [] # 播放列表
         self.playingsong = {} # 当前播放歌曲
+        self.find_lrc = False  # 是否查找过歌词
+        self.lrc_dic = {}  # 歌词
         print '''
         ──╔╗─────╔╗────────╔═╗
         ──║║─────║║────────║╔╝
@@ -156,6 +158,8 @@ LRC = o
 
     # 获得歌曲
     def get_song(self):
+        self.find_lrc = False
+        self.lrc_dic = {}
         if not self.playlist:
             self.get_playlist()
         self.playingsong = self.playlist.pop(0)
@@ -182,19 +186,23 @@ LRC = o
         return path
 
     def get_lrc(self):
-        try:
-            url = "http://api.douban.com/v2/fm/lyric"
-            postdata = {
-                    'sid':self.playingsong['sid'],
-                    'ssid':self.playingsong['ssid'],
-                    }
-            s = requests.session()
-            response = s.post(url, data = postdata)
-            lyric = eval(response.text)
-            lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
-            for key, value in lrc_dic.iteritems():
-                lrc_dic[key] = value.decode('utf-8')  # 原歌词用的unicode,为了兼容
-            return lrc_dic
-        except:
-            return 0
+        if not self.find_lrc:
+            try:
+                url = "http://api.douban.com/v2/fm/lyric"
+                postdata = {
+                        'sid':self.playingsong['sid'],
+                        'ssid':self.playingsong['ssid'],
+                        }
+                s = requests.session()
+                response = s.post(url, data = postdata)
+                lyric = eval(response.text)
+                lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
+                for key, value in lrc_dic.iteritems():
+                    lrc_dic[key] = value.decode('utf-8')  # 原歌词用的unicode,为了兼容
+                self.lrc_dic = lrc_dic
+                return lrc_dic
+            except:
+                return 0
+        self.find_lrc = True
+        return lrc_dic
 ############################################################################
