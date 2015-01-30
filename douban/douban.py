@@ -121,6 +121,8 @@ class Win(cli.Cli):
                 break
             if self.douban.playingsong:
                 rest_time = int(self.douban.playingsong['length']) - int(time.time() - self.unix_songtime) if not self.lock_pause else rest_time
+                if rest_time < 0:
+                    rest_time = 0
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
@@ -217,7 +219,7 @@ class Win(cli.Cli):
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
         if self.lock_muted:  # 静音状态
-            self.p.stdin.write('mute 1\n')
+            self.p.stdin.write('mute 0\n')
         self.lock_start = True
 
     # 暂停歌曲
