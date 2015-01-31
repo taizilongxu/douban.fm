@@ -3,8 +3,6 @@
 
 这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
 
-=======
-
 感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持Mac OS X(>=V0.2.9)
 
 PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
@@ -18,7 +16,7 @@ PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
 
 ### Support
 
-Linux/Mac OS X
+Linux / OS X
 
 ### Do something cool!
 
@@ -51,6 +49,12 @@ OS X:
 ### Login
 
 第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在~/.douban_token.txt,下次登陆无需输入密码.
+
+### last.fm
+
+    $ douban.fm last.fm
+
+设置 last.fm 账号和密码,如果登陆成功左上角` Douban Fm ` 会变成` last.fm `
 
 ### Keys
 
@@ -155,6 +159,8 @@ HELP = h     # 查看帮助
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.2.15 支持 last.fm ,增加显示
 
 V0.2.14 修正上个版本声卡BUG, 优化歌词同步,增加官方歌词
 
