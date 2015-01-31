@@ -15,6 +15,7 @@ import os
 import tempfile
 import ConfigParser
 import platform
+import sys
 #---------------------------------------------------------------------------
 class Win(cli.Cli):
     KEYS = {
@@ -77,12 +78,12 @@ class Win(cli.Cli):
         while True:  # 无红心兆赫进入下一个频道
             try:
                 self.douban.set_channel(self.douban.channels[self.markline]['channel_id'])  # 设置默认频率
-                self.douban.get_playlist()
-                self.play()
                 break
             except:
                 self.markline += 1
                 self.displayline += 1
+        self.douban.get_playlist()
+        self.play()
         self.thread(self.run)
 
     def thread(self,target):
@@ -215,7 +216,10 @@ class Win(cli.Cli):
         if self.lock_muted:  # 静音状态
             self.p.stdin.write('mute 0\n')
         self.lock_start = True
-        self.douban.scrobble_now_playing()
+        try:
+            self.douban.scrobble_now_playing()
+        except:
+            pass
 
     # 暂停歌曲
     def pause_play(self):

@@ -3,13 +3,16 @@
 豆瓣FM的网络连接部分
 """
 #---------------------------------import------------------------------------
+from functools import wraps
+from scrobbler import Scrobbler
 import requests
 import tempfile
 import lrc2dic
 import getpass
 import pickle
 import urllib
-import logger
+import logging
+import sys
 import os
 #---------------------------------------------------------------------------
 
@@ -17,8 +20,6 @@ logger = logging.getLogger()
 
 class Doubanfm(object):
     def __init__(self):
-        self.last_fm_username = 
-        self.last_fm_password = 
         self.login_data = {}
         self.channel_id = 0
         self.lines = [] # 要输出到终端的行
@@ -66,7 +67,7 @@ class Doubanfm(object):
 
     # last.fm登陆
     def login_lastfm(self):
-        if self.lastfm:
+        if self.lastfm and self.last_fm_username and self.last_fm_password:
             self.scrobbler = Scrobbler(
                 self.last_fm_username, self.last_fm_password)
             r, err = self.scrobbler.handshake()
@@ -74,7 +75,9 @@ class Doubanfm(object):
                 logger.debug("Last.fm logged in.")
             else:
                 print("Last.FM 登录失败: " + err)
-                self.scrobbling = False
+                self.lastfm = False
+        else:
+            self.lastfm = False
 
     def last_fm_account_required(f):
         @wraps(f)
@@ -84,17 +87,17 @@ class Doubanfm(object):
             return f(self, *args, **kwds)
         return wrapper
 
-     @last_fm_account_required
+    @last_fm_account_required
     def submit_current_song(self):
         # Submit the track if total playback time of the track > 30s
-        if self.current_song.length_in_sec > 30:
-            self.scrobbler.submit(self.playingsong['artist'], self.playingsong.['title'],
-                                  self.playingsong['albumtitle'], self.playingsong.['length'])
+        if self.playingsong['length'] > 30:
+            self.scrobbler.submit(self.playingsong['artist'], self.playingsong['title'],
+                                  self.playingsong['albumtitle'], self.playingsong['length'])
 
     @last_fm_account_required
     def scrobble_now_playing(self):
-        self.scrobbler.now_playing(self.playingsong['artist'], self.playingsong.['title'],
-                              self.playingsong['albumtitle'], self.playingsong.['length'])
+        self.scrobbler.now_playing(self.playingsong['artist'], self.playingsong['title'],
+                              self.playingsong['albumtitle'], self.playingsong['length'])
 
 
     # 登陆douban.fm获取token
@@ -107,6 +110,9 @@ class Doubanfm(object):
                 self.user_name = self.login_data['user_name']
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
+
+                self.last_fm_username = self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data else None
+                self.last_fm_password = self.login_data['last_fm_password'] if 'last_fm_password' in self.login_data else None
         else: # 未登陆
             while True:
                 self.email, self.password = self.win_login()
@@ -137,6 +143,25 @@ class Doubanfm(object):
                     with open(path_token, 'w') as f:
                         pickle.dump(self.login_data, f)
                     break
+
+        # last.fm登陆
+        try:
+            if sys.argv[1] == 'last.fm':
+                from hashlib import md5
+                username = raw_input('last.fm username:') or None
+                password = getpass.getpass('last.fm password:') or None
+                if username and password:
+                    self.last_fm_username = username
+                    self.last_fm_password = md5(password).hexdigest()
+                with open(path_token, 'r') as f:
+                    data = pickle.load(f)
+                with open(path_token, 'w') as f:
+                    data['last_fm_username'] = username
+                    data['last_fm_password'] = self.last_fm_password
+                    pickle.dump(data, f)
+        except IndexError:
+            pass
+
         # 配置文件
         path_config = os.path.expanduser('~/.doubanfm_config')
         if not os.path.exists(path_config):
