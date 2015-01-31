@@ -65,8 +65,8 @@ class Win(cli.Cli):
         self.q = False  # 退出
 
         # 守护线程
-        self.thread(self.protect)
-        self.thread(self.display_time)
+        self.thread(self.protect)  # 歌曲连续播放
+        self.thread(self.display_time)  # 时间显示
         super(Win, self).__init__(self.douban.lines)
 
         # 启动自动播放
@@ -215,6 +215,7 @@ class Win(cli.Cli):
         if self.lock_muted:  # 静音状态
             self.p.stdin.write('mute 0\n')
         self.lock_start = True
+        self.douban.scrobble_now_playing()
 
     # 暂停歌曲
     def pause_play(self):
@@ -342,7 +343,6 @@ class Win(cli.Cli):
                 self.change_volume(1)
             elif c == '-':
                 self.change_volume(-1)
-
 
     def info(args):
         """

@@ -9,10 +9,16 @@ import lrc2dic
 import getpass
 import pickle
 import urllib
+import logger
 import os
 #---------------------------------------------------------------------------
+
+logger = logging.getLogger()
+
 class Doubanfm(object):
     def __init__(self):
+        self.last_fm_username = 
+        self.last_fm_password = 
         self.login_data = {}
         self.channel_id = 0
         self.lines = [] # 要输出到终端的行
@@ -25,6 +31,7 @@ class Doubanfm(object):
         self.playlist = [] # 播放列表
         self.playingsong = {} # 当前播放歌曲
         self.find_lrc = False  # 是否查找过歌词
+        self.lastfm = True  # lastfm 登陆
         self.lrc_dic = {}  # 歌词
         print '''
         ──╔╗─────╔╗────────╔═╗
@@ -36,6 +43,7 @@ class Doubanfm(object):
 
         '''
         self.login() # 登陆
+        self.login_lastfm() # 登陆 last.fm
         self.get_channels() # 获取频道列表
         self.get_channellines() # 重构列表用以显示
         self.is_pro()
@@ -55,6 +63,39 @@ class Doubanfm(object):
         email = raw_input('email:')
         password = getpass.getpass('password:')
         return email, password
+
+    # last.fm登陆
+    def login_lastfm(self):
+        if self.lastfm:
+            self.scrobbler = Scrobbler(
+                self.last_fm_username, self.last_fm_password)
+            r, err = self.scrobbler.handshake()
+            if r:
+                logger.debug("Last.fm logged in.")
+            else:
+                print("Last.FM 登录失败: " + err)
+                self.scrobbling = False
+
+    def last_fm_account_required(f):
+        @wraps(f)
+        def wrapper(self, *args, **kwds):
+            if not self.lastfm:
+                return
+            return f(self, *args, **kwds)
+        return wrapper
+
+     @last_fm_account_required
+    def submit_current_song(self):
+        # Submit the track if total playback time of the track > 30s
+        if self.current_song.length_in_sec > 30:
+            self.scrobbler.submit(self.playingsong['artist'], self.playingsong.['title'],
+                                  self.playingsong['albumtitle'], self.playingsong.['length'])
+
+    @last_fm_account_required
+    def scrobble_now_playing(self):
+        self.scrobbler.now_playing(self.playingsong['artist'], self.playingsong.['title'],
+                              self.playingsong['albumtitle'], self.playingsong.['length'])
+
 
     # 登陆douban.fm获取token
     def login(self):
@@ -177,6 +218,7 @@ LRC = o
     # 歌曲结束标记
     def end_music(self):
         s = self.requests_url('e', sid=self.playingsong['sid'])
+        self.submit_current_song()
 
     # 获取专辑封面
     def get_pic(self):
