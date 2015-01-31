@@ -15,12 +15,6 @@ import os
 import tempfile
 import ConfigParser
 import platform
-try:
-    import Foundation
-    import objc
-    import AppKit
-except ImportError:
-    pass
 #---------------------------------------------------------------------------
 class Win(cli.Cli):
     KEYS = {
@@ -247,7 +241,7 @@ class Win(cli.Cli):
         if not path:
             path = self.douban.get_pic()  # 获取封面
         if not content:
-            content = self.douban.playingsong['artist']
+            content = self.douban.playingsong['artist'] + ' - ' + self.douban.playingsong['albumtitle']
 
         try:
             if self.platform == 'Linux':
@@ -261,19 +255,44 @@ class Win(cli.Cli):
         subprocess.call(['notify-send', '-i', img_path, title, content])
 
     def send_OS_X_notify(self, title, content, img_path):
-        NSUserNotification = objc.lookUpClass('NSUserNotification')
-        NSUserNotificationCenter = objc.lookUpClass('NSUserNotificationCenter')
-        NSImage = objc.lookUpClass('NSImage')
+        try:
+            from Foundation import NSDate, NSURL, NSUserNotification, NSUserNotificationCenter
+            from AppKit import NSImage
+            import objc
+        except ImportError:
+            pass
+
+        def swizzle(cls, SEL, func):
+            old_IMP = cls.instanceMethodForSelector_(SEL)
+
+            def wrapper(self, *args, **kwargs):
+                return func(self, old_IMP, *args, **kwargs)
+            new_IMP = objc.selector(wrapper, selector=old_IMP.selector,
+                                    signature=old_IMP.signature)
+            objc.classAddMethod(cls, SEL, new_IMP)
+
+        def swizzled_bundleIdentifier(self, original):
+            # Use iTunes icon for notification
+            return 'com.apple.itunes'
+
+        swizzle(objc.lookUpClass('NSBundle'),
+                        b'bundleIdentifier',
+                        swizzled_bundleIdentifier)
         notification = NSUserNotification.alloc().init()
+        notification.setInformativeText_('')
         notification.setTitle_(title.decode('utf-8'))
-        notification.setSubtitle_('')
-        notification.setInformativeText_(content.decode('utf-8'))
+        notification.setSubtitle_(content.decode('utf-8'))
+
+        NSImage = objc.lookUpClass('NSImage')
+        notification.setInformativeText_('')
         notification.setUserInfo_({})
         image = NSImage.alloc().initWithContentsOfFile_(img_path)
-        notification.setContentImage_(image)
-        # notification.setSoundName_("NSUserNotificationDefaultSoundName")
-        notification.setDeliveryDate_(Foundation.NSDate.dateWithTimeInterval_sinceDate_(0, Foundation.NSDate.date()))
-        NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(notification)
+        # notification.setContentImage_(image)
+        notification.set_identityImage_(image)
+        notification.setDeliveryDate_(
+                NSDate.dateWithTimeInterval_sinceDate_(0, NSDate.date()))
+        NSUserNotificationCenter.defaultUserNotificationCenter().scheduleNotification_(
+                notification)
 
     def run(self):
         while True:
