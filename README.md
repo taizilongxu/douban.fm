@@ -1,15 +1,6 @@
-##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg)](https://pypi.python.org/pypi/douban.fm) [![Downloads](https://pypip.in/download/douban.fm/badge.png)](https://pypi.python.org/pypi/douban.fm)
+##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg?style=flat&text=version)](https://pypi.python.org/pypi/douban.fm) [![download](https://pypip.in/download/douban.fm/badge.svg?style=flat)]() [![python](https://pypip.in/py_versions/douban.fm/badge.svg?style=flat)]()
 
-
-这个版本的命令行界面是参考了 Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)制作的,向原作者致敬.终端界面设计的非常好看.
-
-=======
-
-感谢[Cloverstd](https://github.com/cloverstd)的修改,已经支持Mac OS X(>=V0.2.9)
-
-PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
-
-主页( test): http://hackerxu.com/pages/doubanfm/
+终端上的豆瓣FM
 
 ### Screenshots
 
@@ -18,7 +9,7 @@ PS:如果喜欢请加Star(*^__^*)……,如果有任何建议,欢迎提issue
 
 ### Support
 
-Linux/Mac OS X
+Linux / OS X
 
 ### Do something cool!
 
@@ -51,6 +42,12 @@ OS X:
 ### Login
 
 第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在~/.douban_token.txt,下次登陆无需输入密码.
+
+### last.fm
+
+    $ douban.fm last.fm
+
+设置 last.fm 账号和密码,如果登陆成功左上角` Douban Fm ` 会变成` last.fm `
 
 ### Keys
 
@@ -125,12 +122,14 @@ HELP = h     # 查看帮助
 * 支持MAC OS by [Cloverstd](https://github.com/cloverstd)
 * 歌曲暂停 by [Cloverstd](https://github.com/cloverstd)
 * 单曲播放 by [Cloverstd](https://github.com/cloverstd)
+* last.fm by [skyline75489](https://github.com/skyline75489)
 
 ### TODO
 
 * 默认频道
 * 播放歌曲数 红心数 不再播放数
 * 异常处理
+* 离线歌曲
 
 ### BUG
 
@@ -147,6 +146,7 @@ HELP = h     # 查看帮助
 
 * [Fansion](https://github.com/Fansion)
 * [Cloverstd](https://github.com/cloverstd)
+* [skyline75489](https://github.com/skyline75489)
 
 ### Reference
 
@@ -155,6 +155,8 @@ HELP = h     # 查看帮助
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.2.15 支持 last.fm ,增加显示
 
 V0.2.14 修正上个版本声卡BUG, 优化歌词同步,增加官方歌词
 

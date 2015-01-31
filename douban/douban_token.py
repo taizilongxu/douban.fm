@@ -110,9 +110,6 @@ class Doubanfm(object):
                 self.user_name = self.login_data['user_name']
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
-
-                self.last_fm_username = self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data else None
-                self.last_fm_password = self.login_data['last_fm_password'] if 'last_fm_password' in self.login_data else None
         else: # 未登陆
             while True:
                 self.email, self.password = self.win_login()
@@ -144,6 +141,8 @@ class Doubanfm(object):
                         pickle.dump(self.login_data, f)
                     break
 
+        self.last_fm_username = self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data else None
+        self.last_fm_password = self.login_data['last_fm_password'] if 'last_fm_password' in self.login_data else None
         # last.fm登陆
         try:
             if sys.argv[1] == 'last.fm':
