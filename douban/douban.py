@@ -45,8 +45,10 @@ class Win(cli.Cli):
     def __init__(self, douban):
         self.get_config()  # 快捷键配置
         self.douban = douban
+        self.TITLE += colored(' Douban Fm ', 'yellow') if not self.douban.lastfm else colored(' Last.fm ', 'yellow')
         PRO = '' if self.douban.pro == 0 else colored(' PRO ', attrs=['reverse'])
-        self.TITLE += self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
+
+        self.TITLE += ' \ ' + self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
 
         self.lrc_dict = {}  # 歌词
         self.unix_songtime = -1  # unix 时间戳,歌词同步用
