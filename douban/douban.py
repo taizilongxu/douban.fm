@@ -259,7 +259,7 @@ class Win(cli.Cli):
             pass
 
     def send_Linux_notify(self, title, content, img_path):
-        subprocess.call(['notify-send', '-i', img_path, title, content])
+        subprocess.call(['notify-send', '-a', 'Douban.fm', '-t', '5000', '--hint=int:transient:1', '-i', img_path, title, content])
 
     def send_OS_X_notify(self, title, content, img_path):
         try:
