@@ -148,7 +148,7 @@ class Win(cli.Cli):
     # 获取音量
     def get_volume(self):
         if self.platform == 'Linux':
-            volume = subprocess.check_output('amixer get ' + self.sound_card + '  | grep Mono: | cut -d " " -f 6', shell=True)
+            volume = subprocess.check_output('amixer -M get ' + self.sound_card + ' | grep -o -m 1 \'\[[[:digit:]]\+%\]\'', shell=True)
             return volume[1:-3]
         elif self.platform == 'Darwin':
             return subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
@@ -162,7 +162,7 @@ class Win(cli.Cli):
         else:
             volume = int(self.volume) - 5
         if self.platform == 'Linux':
-            subprocess.Popen('amixer set ' + self.sound_card + ' ' + str(volume) + '% >/dev/null 2>&1', shell=True)
+            subprocess.Popen('amixer -M set ' + self.sound_card + ' ' + str(volume) + '% >/dev/null 2>&1', shell=True)
         elif self.platform == 'Darwin':
             subprocess.Popen('osascript -e "set volume output volume ' + str(volume) + '"', shell=True)
         else:
