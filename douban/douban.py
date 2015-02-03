@@ -54,7 +54,9 @@ class Win(cli.Cli):
         self.unix_songtime = -1  # unix 时间戳,歌词同步用
         self.pause_time = -1
 
-        self.mplayer_controller = os.path.join(tempfile.mkdtemp(), 'mplayer_controller')
+        self._tempdir = tempfile.mkdtemp()
+        self.cover_file = None
+        self.mplayer_controller = os.path.join(self._tempdir, 'mplayer_controller')
         os.mkfifo(self.mplayer_controller)
 
         # 线程锁
@@ -212,7 +214,10 @@ class Win(cli.Cli):
         self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
         self.lock_pause= False
         self.display()
-        self.notifySend()
+
+        self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
+        self.douban.get_pic(self.cover_file.name)
+        self.send_notification()
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
         if self.lock_muted:  # 静音状态
@@ -229,10 +234,10 @@ class Win(cli.Cli):
         if self.lock_pause:
             self.unix_songtime += time.time() - self.pause_time
             self.lock_pause= False
-            self.notifySend(content='开始播放')
+            self.send_notification(content='开始播放')
         else:
             self.pause_time = time.time()
-            self.notifySend(content='暂停播放')
+            self.send_notification(content='暂停播放')
             self.lock_pause= True
 
     # 结束mplayer
@@ -240,21 +245,19 @@ class Win(cli.Cli):
         self.p.stdin.write('quit 0\n')
 
     # 发送桌面通知
-    def notifySend(self, title=None, content=None, path=None):
+    def send_notification(self, title=None, content=None):
         if not title and not content:
             title = self.douban.playingsong['title']
         elif not title:
             title = self.douban.playingsong['title'] + ' - ' + self.douban.playingsong['artist']
-        if not path:
-            path = self.douban.get_pic()  # 获取封面
         if not content:
             content = self.douban.playingsong['artist'] + ' - ' + self.douban.playingsong['albumtitle']
 
         try:
             if self.platform == 'Linux':
-                self.send_Linux_notify(title, content, path)
+                self.send_Linux_notify(title, content, self.cover_file.name)
             elif self.platform == 'Darwin':
-                self.send_OS_X_notify(title, content, path)
+                self.send_OS_X_notify(title, content, self.cover_file.name)
         except:
             pass
 
@@ -378,21 +381,21 @@ class Win(cli.Cli):
                 self.display()
                 self.douban.rate_music()
                 self.douban.playingsong['like'] = 1
-                self.notifySend(content='标记红心')
+                self.send_notification(content='标记红心')
             else:
                 self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
                 self.display()
                 self.douban.unrate_music()
                 self.douban.playingsong['like'] = 0
-                self.notifySend(content='取消标记红心')
+                self.send_notification(content='取消标记红心')
         self.lock_rate = False
 
     def set_loop(self):
         if self.lock_loop:
-            self.notifySend(content='停止单曲循环')
+            self.send_notification(content='停止单曲循环')
             self.lock_loop = False
         else:
-            self.notifySend(content='单曲循环')
+            self.send_notification(content='单曲循环')
             self.lock_loop = True
 
     def set_url(self):
@@ -406,6 +409,10 @@ class Win(cli.Cli):
         if self.lock_start:
             self.kill_mplayer()
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
+        if self.cover_file is not None:
+            self.cover_file.close()
+        os.unlink(self.mplayer_controller)
+        os.rmdir(self._tempdir)
         exit()
 
     @info('正在加载请稍后...')
@@ -426,6 +433,8 @@ class Win(cli.Cli):
             self.kill_mplayer()
             self.thread(self.douban.skip_song)  # 线程处理网络请求
             self.douban.playingsong = {}
+            if self.cover_file is not None:
+                self.cover_file.close()
             self.play()
 
     @info('不再播放,切换下一首...')
