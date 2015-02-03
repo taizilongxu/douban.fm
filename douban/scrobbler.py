@@ -25,13 +25,11 @@ class Scrobbler(object):
         self.version = version
 
     def handshake(self):
-        logger.debug('Scrobbler handshake')
         timestamp = int(time()).__str__()
-        logger.debug(timestamp)
 
         inner_md5 = (self.password + timestamp).encode('utf-8')
         auth = md5(inner_md5).hexdigest()
-        logger.debug(auth)
+        logger.debug('Scrobbler handshake - AUTH : ' + auth)
 
         payload = {
             "hs": "true",
@@ -70,7 +68,7 @@ class Scrobbler(object):
         return False, err
 
     def now_playing(self, artist, title, album="", length="", tracknumber="", mb_trackid=""):
-        logger.debug("Now Playing %s - %s - %s" % (artist, title, album))
+        logger.debug("Last.fm playing %s - %s - %s" % (artist, title, album))
 
         payload = {
             "s": self.session_id,
@@ -86,15 +84,15 @@ class Scrobbler(object):
         resp = r.text
 
         if resp.startswith("OK"):
-            logger.debug('Now Playing OK')
+            logger.debug('Last.fm playing OK')
             return True
 
         if resp.startswith("FAILED"):
-            logger.debug('Now Playing FAILED')
+            logger.debug('Last.fm playing FAILED')
             return False
 
     def submit(self, artist, title, album="", length="", tracknumber="", mb_trackid=""):
-        logger.debug("Submitting %s - %s" % (artist, title))
+        logger.debug("Last.fm submitting %s - %s" % (artist, title))
 
         timestamp = int(time())
 
@@ -115,9 +113,9 @@ class Scrobbler(object):
         resp = r.text
 
         if resp.startswith("OK"):
-            logger.debug("Submitting OK")
+            logger.debug("Last.fm submitting OK")
             return True
 
         if resp.startswith("FAILED"):
-            logger.debug("Submitting FAILED")
+            logger.debug("Last.fm submitting FAILED")
             return False

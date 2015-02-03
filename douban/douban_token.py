@@ -72,9 +72,9 @@ class Doubanfm(object):
                 self.last_fm_username, self.last_fm_password)
             r, err = self.scrobbler.handshake()
             if r:
-                logger.debug("Last.fm logged in.")
+                logger.debug("Last.fm logged success!")
             else:
-                print("Last.FM 登录失败: " + err)
+                logger.info("Last.fm 登录失败: " + err)
                 self.lastfm = False
         else:
             self.lastfm = False
@@ -110,7 +110,9 @@ class Doubanfm(object):
                 self.user_name = self.login_data['user_name']
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
+            logger.debug('Get local data - user_name:' + self.user_name + ' token:' + self.token)
         else: # 未登陆
+            logger.debug('First to login in douban.fm')
             while True:
                 self.email, self.password = self.win_login()
                 login_data = {
@@ -122,7 +124,7 @@ class Doubanfm(object):
                 s = requests.post('http://www.douban.com/j/app/login', login_data)
                 dic = eval(s.text)
                 if dic['r'] == 1:
-                    print dic['err']
+                    logger.debug(dic['err'])
                     continue
                 else:
                     self.token = dic['token']
@@ -137,8 +139,10 @@ class Doubanfm(object):
                         'token' : self.token,
                         'user_name' : self.user_name
                             }
+                    logger.debug('Login username: ' + self.user_name)
                     with open(path_token, 'w') as f:
                         pickle.dump(self.login_data, f)
+                        logger.debug('Write data to ' + path_token)
                     break
 
         self.last_fm_username = self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data else None
@@ -164,6 +168,7 @@ class Doubanfm(object):
         # 配置文件
         path_config = os.path.expanduser('~/.doubanfm_config')
         if not os.path.exists(path_config):
+            logger.debug('Get default config')
             config = '''[key]
 UP = k
 DOWN = j
@@ -181,6 +186,8 @@ LRC = o
 ''' # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)
+        else:
+            logger.debug('Get local config')
 
     # 获取channel,c存入self.channels
     def get_channels(self):
@@ -198,7 +205,8 @@ LRC = o
         post_data['type'] = ptype
         for x in data:
             post_data[x] = data[x]
-        s = requests.get('http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data))
+        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data)
+        s = requests.get(url)
         return s.text
 
     # 当playlist为空,获取播放列表
@@ -266,8 +274,10 @@ LRC = o
                 for key, value in lrc_dic.iteritems():
                     lrc_dic[key] = value.decode('utf-8')  # 原歌词用的unicode,为了兼容
                 self.lrc_dic = lrc_dic
+                logger.debug('Get lyric success!')
                 return lrc_dic
             except:
+                logger.info('Get lyric failed!')
                 return 0
         self.find_lrc = True
         return lrc_dic

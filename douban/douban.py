@@ -15,8 +15,15 @@ import os
 import tempfile
 import ConfigParser
 import platform
+import logging
 import sys
 #---------------------------------------------------------------------------
+logging.basicConfig(format='%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s',
+                        filename=os.path.expanduser('~/fm.log'),
+                        level=logging.DEBUG)
+
+logger = logging.getLogger()
+
 class Win(cli.Cli):
     KEYS = {
         'UP': 'k',
@@ -34,13 +41,13 @@ class Win(cli.Cli):
         'LRC': 'o',
         'HELP': 'h'
         }
-    platform = platform.system()
+    PLATFORM = platform.system()
     try:
         if subprocess.check_output('amixer | grep PCM'):
-            sound_card = "PCM"
+            SOUNDCARD = "PCM"
     except:
-        sound_card = "Master"
-    rate = ['★ '*i for i in range(1, 6)]  # 歌曲评分
+        SOUNDCARD = "Master"
+    RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
 
     def __init__(self, douban):
         self.get_config()  # 快捷键配置
@@ -125,7 +132,7 @@ class Win(cli.Cli):
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
                 self.volume = self.get_volume()  # 获取音量
-                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.rate[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
+                self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.RATE[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
                 if self.lock_muted:
                     self.TITLE += '✖'
                 else:
@@ -147,10 +154,10 @@ class Win(cli.Cli):
 
     # 获取音量
     def get_volume(self):
-        if self.platform == 'Linux':
-            volume = subprocess.check_output('amixer -M get ' + self.sound_card + ' | grep -o -m 1 \'\[[[:digit:]]\+%\]\'', shell=True)
+        if self.PLATFORM == 'Linux':
+            volume = subprocess.check_output('amixer -M get ' + self.SOUNDCARD + ' | grep -o -m 1 \'\[[[:digit:]]\+%\]\'', shell=True)
             return volume[1:-3]
-        elif self.platform == 'Darwin':
+        elif self.PLATFORM == 'Darwin':
             return subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
         else:
             return
@@ -161,9 +168,9 @@ class Win(cli.Cli):
             volume = int(self.volume) + 5
         else:
             volume = int(self.volume) - 5
-        if self.platform == 'Linux':
-            subprocess.Popen('amixer -M set ' + self.sound_card + ' ' + str(volume) + '% >/dev/null 2>&1', shell=True)
-        elif self.platform == 'Darwin':
+        if self.PLATFORM == 'Linux':
+            subprocess.Popen('amixer -M set ' + self.SOUNDCARD + ' ' + str(volume) + '% >/dev/null 2>&1', shell=True)
+        elif self.PLATFORM == 'Darwin':
             subprocess.Popen('osascript -e "set volume output volume ' + str(volume) + '"', shell=True)
         else:
             pass
@@ -251,9 +258,9 @@ class Win(cli.Cli):
             content = self.douban.playingsong['artist'] + ' - ' + self.douban.playingsong['albumtitle']
 
         try:
-            if self.platform == 'Linux':
+            if self.PLATFORM == 'Linux':
                 self.send_Linux_notify(title, content, path)
-            elif self.platform == 'Darwin':
+            elif self.PLATFORM == 'Darwin':
                 self.send_OS_X_notify(title, content, path)
         except:
             pass
