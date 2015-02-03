@@ -6,7 +6,6 @@
 from functools import wraps
 from scrobbler import Scrobbler
 import requests
-import tempfile
 import lrc2dic
 import getpass
 import pickle
@@ -253,11 +252,9 @@ LRC = o
         self.submit_current_song()
 
     # 获取专辑封面
-    def get_pic(self):
-        path = os.path.join(tempfile.gettempdir(), 'tmp.jpg')
+    def get_pic(self, tempfile_path):
         url = self.playingsong['picture'].replace('\\', '')
-        urllib.urlretrieve(url, path)
-        return path
+        urllib.urlretrieve(url, tempfile_path)
 
     def get_lrc(self):
         if not self.find_lrc:
