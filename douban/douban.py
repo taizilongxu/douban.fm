@@ -225,8 +225,8 @@ class Win(cli.Cli):
         try:
             self.p.stdin.write('volume 0 1\n')
         except IOError as e:
-            if e.errno == errno.EPIPE:
-                pass
+            if e.errno != errno.EPIPE:
+                raise e
 
     def protect(self):
         '''守护线程，检查歌曲是否播放完毕'''
