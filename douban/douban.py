@@ -18,7 +18,8 @@ import platform
 import logging
 import sys
 #---------------------------------------------------------------------------
-logging.basicConfig(format='%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s',
+logging.basicConfig(format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
+                        filemode = 'w',
                         filename=os.path.expanduser('~/fm.log'),
                         level=logging.DEBUG)
 
@@ -43,7 +44,7 @@ class Win(cli.Cli):
         }
     PLATFORM = platform.system()
     try:
-        if subprocess.check_output('amixer | grep PCM'):
+        if subprocess.check_output('amixer | grep PCM', shell='True'):
             SOUNDCARD = "PCM"
     except:
         SOUNDCARD = "Master"
