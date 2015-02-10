@@ -17,6 +17,7 @@ import ConfigParser
 import platform
 import logging
 import sys
+import errno
 #---------------------------------------------------------------------------
 logging.basicConfig(format='%(asctime)s %(filename)s [line:%(lineno)d] %(levelname)s %(message)s',
                         filemode = 'w',
@@ -43,6 +44,7 @@ class Win(cli.Cli):
         'HELP': 'h'
         }
     PLATFORM = platform.system()
+    FNULL = open(os.devnull, 'w')
     try:
         if subprocess.check_output('amixer | grep PCM', shell='True'):
             SOUNDCARD = "PCM"
@@ -77,6 +79,9 @@ class Win(cli.Cli):
         self.lock_muted= False  # 静音锁
         self.lock_pause= True  # 暂停锁
         self.q = False  # 退出
+
+        # subprocess
+        self.p = None
 
         # 守护线程
         self.thread(self.protect)  # 歌曲连续播放
@@ -128,7 +133,14 @@ class Win(cli.Cli):
             if self.q == True:  # 退出
                 break
             if self.douban.playingsong:
-                rest_time = int(self.douban.playingsong['length']) - int(time.time() - self.unix_songtime) if not self.lock_pause else rest_time
+                try:
+                    if self.lock_pause:
+                        rest_time = rest_time
+                    else:
+                        rest_time = \
+                            int(self.douban.playingsong['length']) - int(time.time() - self.unix_songtime)
+                except NameError:
+                    rest_time = 0
                 if rest_time < 0:
                     rest_time = 0
                 minute = int(rest_time) / 60
@@ -175,18 +187,27 @@ class Win(cli.Cli):
         else:
             self.lock_muted= True
             mute = 1
+        try:
             self.p.stdin.write('volume 0 1\n')
+        except IOError as e:
+            if e.errno == errno.EPIPE:
+                pass
 
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
         while True:
             if self.q == True:
                 break
-            if self.lock_start:
-                self.p.poll()
-                if self.p.returncode == 0:
-                    if not self.lock_loop and self.douban.playingsong:
-                        self.douban.end_music()  # 发送完成
+            if self.p is not None:
+                logger.debug("Watching mplayer[%d]" % self.p.pid)
+                self.p.wait()
+                if self.p.returncode is not None:
+                    logger.debug("mplayer exits with code %d" % self.p.returncode)
+                if self.q == True:
+                    break
+                if self.p.returncode == 0 and not self.lock_loop and self.douban.playingsong:
+                    self.douban.end_music()  # 发送完成
+                if self.lock_start:
                     self.play()
             time.sleep(1)
 
@@ -207,9 +228,18 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -volume {volume} -slave -input file={fifo} {song_url} >/dev/null 2>&1'
-        volume = '0' if self.lock_muted else self.VOLUME
-        self.p = subprocess.Popen(cmd.format(volume=volume, fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
+        cmd = 'mplayer -slave -nolirc -really-quiet -volume {volume} {song_url}'
+        cmd = cmd.format(volume=volume, song_url=song['url'])
+        logger.debug('Starting process: ' + cmd)
+        self.p = subprocess.Popen(
+            cmd,
+            shell=True,
+            # I/O 重定向
+            # 不在命令中直接使用管道符，避免产生多余的 sh 进程
+            stdin=subprocess.PIPE,      # open a pipe for input
+            stdout=self.FNULL,          # >/dev/null
+            stderr=subprocess.STDOUT    # 2>&1
+        )
         self.lock_pause= False
         self.display()
 
@@ -240,7 +270,12 @@ class Win(cli.Cli):
 
     # 结束mplayer
     def kill_mplayer(self):
-        self.p.stdin.write('quit 0\n')
+        try:
+            self.p.stdin.write('quit 0\n')
+        except IOError as e:
+            if e.errno == errno.EPIPE:
+                pass
+
 
     # 发送桌面通知
     def send_notification(self, title=None, content=None):
@@ -407,10 +442,13 @@ class Win(cli.Cli):
         if self.lock_start:
             self.kill_mplayer()
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
-        if self.cover_file is not None:
-            self.cover_file.close()
-        os.unlink(self.mplayer_controller)
-        os.rmdir(self._tempdir)
+        try:
+            if self.cover_file is not None:
+                self.cover_file.close()
+            os.unlink(self.mplayer_controller)
+            os.rmdir(self._tempdir)
+        except OSError:
+            pass
         exit()
 
     @info('正在加载请稍后...')
