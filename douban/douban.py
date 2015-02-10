@@ -80,8 +80,6 @@ class Win(cli.Cli):
 
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
-        self.mplayer_controller = os.path.join(self._tempdir, 'mplayer_controller')
-        os.mkfifo(self.mplayer_controller)
 
         # 线程锁
         self.lock_start = False  # 播放锁,play之前需要加
@@ -479,7 +477,6 @@ class Win(cli.Cli):
         try:
             if self.cover_file is not None:
                 self.cover_file.close()
-            os.unlink(self.mplayer_controller)
             os.rmdir(self._tempdir)
         except OSError:
             pass
