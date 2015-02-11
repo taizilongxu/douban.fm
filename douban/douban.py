@@ -49,6 +49,7 @@ class Win(cli.Cli):
     except:
         SOUNDCARD = "Master"
     RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
+    VOLUME = 100  # mplayer默认音量
 
     def __init__(self, douban):
         self.get_config()  # 快捷键配置
@@ -134,12 +135,11 @@ class Win(cli.Cli):
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
-                self.volume = self.get_volume()  # 获取音量
                 self.TITLE = self.TITLE[:length - 1] + '  ' + self.douban.playingsong['kbps'] + 'kbps  ' + colored(show_time, 'cyan') + '  rate: ' + colored(self.RATE[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
                 if self.lock_muted:
                     self.TITLE += '✖'
                 else:
-                    self.TITLE += self.volume.strip() + '%'
+                    self.TITLE += str(self.VOLUME) + '%'
                 if self.lock_loop:
                     self.TITLE += '  ' + colored('↺', 'red')
                 else:
@@ -155,38 +155,27 @@ class Win(cli.Cli):
         if not self.lock_lrc and self.lock_start and not self.lock_help:
             cli.Cli.display(self)
 
-    # 获取音量
-    def get_volume(self):
-        if self.PLATFORM == 'Linux':
-            volume = subprocess.check_output('amixer -M get ' + self.SOUNDCARD + ' | grep -o -m 1 \'\[[[:digit:]]\+%\]\'', shell=True)
-            return volume[1:-3]
-        elif self.PLATFORM == 'Darwin':
-            return subprocess.check_output('osascript -e "output volume of (get volume settings)"', shell=True)
-        else:
-            return
-
     # 调整音量大小
     def change_volume(self, increment):
         if increment == 1:
-            volume = int(self.volume) + 5
+            self.VOLUME += 5
         else:
-            volume = int(self.volume) - 5
-        if self.PLATFORM == 'Linux':
-            subprocess.Popen('amixer -M set ' + self.SOUNDCARD + ' ' + str(volume) + '% >/dev/null 2>&1', shell=True)
-        elif self.PLATFORM == 'Darwin':
-            subprocess.Popen('osascript -e "set volume output volume ' + str(volume) + '"', shell=True)
-        else:
-            pass
+            self.VOLUME -= 5
+        if self.VOLUME > 100:
+            self.VOLUME = 100
+        if self.VOLUME < 0:
+            self.VOLUME = 0
+        self.p.stdin.write('volume {volume} 1\n'.format(volume=self.VOLUME))
 
     # 静音
     def mute(self):
         if self.lock_muted:
             self.lock_muted= False
-            mute = 0
+            self.p.stdin.write('volume {volume} 1\n'.format(volume=self.VOLUME))
         else:
             self.lock_muted= True
             mute = 1
-        self.p.stdin.write('mute {mute}\n'.format(mute=mute))
+            self.p.stdin.write('volume 0 1\n')
 
     # 守护线程,检查歌曲是否播放完毕
     def protect(self):
@@ -218,8 +207,9 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -slave -input file={fifo} {song_url} >/dev/null 2>&1'
-        self.p = subprocess.Popen(cmd.format(fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
+        cmd = 'mplayer -volume {volume} -slave -input file={fifo} {song_url} >/dev/null 2>&1'
+        volume = '0' if self.lock_muted else self.VOLUME
+        self.p = subprocess.Popen(cmd.format(volume=volume, fifo=self.mplayer_controller, song_url=song['url']), shell=True, stdin=subprocess.PIPE)  # subprocess.PIPE防止继承父进程
         self.lock_pause= False
         self.display()
 
@@ -228,8 +218,8 @@ class Win(cli.Cli):
         self.send_notification()
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
-        if self.lock_muted:  # 静音状态
-            self.p.stdin.write('mute 0\n')
+        # if self.lock_muted:  # 静音状态
+        #     self.p.stdin.write('mute 0\n')
         self.lock_start = True
         try:
             self.douban.scrobble_now_playing()
