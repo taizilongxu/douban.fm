@@ -1,8 +1,7 @@
-#-*- encoding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 """
 豆瓣FM的网络连接部分
 """
-#---------------------------------import------------------------------------
 from functools import wraps
 from scrobbler import Scrobbler
 import requests
@@ -13,23 +12,23 @@ import urllib
 import logging
 import sys
 import os
-#---------------------------------------------------------------------------
 
 logger = logging.getLogger()
+
 
 class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
         self.channel_id = 0
-        self.lines = [] # 要输出到终端的行
+        self.lines = []  # 要输出到终端的行
         # 红心兆赫需要手动添加
         self.channels = [{
-            'name':'红心兆赫',
-            'channel_id' : -3
-            }]
+            'name': '红心兆赫',
+            'channel_id': -3
+        }]
         self.pro = 0
-        self.playlist = [] # 播放列表
-        self.playingsong = {} # 当前播放歌曲
+        self.playlist = []  # 播放列表
+        self.playingsong = {}  # 当前播放歌曲
         self.find_lrc = False  # 是否查找过歌词
         self.lastfm = True  # lastfm 登陆
         self.lrc_dic = {}  # 歌词
@@ -42,30 +41,30 @@ class Doubanfm(object):
         ╚══╩══╩══╩══╩╝╚╩╝╚╩╩╝╚╩╩╝
 
         '''
-        self.login() # 登陆
-        self.login_lastfm() # 登陆 last.fm
-        self.get_channels() # 获取频道列表
-        self.get_channellines() # 重构列表用以显示
+        self.login()  # 登陆
+        self.login_lastfm()  # 登陆 last.fm
+        self.get_channels()  # 获取频道列表
+        self.get_channellines()  # 重构列表用以显示
         self.is_pro()
         if self.pro == 1:
-            self.login_data['kbps'] = 192 # 128 64 歌曲kbps的选择
+            self.login_data['kbps'] = 192  # 128 64 歌曲kbps的选择
 
-    # 查看是否是pro用户
     def is_pro(self):
+        '''查看是否是pro用户'''
         self.get_playlist()
         self.get_song()
-        if  int(self.playingsong['kbps']) != 64:
+        if int(self.playingsong['kbps']) != 64:
             self.pro = 1
-        self.playingsong = {} # 清空列表
+        self.playingsong = {}  # 清空列表
 
-    # 登陆界面
     def win_login(self):
+        '''登陆界面'''
         email = raw_input('email:')
         password = getpass.getpass('password:')
         return email, password
 
-    # last.fm登陆
     def login_lastfm(self):
+        '''last.fm登陆'''
         if self.lastfm and self.last_fm_username and self.last_fm_password:
             self.scrobbler = Scrobbler(
                 self.last_fm_username, self.last_fm_password)
@@ -79,6 +78,7 @@ class Doubanfm(object):
             self.lastfm = False
 
     def last_fm_account_required(f):
+        '''装饰器，用于需要登录last.fm后才能使用的接口'''
         @wraps(f)
         def wrapper(self, *args, **kwds):
             if not self.lastfm:
@@ -88,29 +88,43 @@ class Doubanfm(object):
 
     @last_fm_account_required
     def submit_current_song(self):
+        '''提交播放过的曲目'''
         # Submit the track if total playback time of the track > 30s
         if self.playingsong['length'] > 30:
-            self.scrobbler.submit(self.playingsong['artist'], self.playingsong['title'],
-                                  self.playingsong['albumtitle'], self.playingsong['length'])
+            self.scrobbler.submit(
+                self.playingsong['artist'],
+                self.playingsong['title'],
+                self.playingsong['albumtitle'],
+                self.playingsong['length']
+            )
 
     @last_fm_account_required
     def scrobble_now_playing(self):
-        self.scrobbler.now_playing(self.playingsong['artist'], self.playingsong['title'],
-                              self.playingsong['albumtitle'], self.playingsong['length'])
+        '''提交当前正在播放曲目'''
+        self.scrobbler.now_playing(
+            self.playingsong['artist'],
+            self.playingsong['title'],
+            self.playingsong['albumtitle'],
+            self.playingsong['length']
+        )
 
-
-    # 登陆douban.fm获取token
     def login(self):
+        '''登陆douban.fm获取token'''
         path_token = os.path.expanduser('~/.douban_token.txt')
-        if  os.path.exists(path_token): # 已登陆
+        if os.path.exists(path_token):
+            # 已登陆
             with open(path_token, 'r') as f:
                 self.login_data = pickle.load(f)
                 self.token = self.login_data['token']
                 self.user_name = self.login_data['user_name']
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
-            logger.debug('Get local data - user_name:' + self.user_name + ' token:' + self.token)
-        else: # 未登陆
+            logger.debug(
+                'Get local data - user_name: %s; token: %s',
+                self.user_name, self.token
+            )
+        else:
+            # 未登陆
             logger.debug('First to login in douban.fm')
             while True:
                 self.email, self.password = self.win_login()
@@ -131,21 +145,25 @@ class Doubanfm(object):
                     self.user_id = dic['user_id']
                     self.expire = dic['expire']
                     self.login_data = {
-                        'app_name' : 'radio_desktop_win',
-                        'version' : '100',
-                        'user_id' : self.user_id,
-                        'expire' : self.expire,
-                        'token' : self.token,
-                        'user_name' : self.user_name
-                            }
+                        'app_name': 'radio_desktop_win',
+                        'version': '100',
+                        'user_id': self.user_id,
+                        'expire': self.expire,
+                        'token': self.token,
+                        'user_name': self.user_name
+                    }
                     logger.debug('Login username: ' + self.user_name)
                     with open(path_token, 'w') as f:
                         pickle.dump(self.login_data, f)
                         logger.debug('Write data to ' + path_token)
                     break
 
-        self.last_fm_username = self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data else None
-        self.last_fm_password = self.login_data['last_fm_password'] if 'last_fm_password' in self.login_data else None
+        self.last_fm_username = \
+            self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data\
+            else None
+        self.last_fm_password = \
+            self.login_data['last_fm_password'] if 'last_fm_password' in self.login_data\
+            else None
         # last.fm登陆
         try:
             if sys.argv[1] == 'last.fm':
@@ -182,24 +200,24 @@ PAUSE = p
 LOOP = l
 MUTE = m
 LRC = o
-''' # 这个很丑,怎么办
+'''  # 这个很丑,怎么办
             with open(path_config, 'w') as F:
                 F.write(config)
         else:
             logger.debug('Get local config')
 
-    # 获取channel,c存入self.channels
     def get_channels(self):
+        '''获取channel，存入self.channels'''
         r = requests.get('http://www.douban.com/j/app/radio/channels')
         self.channels += eval(r.text)['channels']
 
-    # 格式化频道列表,以便display
     def get_channellines(self):
+        '''格式化频道列表，以便display'''
         for index, channel in enumerate(self.channels):
             self.lines.append(channel['name'])
 
-    # 发送post_data
     def requests_url(self, ptype, **data):
+        '''发送post_data'''
         post_data = self.login_data.copy()
         post_data['type'] = ptype
         for x in data:
@@ -208,68 +226,70 @@ LRC = o
         s = requests.get(url)
         return s.text
 
-    # 当playlist为空,获取播放列表
     def get_playlist(self):
+        '''当playlist为空时，获取播放列表'''
         self.login_data['channel'] = self.channel_id
         s = self.requests_url('n')
         self.playlist = eval(s)['song']
 
-    # 下一首
     def skip_song(self):
+        '''下一首'''
         s = self.requests_url('s', sid=self.playingsong['sid'])
         self.playlist = eval(s)['song']
 
-    # bye,不再播放
     def bye(self):
+        '''不再播放'''
         s = self.requests_url('b', sid=self.playingsong['sid'])
         self.playlist = eval(s)['song']
 
-    # 选择频道
     def set_channel(self, num):
+        '''选择频道'''
         self.channel_id = num
 
-    # 获得歌曲
     def get_song(self):
+        '''获得歌曲'''
         self.find_lrc = False
         self.lrc_dic = {}
         if not self.playlist:
             self.get_playlist()
         self.playingsong = self.playlist.pop(0)
 
-    # 标记喜欢歌曲
     def rate_music(self):
+        '''标记喜欢歌曲'''
         s = self.requests_url('r', sid=self.playingsong['sid'])
         self.playlist = eval(s)['song']
 
-    # 取消标记喜欢歌曲
     def unrate_music(self):
+        '''取消标记喜欢歌曲'''
         s = self.requests_url('u', sid=self.playingsong['sid'])
         self.playlist = eval(s)['song']
 
-    # 歌曲结束标记
     def end_music(self):
+        '''歌曲结束标记'''
         s = self.requests_url('e', sid=self.playingsong['sid'])
         self.submit_current_song()
 
-    # 获取专辑封面
     def get_pic(self, tempfile_path):
+        '''获取专辑封面'''
         url = self.playingsong['picture'].replace('\\', '')
         urllib.urlretrieve(url, tempfile_path)
 
     def get_lrc(self):
+        '''获取歌词'''
         if not self.find_lrc:
             try:
                 url = "http://api.douban.com/v2/fm/lyric"
                 postdata = {
-                        'sid':self.playingsong['sid'],
-                        'ssid':self.playingsong['ssid'],
-                        }
+                    'sid': self.playingsong['sid'],
+                    'ssid': self.playingsong['ssid'],
+                }
                 s = requests.session()
-                response = s.post(url, data = postdata)
+                response = s.post(url, data=postdata)
                 lyric = eval(response.text)
                 lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
+                # 原歌词用的unicode,为了兼容
                 for key, value in lrc_dic.iteritems():
-                    lrc_dic[key] = value.decode('utf-8')  # 原歌词用的unicode,为了兼容
+                    lrc_dic[key] = value.decode('utf-8')
                 self.lrc_dic = lrc_dic
                 logger.debug('Get lyric success!')
                 return lrc_dic
@@ -278,4 +298,5 @@ LRC = o
                 return 0
         self.find_lrc = True
         return lrc_dic
+
 ############################################################################
