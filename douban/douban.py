@@ -43,11 +43,6 @@ class Win(cli.Cli):
         'HELP': 'h'
         }
     PLATFORM = platform.system()
-    try:
-        if subprocess.check_output('amixer | grep PCM', shell='True'):
-            SOUNDCARD = "PCM"
-    except:
-        SOUNDCARD = "Master"
     RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
     VOLUME = 100  # mplayer默认音量
 
@@ -218,8 +213,6 @@ class Win(cli.Cli):
         self.send_notification()
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
-        # if self.lock_muted:  # 静音状态
-        #     self.p.stdin.write('mute 0\n')
         self.lock_start = True
         try:
             self.douban.scrobble_now_playing()
