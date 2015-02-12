@@ -32,7 +32,6 @@ logging.basicConfig(
     filename=os.path.expanduser('~/.doubanfm.log'),
     level=logging.INFO
 )
->>>>>>> Pythonic! (almost PEP8)
 logger = logging.getLogger()
 
 
@@ -212,18 +211,22 @@ class Win(cli.Cli):
             self.VOLUME = 100
         if self.VOLUME < 0:
             self.VOLUME = 0
-        self.p.stdin.write('volume {volume} 1\n'.format(volume=self.VOLUME))
+        try:
+            self.p.stdin.write('volume %d 1\n' % self.VOLUME)
+        except IOError as e:
+            if e.errno != errno.EPIPE:
+                raise e
 
     def mute(self):
         '''静音'''
         if self.lock_muted:
             self.lock_muted= False
-            self.p.stdin.write('volume {volume} 1\n'.format(volume=self.VOLUME))
+            volume = self.VOLUME
         else:
             self.lock_muted = True
-            mute = 1
+            volume = 0
         try:
-            self.p.stdin.write('volume 0 1\n')
+            self.p.stdin.write('volume %d 1\n' % volume)
         except IOError as e:
             if e.errno != errno.EPIPE:
                 raise e
@@ -264,7 +267,7 @@ class Win(cli.Cli):
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
         cmd = 'mplayer -slave -nolirc -really-quiet -volume {volume} {song_url}'
-        cmd = cmd.format(volume=volume, song_url=song['url'])
+        cmd = cmd.format(volume=self.VOLUME, song_url=song['url'])
         logger.debug('Starting process: ' + cmd)
         self.p = subprocess.Popen(
             cmd,
@@ -283,8 +286,6 @@ class Win(cli.Cli):
         self.send_notification()
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
-        # if self.lock_muted:  # 静音状态
-        #     self.p.stdin.write('mute 0\n')
         self.lock_start = True
         try:
             self.douban.scrobble_now_playing()
@@ -293,7 +294,6 @@ class Win(cli.Cli):
 
     def pause_play(self):
         '''暂停歌曲'''
-        self.p.stdin.write('pause\n')
         if self.lock_pause:
             self.unix_songtime += time.time() - self.pause_time
             self.lock_pause = False
@@ -302,6 +302,11 @@ class Win(cli.Cli):
             self.pause_time = time.time()
             self.send_notification(content='暂停播放')
             self.lock_pause = True
+        try:
+            self.p.stdin.write('pause\n')
+        except IOError as e:
+            if e.errno != errno.EPIPE:
+                raise e
 
     def kill_mplayer(self):
         '''结束mplayer'''
