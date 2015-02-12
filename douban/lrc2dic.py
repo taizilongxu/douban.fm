@@ -1,13 +1,14 @@
-#-*- encoding: UTF-8 -*-
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 # reference: (http://reverland.org/python/2014/10/09/lrc/)
-#---------------------------------import------------------------------------
 import re
-#---------------------------------------------------------------------------
 
 
 def lrc2dict(lrc):
+    def remove(x):
+        return x.strip('[|]')
+
     lrc_dict = {}
-    remove = lambda x: x.strip('[|]')
     for line in lrc.split('\n'):
         if line.strip('\n'):
             time_stamps = re.findall(r'\[[^\]]+\]', line)
@@ -39,4 +40,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 ############################################################################

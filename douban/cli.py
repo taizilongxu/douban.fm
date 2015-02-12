@@ -1,4 +1,5 @@
-#-*- encoding: UTF-8 -*-
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 '''
 用print设计的滚动终端界面
 
@@ -8,11 +9,9 @@ SUFFIX_SELECTED:对选中行进行标记
 SUFFIX_DESELECTED:暂时无用
 TITLE:界面标题的设定
 '''
-#---------------------------------import------------------------------------
 import subprocess
 from termcolor import colored
 import getch
-#---------------------------------------------------------------------------
 
 
 class Cli(object):
@@ -31,14 +30,14 @@ class Cli(object):
         self.screenline, self.screenline_char = self.linesnum()  # 屏幕显示行数
         subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
 
-    # 测试屏幕显示行数,每行字符数
     def linesnum(self):
+        '''测试屏幕显示行数,每行字符数'''
         num = subprocess.check_output('stty size', shell=True)
         tmp = num.split(' ')
         return int(tmp[0]) - 4, int(tmp[1])  # -4上下空余
 
-    # 展示窗口
     def display(self):
+        '''展示窗口'''
         subprocess.call('clear', shell=True)  # 清屏
         print
         print self.TITLE
@@ -59,12 +58,12 @@ class Cli(object):
             line = '%s %s %s' % (prefix, i, suffix)
             print line + '\r'  # 为什么加\r,我不知道,如果不加会出bug
 
-    # 显示歌曲的行号
     def displaysong(self):
+        '''显示歌曲的行号'''
         self.displayline = self.markline + self.topline
 
-    # 界面执行程序
     def run(self):
+        '''界面执行程序'''
         while True:
             self.display()
             i = getch._Getch()
@@ -76,8 +75,8 @@ class Cli(object):
             if c == 'q':
                 break
 
-    # 对上下键进行反应,调成page和scroll
     def updown(self, increment):
+        '''对上下键进行反应,调成page和scroll'''
         # paging
         if increment == -1 and self.markline == 0 and self.topline != 0:
             self.topline -= 1
@@ -97,3 +96,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+############################################################################
