@@ -209,8 +209,11 @@ class Win(cli.Cli):
             self.VOLUME -= 5
         if self.VOLUME > 100:
             self.VOLUME = 100
-        if self.VOLUME < 0:
+        if self.VOLUME <= 0:
+            self.lock_muted = True
             self.VOLUME = 0
+        else:
+            self.lock_muted = False
         try:
             self.p.stdin.write('volume %d 1\n' % self.VOLUME)
         except IOError as e:
@@ -220,7 +223,9 @@ class Win(cli.Cli):
     def mute(self):
         '''静音'''
         if self.lock_muted:
-            self.lock_muted= False
+            self.lock_muted = False
+            if self.VOLUME == 0:
+                self.VOLUME = 10
             volume = self.VOLUME
         else:
             self.lock_muted = True
@@ -267,7 +272,8 @@ class Win(cli.Cli):
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
         cmd = 'mplayer -slave -nolirc -really-quiet -volume {volume} {song_url}'
-        cmd = cmd.format(volume=self.VOLUME, song_url=song['url'])
+        volume = 0 if self.lock_muted else self.VOLUME
+        cmd = cmd.format(volume=volume, song_url=song['url'])
         logger.debug('Starting process: ' + cmd)
         self.p = subprocess.Popen(
             cmd,
