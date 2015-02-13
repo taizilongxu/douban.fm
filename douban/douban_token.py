@@ -273,7 +273,6 @@ LRC = o
     def end_music(self):
         '''歌曲结束标记'''
         s = self.requests_url('e', sid=self.playingsong['sid'])
-        self.submit_current_song()
 
     def get_pic(self, tempfile_path):
         '''获取专辑封面'''

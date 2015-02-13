@@ -247,6 +247,7 @@ class Win(cli.Cli):
                     break
                 if self.p.returncode == 0 and not self.lock_loop and self.douban.playingsong:
                     self.douban.end_music()  # 发送完成
+                    self.thread(self.douban.submit_current_song)
                 if self.lock_start:
                     self.play()
             time.sleep(1)
@@ -291,7 +292,7 @@ class Win(cli.Cli):
             self.thread(self.display_lrc)
         self.lock_start = True
         try:
-            self.douban.scrobble_now_playing()
+            self.thread(self.douban.scrobble_now_playing)
         except:
             pass
 
