@@ -121,6 +121,8 @@ class Doubanfm(object):
                 self.expire = self.login_data['expire']
                 self.default_volume = int(self.login_data['volume'])\
                         if 'volume' in self.login_data else 50
+                self.default_channel = int(self.login_data['channel'])\
+                        if 'channel' in self.login_data else 0
             logger.debug(
                 'Get local data - user_name: %s; token: %s',
                 self.user_name, self.token
@@ -153,7 +155,8 @@ class Doubanfm(object):
                         'expire': self.expire,
                         'token': self.token,
                         'user_name': self.user_name,
-                        'volume': '50'
+                        'volume': '50',
+                        'channel': '0'
                     }
                     logger.debug('Login username: ' + self.user_name)
                     with open(path_token, 'w') as f:

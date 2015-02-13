@@ -95,6 +95,7 @@ class Win(cli.Cli):
         super(Win, self).__init__(self.douban.lines)
 
         # 启动自动播放
+        self.markline = self.displayline = douban.default_channel
         self.lock_start = True
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
@@ -491,6 +492,7 @@ class Win(cli.Cli):
         with open(path_token, 'r') as f:
             data = pickle.load(f)
             data['volume'] = self.volume
+            data['channel'] = self.displayline
         with open(path_token, 'w') as f:
             pickle.dump(data, f)
         exit()
