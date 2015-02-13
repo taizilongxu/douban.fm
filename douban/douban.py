@@ -17,6 +17,7 @@ import platform
 import logging
 import sys
 import errno
+import pickle
 if platform.system() == 'Darwin':
     try:
         from Foundation import NSDate, NSURL, NSUserNotification, NSUserNotificationCenter
@@ -56,9 +57,9 @@ class Win(cli.Cli):
     PLATFORM = platform.system()
     FNULL = open(os.devnull, 'w')
     RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
-    VOLUME = 100  # mplayer默认音量
 
     def __init__(self, douban):
+        self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
         self.douban = douban
         self.TITLE += \
@@ -164,7 +165,7 @@ class Win(cli.Cli):
                 if self.lock_muted:
                     self.TITLE += '✖'
                 else:
-                    self.TITLE += str(self.VOLUME) + '%'
+                    self.TITLE += str(self.volume) + '%'
                 if self.lock_loop:
                     self.TITLE += '  ' + colored('↺', 'red')
                 else:
@@ -199,18 +200,18 @@ class Win(cli.Cli):
     def change_volume(self, increment):
         '''调整音量大小'''
         if increment == 1:
-            self.VOLUME += 5
+            self.volume += 5
         else:
-            self.VOLUME -= 5
-        if self.VOLUME > 100:
-            self.VOLUME = 100
-        if self.VOLUME <= 0:
+            self.volume -= 5
+        if self.volume > 100:
+            self.volume = 100
+        if self.volume <= 0:
             self.lock_muted = True
-            self.VOLUME = 0
+            self.volume = 0
         else:
             self.lock_muted = False
         try:
-            self.p.stdin.write('volume %d 1\n' % self.VOLUME)
+            self.p.stdin.write('volume %d 1\n' % self.volume)
         except IOError as e:
             if e.errno != errno.EPIPE:
                 raise e
@@ -219,9 +220,9 @@ class Win(cli.Cli):
         '''静音'''
         if self.lock_muted:
             self.lock_muted = False
-            if self.VOLUME == 0:
-                self.VOLUME = 10
-            volume = self.VOLUME
+            if self.volume == 0:
+                self.volume = 10
+            volume = self.volume
         else:
             self.lock_muted = True
             volume = 0
@@ -267,7 +268,7 @@ class Win(cli.Cli):
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
         cmd = 'mplayer -slave -nolirc -really-quiet -volume {volume} {song_url}'
-        volume = 0 if self.lock_muted else self.VOLUME
+        volume = 0 if self.lock_muted else self.volume
         cmd = cmd.format(volume=volume, song_url=song['url'])
         logger.debug('Starting process: ' + cmd)
         self.p = subprocess.Popen(
@@ -486,6 +487,12 @@ class Win(cli.Cli):
             os.rmdir(self._tempdir)
         except OSError:
             pass
+        path_token = os.path.expanduser('~/.douban_token.txt')
+        with open(path_token, 'r') as f:
+            data = pickle.load(f)
+            data['volume'] = self.volume
+        with open(path_token, 'w') as f:
+            pickle.dump(data, f)
         exit()
 
     @info('正在加载请稍后...')
