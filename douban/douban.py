@@ -31,7 +31,7 @@ logging.basicConfig(
     format='%(asctime)s - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%I:%S',
     filename=os.path.expanduser('~/.doubanfm.log'),
-    level=logging.INFO
+    level=logging.DEBUG
 )
 logger = logging.getLogger()
 
@@ -332,9 +332,9 @@ class Win(cli.Cli):
                 + self.douban.playingsong['albumtitle']
 
         try:
-            if self.platform == 'Linux':
+            if self.PLATFORM == 'Linux':
                 self.send_Linux_notify(title, content, self.cover_file.name)
-            elif self.platform == 'Darwin':
+            elif self.PLATFORM == 'Darwin':
                 self.send_OS_X_notify(title, content, self.cover_file.name)
         except:
             pass
