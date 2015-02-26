@@ -246,7 +246,7 @@ class Win(cli.Cli):
                 if self.q:
                     break
                 if self.p.returncode == 0 and not self.lock_loop and self.douban.playingsong:
-                    self.douban.end_music()  # 发送完成
+                    self.thread(self.douban.end_music)  # 发送完成
                     self.thread(self.douban.submit_current_song)
                 if self.lock_start:
                     self.play()
