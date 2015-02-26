@@ -277,7 +277,10 @@ LRC = o
     def get_pic(self, tempfile_path):
         '''获取专辑封面'''
         url = self.playingsong['picture'].replace('\\', '')
-        urllib.urlretrieve(url, tempfile_path)
+        try:
+            urllib.urlretrieve(url, tempfile_path)
+        except:
+            pass
 
     def get_lrc(self):
         '''获取歌词'''
