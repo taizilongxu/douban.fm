@@ -1,6 +1,4 @@
-##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg?style=flat&text=version)](https://pypi.python.org/pypi/douban.fm) [![download](https://pypip.in/download/douban.fm/badge.svg?style=flat)]() [![python](https://pypip.in/py_versions/douban.fm/badge.svg?style=flat)]()
-
-[![Join the chat at https://gitter.im/taizilongxu/douban.fm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/taizilongxu/douban.fm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg?style=flat&text=version)](https://pypi.python.org/pypi/douban.fm) [![python](https://pypip.in/py_versions/douban.fm/badge.svg?style=flat)]() [![Join the chat at https://gitter.im/taizilongxu/douban.fm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/taizilongxu/douban.fm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 终端上的豆瓣FM
 
