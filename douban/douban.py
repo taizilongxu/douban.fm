@@ -269,7 +269,7 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -slave -nolirc -really-quiet -volume {volume} {song_url}'
+        cmd = 'mplayer -slave -nolirc -really-quiet -softvol -volume {volume} {song_url}'
         volume = 0 if self.lock_muted else self.volume
         cmd = cmd.format(volume=volume, song_url=song['url'])
         logger.debug('Starting process: ' + cmd)
