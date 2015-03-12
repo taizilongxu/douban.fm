@@ -144,9 +144,7 @@ class Win(cli.Cli):
                 break
             if self.douban.playingsong:
                 try:
-                    if self.lock_pause:
-                        rest_time = rest_time
-                    else:
+                    if not self.lock_pause:
                         rest_time = \
                             int(self.douban.playingsong['length']) - \
                             int(time.time() - self.unix_songtime)
