@@ -15,7 +15,6 @@ import tempfile
 import ConfigParser
 import platform
 import logging
-import sys
 import errno
 import pickle
 if platform.system() == 'Darwin':
