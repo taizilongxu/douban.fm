@@ -148,6 +148,8 @@ class Doubanfm(object):
                     self.user_name = dic['user_name']
                     self.user_id = dic['user_id']
                     self.expire = dic['expire']
+                    self.default_volume = 50
+                    self.default_channel = 0
                     self.login_data = {
                         'app_name': 'radio_desktop_win',
                         'version': '100',
