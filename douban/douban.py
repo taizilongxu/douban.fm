@@ -563,8 +563,8 @@ class Lrc(cli.Cli):
 
     def find_line(self):
         '''第一次载入时查找歌词'''
-        for time in reversed(range(self.song_time)):
-            locate = [index for index, i in enumerate(self.sort_lrc_dict) if i[0] == time]  # 查找歌词在self.sort_lrc_dict中的位置
+        for now_time in reversed(range(self.song_time)):
+            locate = [index for index, i in enumerate(self.sort_lrc_dict) if i[0] == now_time]  # 查找歌词在self.sort_lrc_dict中的位置
             if locate:
                 return locate[0]
         return 0
