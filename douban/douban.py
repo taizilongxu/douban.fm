@@ -20,7 +20,7 @@ import errno
 import pickle
 if platform.system() == 'Darwin':
     try:
-        from Foundation import NSDate, NSURL, NSUserNotification, NSUserNotificationCenter
+        from Foundation import NSDate, NSUserNotification, NSUserNotificationCenter
         from AppKit import NSImage
         import objc
     except ImportError:

@@ -79,7 +79,7 @@ class Doubanfm(object):
 
     def last_fm_account_required(fun):
         '''装饰器，用于需要登录last.fm后才能使用的接口'''
-        @wraps(f)
+        @wraps(fun)
         def wrapper(self, *args, **kwds):
             if not self.lastfm:
                 return
