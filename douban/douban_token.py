@@ -77,13 +77,13 @@ class Doubanfm(object):
         else:
             self.lastfm = False
 
-    def last_fm_account_required(f):
+    def last_fm_account_required(fun):
         '''装饰器，用于需要登录last.fm后才能使用的接口'''
         @wraps(f)
         def wrapper(self, *args, **kwds):
             if not self.lastfm:
                 return
-            return f(self, *args, **kwds)
+            return fun(self, *args, **kwds)
         return wrapper
 
     @last_fm_account_required
