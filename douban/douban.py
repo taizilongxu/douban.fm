@@ -363,7 +363,6 @@ class Win(cli.Cli):
         notification.setTitle_(title.decode('utf-8'))
         notification.setSubtitle_(content.decode('utf-8'))
 
-        NSImage = objc.lookUpClass('NSImage')
         notification.setInformativeText_('')
         notification.setUserInfo_({})
         image = NSImage.alloc().initWithContentsOfFile_(img_path)
