@@ -108,7 +108,6 @@ class Win(cli.Cli):
             except:
                 self.markline += 1
                 self.displayline += 1
-        self.douban.get_playlist()
         self.play()
         self.thread(self.run)
 
