@@ -92,9 +92,6 @@ class Win(cli.Cli):
         # subprocess
         self.p = None
 
-        # 守护线程
-        self.thread(self.protect)  # 歌曲连续播放
-        self.thread(self.display_time)  # 时间显示
         super(Win, self).__init__(self.douban.lines)
 
         # 启动自动播放
@@ -113,6 +110,8 @@ class Win(cli.Cli):
                 self.markline += 1
                 self.displayline += 1
         self.thread(self.play)
+        self.thread(self.protect)  # 歌曲连续播放
+        self.thread(self.display_time)  # 时间显示
 
     def thread(self, target):
         '''启动新线程'''
@@ -140,17 +139,15 @@ class Win(cli.Cli):
     def display_time(self):
         '''时间/音量显示线程'''
         length = len(self.TITLE)
+        rest_time = 0
         while True:
             if self.q:  # 退出
                 break
             if self.douban.playingsong:
-                try:
-                    if not self.lock_pause:
-                        rest_time = \
-                            int(self.douban.playingsong['length']) - \
-                            int(time.time() - self.unix_songtime)
-                except NameError:
-                    rest_time = 0
+                if not self.lock_pause:
+                    rest_time = \
+                        int(self.douban.playingsong['length']) - \
+                        int(time.time() - self.unix_songtime)
                 if rest_time < 0:
                     rest_time = 0
                 minute = int(rest_time) / 60
