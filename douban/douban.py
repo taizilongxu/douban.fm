@@ -512,7 +512,7 @@ class Win(cli.Cli):
             self.lock_loop = False
             self.lock_start = False
             self.kill_mplayer()
-            self.thread(self.douban.skip_song)  # 线程处理网络请求
+            self.douban.skip_song()
             self.douban.playingsong = {}
             if self.cover_file is not None:
                 self.cover_file.close()
