@@ -255,6 +255,9 @@ class Win(cli.Cli):
         if not self.lock_loop:
             self.douban.get_song()
         song = self.douban.playingsong
+
+        self.thread(self.init_notification)
+
         self.unix_songtime = time.time()
         # 是否是红心歌曲
         if song['like'] == 1:
@@ -282,9 +285,6 @@ class Win(cli.Cli):
         self.lock_pause = False
         self.display()
 
-        self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
-        self.douban.get_pic(self.cover_file.name)
-        self.send_notification()
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
         self.lock_start = True
@@ -316,6 +316,12 @@ class Win(cli.Cli):
         except IOError as e:
             if e.errno != errno.EPIPE:
                 raise e
+
+    def init_notification(self):
+        '''第一次桌面通知时加入图片'''
+        self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
+        self.douban.get_pic(self.cover_file.name)
+        self.send_notification()
 
     def send_notification(self, title=None, content=None):
         '''发送桌面通知'''
