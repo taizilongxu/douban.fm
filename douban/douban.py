@@ -58,9 +58,22 @@ class Win(cli.Cli):
     RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
 
     def __init__(self, douban):
+        # 线程锁
+        self.lock_start = False  # 播放锁,play之前需要加
+        self.lock_lrc = False    # 是否显示歌词
+        self.lock_rate = False   # 加心锁
+        self.lock_help = False   # 帮助锁
+        self.lock_loop = False   # 循环锁
+        self.lock_muted = False  # 静音锁
+        self.lock_pause = True   # 暂停锁
+        self.q = False           # 退出
+
         self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
         self.douban = douban
+
+        self.thread(self.run)
+
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
             else colored(' Last.fm ', 'yellow')
@@ -75,15 +88,6 @@ class Win(cli.Cli):
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
 
-        # 线程锁
-        self.lock_start = False  # 播放锁,play之前需要加
-        self.lock_lrc = False    # 是否显示歌词
-        self.lock_rate = False   # 加心锁
-        self.lock_help = False   # 帮助锁
-        self.lock_loop = False   # 循环锁
-        self.lock_muted = False  # 静音锁
-        self.lock_pause = True   # 暂停锁
-        self.q = False           # 退出
 
         # subprocess
         self.p = None
@@ -108,8 +112,7 @@ class Win(cli.Cli):
             except:
                 self.markline += 1
                 self.displayline += 1
-        self.play()
-        self.thread(self.run)
+        self.thread(self.play)
 
     def thread(self, target):
         '''启动新线程'''
