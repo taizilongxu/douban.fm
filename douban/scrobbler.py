@@ -41,9 +41,12 @@ class Scrobbler(object):
             "a": auth
         }
 
-        r = requests.get(self.url, params=payload)
-        resp = r.text
+        try:
+            r = requests.get(self.url, params=payload)
+        except requests.exceptions.RequestException:
+            return False, "Network error"
 
+        resp = r.text
         if resp.startswith("OK"):
             logger.debug('Handshake OK')
             resp_info = resp.split("\n")
@@ -80,9 +83,13 @@ class Scrobbler(object):
             "m": mb_trackid
         }
 
-        r = requests.post(self.now_playing_url, params=payload)
-        resp = r.text
+        try:
+            r = requests.post(self.now_playing_url, params=payload)
+        except requests.exceptions.RequestException:
+            logger.debug('Last.fm network error')
+            return False
 
+        resp = r.text
         if resp.startswith("OK"):
             logger.debug('Last.fm playing OK')
             return True
@@ -109,9 +116,13 @@ class Scrobbler(object):
             "m[0]": mb_trackid
         }
 
-        r = requests.post(self.submission_url, params=payload)
-        resp = r.text
+        try:
+            r = requests.post(self.submission_url, params=payload)
+        except requests.exceptions.RequestException:
+            logger.debug('Last.fm network error')
+            return False
 
+        resp = r.text
         if resp.startswith("OK"):
             logger.debug("Last.fm submitting OK")
             return True

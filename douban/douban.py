@@ -87,18 +87,23 @@ class Win(cli.Cli):
         super(Win, self).__init__(self.douban.lines)
 
         # 启动自动播放
-        self.markline = self.displayline = douban.default_channel
+        self.markline = self.displayline = self.douban.default_channel
         self.lock_start = True
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
         self.lock_start = False
         while True:
-            # 无红心兆赫进入下一个频道
             try:
                 # 设置默认频率
                 self.douban.set_channel(self.douban.channels[self.markline]['channel_id'])
                 break
-            except:
+            except IndexError as e:
+                # 默认频道不存在，重置为红心兆赫
+                if self.markline == 0:
+                    raise e
+                self.markline = self.displayline = 0
+            except KeyError:
+                # 无红心兆赫进入下一个频道
                 self.markline += 1
                 self.displayline += 1
         self.thread(self.play)          # 播放控制
@@ -284,10 +289,8 @@ class Win(cli.Cli):
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
         self.lock_start = True
-        try:
-            self.thread(self.douban.scrobble_now_playing)
-        except:
-            pass
+        # Will do nothing if not log into Last.fm
+        self.thread(self.douban.scrobble_now_playing)
 
     def pause_play(self):
         '''暂停歌曲'''
