@@ -8,22 +8,15 @@ import douban_token  # network
 import getch  # get char
 import subprocess
 from termcolor import colored
+import notification
 import threading
 import time
 import os
 import tempfile
 import ConfigParser
-import platform
 import logging
 import errno
 import pickle
-if platform.system() == 'Darwin':
-    try:
-        from Foundation import NSDate, NSUserNotification, NSUserNotificationCenter
-        from AppKit import NSImage
-        import objc
-    except ImportError:
-        pass
 
 # 设置logger
 logging.basicConfig(
@@ -53,7 +46,6 @@ class Win(cli.Cli):
         'LRC': 'o',
         'HELP': 'h'
         }
-    PLATFORM = platform.system()
     FNULL = open(os.devnull, 'w')
     RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
 
@@ -87,7 +79,6 @@ class Win(cli.Cli):
 
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
-
 
         # subprocess
         self.p = None
@@ -127,6 +118,21 @@ class Win(cli.Cli):
                 option = option.upper()
                 if option in self.KEYS:
                     self.KEYS[option] = config.get('key', option)
+
+    def init_notification(self):
+        '''第一次桌面通知时加入图片'''
+        self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
+        self.douban.get_pic(self.cover_file.name)
+
+        title = self.douban.playingsong['title']
+        content = self.douban.playingsong['artist'] + ' - ' \
+            + self.douban.playingsong['albumtitle']
+        notification.send_notification(title, content, self.cover_file.name)
+
+    def send_notify(self, content):
+        title = self.douban.playingsong['title']
+        notification.send_notification(title, content, self.cover_file.name)
+
 
     def display_lrc(self):
         '''歌词显示线程'''
@@ -177,22 +183,6 @@ class Win(cli.Cli):
         '''显示主控制界面'''
         if not self.lock_lrc and self.lock_start and not self.lock_help:
             cli.Cli.display(self)
-
-    def get_volume(self):
-        '''获取音量'''
-        if self.PLATFORM == 'Linux':
-            volume = subprocess.check_output(
-                "amixer -M get " + self.SOUNDCARD + " | grep -o -m 1 '\[[[:digit:]]\+%\]'",
-                shell=True
-            )
-            return volume[1:-3]
-        elif self.PLATFORM == 'Darwin':
-            return subprocess.check_output(
-                'osascript -e "output volume of (get volume settings)"',
-                shell=True
-            )
-        else:
-            return
 
     def change_volume(self, increment):
         '''调整音量大小'''
@@ -297,10 +287,10 @@ class Win(cli.Cli):
         if self.lock_pause:
             self.unix_songtime += time.time() - self.pause_time
             self.lock_pause = False
-            self.send_notification(content='开始播放')
+            self.send_notify(content='开始播放')
         else:
             self.pause_time = time.time()
-            self.send_notification(content='暂停播放')
+            self.send_notify(content='暂停播放')
             self.lock_pause = True
         try:
             self.p.stdin.write('pause\n')
@@ -316,68 +306,6 @@ class Win(cli.Cli):
             if e.errno != errno.EPIPE:
                 raise e
 
-    def init_notification(self):
-        '''第一次桌面通知时加入图片'''
-        self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
-        self.douban.get_pic(self.cover_file.name)
-        self.send_notification()
-
-    def send_notification(self, title=None, content=None):
-        '''发送桌面通知'''
-        if not title and not content:
-            title = self.douban.playingsong['title']
-        elif not title:
-            title = self.douban.playingsong['title'] + ' - ' \
-                + self.douban.playingsong['artist']
-        if not content:
-            content = self.douban.playingsong['artist'] + ' - ' \
-                + self.douban.playingsong['albumtitle']
-
-        try:
-            if self.PLATFORM == 'Linux':
-                self.send_Linux_notify(title, content, self.cover_file.name)
-            elif self.PLATFORM == 'Darwin':
-                self.send_OS_X_notify(title, content, self.cover_file.name)
-        except:
-            pass
-
-    def send_Linux_notify(self, title, content, img_path):
-        '''发送Linux桌面通知'''
-        subprocess.call(['notify-send', '-a', 'Douban.fm', '-t', '5000', '--hint=int:transient:1', '-i', img_path, title, content])
-
-    def send_OS_X_notify(self, title, content, img_path):
-        '''发送Mac桌面通知'''
-        def swizzle(cls, SEL, func):
-            old_IMP = cls.instanceMethodForSelector_(SEL)
-
-            def wrapper(self, *args, **kwargs):
-                return func(self, old_IMP, *args, **kwargs)
-            new_IMP = objc.selector(wrapper, selector=old_IMP.selector,
-                                    signature=old_IMP.signature)
-            objc.classAddMethod(cls, SEL, new_IMP)
-
-        def swizzled_bundleIdentifier(self, original):
-            # Use iTunes icon for notification
-            return 'com.apple.itunes'
-
-        swizzle(objc.lookUpClass('NSBundle'),
-                b'bundleIdentifier',
-                swizzled_bundleIdentifier)
-        notification = NSUserNotification.alloc().init()
-        notification.setInformativeText_('')
-        notification.setTitle_(title.decode('utf-8'))
-        notification.setSubtitle_(content.decode('utf-8'))
-
-        notification.setInformativeText_('')
-        notification.setUserInfo_({})
-        image = NSImage.alloc().initWithContentsOfFile_(img_path)
-        # notification.setContentImage_(image)
-        notification.set_identityImage_(image)
-        notification.setDeliveryDate_(
-                NSDate.dateWithTimeInterval_sinceDate_(0, NSDate.date())
-        )
-        NSUserNotificationCenter.defaultUserNotificationCenter().\
-            scheduleNotification_(notification)
 
     def run(self):
         '''主交互逻辑 (key event loop)'''
@@ -453,22 +381,22 @@ class Win(cli.Cli):
                 self.display()
                 self.douban.rate_music()
                 self.douban.playingsong['like'] = 1
-                self.send_notification(content='标记红心')
+                self.send_notify(content='标记红心')
             else:
                 self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
                 self.display()
                 self.douban.unrate_music()
                 self.douban.playingsong['like'] = 0
-                self.send_notification(content='取消标记红心')
+                self.send_notify(content='取消标记红心')
         self.lock_rate = False
 
     def set_loop(self):
         '''设置单曲循环'''
         if self.lock_loop:
-            self.send_notification(content='停止单曲循环')
+            self.send_notify(content='停止单曲循环')
             self.lock_loop = False
         else:
-            self.send_notification(content='单曲循环')
+            self.send_notify(content='单曲循环')
             self.lock_loop = True
 
     def set_url(self):
