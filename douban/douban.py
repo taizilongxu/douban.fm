@@ -321,7 +321,7 @@ class Win(cli.Cli):
         '''主交互逻辑 (key event loop)'''
         while True:
             self.display()
-            c = getch._Getch()()
+            c = getch.getch()
             if self.lock_lrc or self.lock_help:  # 歌词界面截断
                 if c == self.KEYS['QUIT']:
                     self.lock_lrc = False

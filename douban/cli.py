@@ -66,8 +66,7 @@ class Cli(object):
         '''界面执行程序'''
         while True:
             self.display()
-            i = getch._Getch()
-            c = i()
+            c = getch.getch()
             if c == 'k':
                 self.updown(-1)
             if c == 'j':
