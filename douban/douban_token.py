@@ -221,7 +221,7 @@ LRC = o
 
     def get_channellines(self):
         '''格式化频道列表，以便display'''
-        for index, channel in enumerate(self.channels):
+        for channel in self.channels:
             self.lines.append(channel['name'])
 
     def requests_url(self, ptype, **data):

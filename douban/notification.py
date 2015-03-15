@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import platform
+import subprocess
 
 PLATFORM = platform.system()
 

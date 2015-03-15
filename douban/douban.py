@@ -133,7 +133,6 @@ class Win(cli.Cli):
         title = self.douban.playingsong['title']
         notification.send_notification(title, content, self.cover_file.name)
 
-
     def display_lrc(self):
         '''歌词显示线程'''
         self.lrc_dict = self.douban.get_lrc()
