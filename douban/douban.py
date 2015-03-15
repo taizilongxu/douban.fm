@@ -79,6 +79,7 @@ class Win(cli.Cli):
 
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
+        self.has_cover = False
 
         # subprocess
         self.p = None
@@ -86,22 +87,27 @@ class Win(cli.Cli):
         super(Win, self).__init__(self.douban.lines)
 
         # 启动自动播放
-        self.markline = self.displayline = douban.default_channel
+        self.markline = self.displayline = self.douban.default_channel
         self.lock_start = True
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
         self.lock_start = False
         while True:
-            # 无红心兆赫进入下一个频道
             try:
                 # 设置默认频率
                 self.douban.set_channel(self.douban.channels[self.markline]['channel_id'])
                 break
-            except:
+            except IndexError as e:
+                # 默认频道不存在，重置为红心兆赫
+                if self.markline == 0:
+                    raise e
+                self.markline = self.displayline = 0
+            except KeyError:
+                # 无红心兆赫进入下一个频道
                 self.markline += 1
                 self.displayline += 1
-        self.thread(self.play)
-        self.thread(self.protect)  # 歌曲连续播放
+        self.thread(self.play)          # 播放控制
+        self.thread(self.watchdog)      # 播放器守护线程
         self.thread(self.display_time)  # 时间显示
 
     def thread(self, target):
@@ -121,17 +127,25 @@ class Win(cli.Cli):
 
     def init_notification(self):
         '''第一次桌面通知时加入图片'''
+        old_title = self.douban.playingsong['title']
         self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
-        self.douban.get_pic(self.cover_file.name)
-
+        if not self.douban.get_pic(self.cover_file.name):
+            return
         title = self.douban.playingsong['title']
+        if old_title != title:
+            # 已切换至下一首歌
+            return
+        self.has_cover = True
         content = self.douban.playingsong['artist'] + ' - ' \
             + self.douban.playingsong['albumtitle']
         notification.send_notification(title, content, self.cover_file.name)
 
     def send_notify(self, content):
         title = self.douban.playingsong['title']
-        notification.send_notification(title, content, self.cover_file.name)
+        if self.has_cover:
+            notification.send_notification(title, content, self.cover_file.name)
+        else:
+            notification.send_notification(title, content)
 
     def display_lrc(self):
         '''歌词显示线程'''
@@ -218,7 +232,7 @@ class Win(cli.Cli):
             if e.errno != errno.EPIPE:
                 raise e
 
-    def protect(self):
+    def watchdog(self):
         '''守护线程，检查歌曲是否播放完毕'''
         while True:
             if self.q:
@@ -276,10 +290,8 @@ class Win(cli.Cli):
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
         self.lock_start = True
-        try:
-            self.thread(self.douban.scrobble_now_playing)
-        except:
-            pass
+        # Will do nothing if not log into Last.fm
+        self.thread(self.douban.scrobble_now_playing)
 
     def pause_play(self):
         '''暂停歌曲'''
@@ -310,7 +322,7 @@ class Win(cli.Cli):
         '''主交互逻辑 (key event loop)'''
         while True:
             self.display()
-            c = getch._Getch()()
+            c = getch.getch()
             if self.lock_lrc or self.lock_help:  # 歌词界面截断
                 if c == self.KEYS['QUIT']:
                     self.lock_lrc = False
@@ -448,6 +460,7 @@ class Win(cli.Cli):
             self.douban.playingsong = {}
             if self.cover_file is not None:
                 self.cover_file.close()
+            self.has_cover = False
             self.play()
 
     @info('不再播放，切换下一首...')

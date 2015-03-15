@@ -58,6 +58,7 @@ class Doubanfm(object):
         if int(self.playingsong['kbps']) != 64:
             self.pro = 1
         self.playingsong = {}  # 清空列表
+        self.playlist = []
 
     def win_login(self):
         '''登陆界面'''
@@ -72,10 +73,10 @@ class Doubanfm(object):
                 self.last_fm_username, self.last_fm_password)
             r, err = self.scrobbler.handshake()
             if r:
-                logger.debug("Last.fm logged success!")
+                logger.info("Last.fm logged success!")
                 print 'Loging Last.fm : %s' % self.last_fm_username
             else:
-                logger.info("Last.fm 登录失败: " + err)
+                logger.error("Last.fm 登录失败: " + err)
                 self.lastfm = False
         else:
             self.lastfm = False
@@ -129,7 +130,7 @@ class Doubanfm(object):
             print 'Get local token - user_name: %s ...' % self.user_name
         else:
             # 未登陆
-            logger.debug('First to login in douban.fm')
+            logger.info('First time logging in douban.fm')
             while True:
                 self.email, self.password = self.win_login()
                 login_data = {
@@ -160,7 +161,7 @@ class Doubanfm(object):
                         'volume': '50',
                         'channel': '0'
                     }
-                    logger.debug('Login username: ' + self.user_name)
+                    logger.info('Logged in username: ' + self.user_name)
                     with open(path_token, 'w') as f:
                         pickle.dump(self.login_data, f)
                         logger.debug('Write data to ' + path_token)
@@ -279,10 +280,15 @@ LRC = o
     def get_pic(self, tempfile_path):
         '''获取专辑封面'''
         url = self.playingsong['picture'].replace('\\', '')
-        try:
-            urllib.urlretrieve(url, tempfile_path)
-        except:
-            pass
+        for i in range(3):
+            try:
+                urllib.urlretrieve(url, tempfile_path)
+                logger.debug('Get cover art success!')
+                return True
+            except (IOError, urllib.ContentTooShortError):
+                pass
+        logger.error('Get cover art failed!')
+        return False
 
     def get_lrc(self):
         '''获取歌词'''
@@ -303,10 +309,8 @@ LRC = o
                 self.lrc_dic = lrc_dic
                 logger.debug('Get lyric success!')
                 return lrc_dic
-            except:
-                logger.info('Get lyric failed!')
+            except requests.exceptions.RequestException:
+                logger.error('Get lyric failed!')
                 return 0
         self.find_lrc = True
         return lrc_dic
-
-############################################################################
