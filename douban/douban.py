@@ -129,7 +129,8 @@ class Win(cli.Cli):
         '''第一次桌面通知时加入图片'''
         old_title = self.douban.playingsong['title']
         self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
-        self.douban.get_pic(self.cover_file.name)
+        if not self.douban.get_pic(self.cover_file.name):
+            return
         title = self.douban.playingsong['title']
         if old_title != title:
             # 已切换至下一首歌
