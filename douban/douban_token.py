@@ -32,6 +32,8 @@ class Doubanfm(object):
         self.find_lrc = False  # 是否查找过歌词
         self.lastfm = True  # lastfm 登陆
         self.lrc_dic = {}  # 歌词
+
+    def init_login(self):
         print '''
         ──╔╗─────╔╗────────╔═╗
         ──║║─────║║────────║╔╝
@@ -41,7 +43,7 @@ class Doubanfm(object):
         ╚══╩══╩══╩══╩╝╚╩╝╚╩╩╝╚╩╩╝
 
         '''
-        self.login()  # 登陆
+        self.douban_login()  # 登陆
         self.login_lastfm()  # 登陆 last.fm
         self.get_channels()  # 获取频道列表
         print 'Get channels ...'
@@ -112,7 +114,7 @@ class Doubanfm(object):
             self.playingsong['length']
         )
 
-    def login(self):
+    def douban_login(self):
         '''登陆douban.fm获取token'''
         path_token = os.path.expanduser('~/.douban_token.txt')
         if os.path.exists(path_token):

@@ -614,6 +614,7 @@ class Help(cli.Cli):
 
 def main():
     douban = douban_token.Doubanfm()
+    douban.init_login()  #登录
     Win(douban)
 
 if __name__ == '__main__':
