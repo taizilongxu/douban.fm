@@ -74,8 +74,8 @@ class Win(cli.Cli):
         self.TITLE += ' \ ' + self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
 
         self.lrc_dict = {}  # 歌词
-        self.unix_songtime = -1  # unix 时间戳,歌词同步用
-        self.pause_time = -1
+        # self.unix_songtime = -1  # unix 时间戳,歌词同步用
+        # self.pause_time = -1
 
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
@@ -166,7 +166,10 @@ class Win(cli.Cli):
                 if not self.lock_pause:
                     rest_time = \
                         int(self.douban.playingsong['length']) - \
-                        int(time.time() - self.unix_songtime)
+                        self.get_songtime()
+                    # rest_time = \
+                    #     int(self.douban.playingsong['length']) - \
+                    #     int(time.time() - self.unix_songtime)
                 if rest_time < 0:
                     rest_time = 0
                 minute = int(rest_time) / 60
@@ -190,7 +193,28 @@ class Win(cli.Cli):
                 self.display()
             else:
                 self.TITLE = self.TITLE[:length]
-            time.sleep(0.5)
+            time.sleep(1)
+
+    def perform_command(self, p, cmd, expect):
+        '''myplayer 读取mplayer输出'''
+        import select
+        p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
+        while select.select([p.stdout], [], [], 0.05)[0]: # give mplayer time to answer...
+            output = p.stdout.readline()
+            logger.debug("output: {}".format(output.rstrip()))
+            split_output = output.split(expect + '=', 1)
+            if len(split_output) == 2 and split_output[0] == '': # we have found it
+                value = split_output[1]
+                return value.rstrip()
+
+    def get_songtime(self):
+        '''获取歌曲播放时间'''
+        song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
+        logger.debug(song_time)
+        if song_time:
+            return int(float(song_time))
+        else:
+            return 0
 
     def display(self):
         '''显示主控制界面'''
@@ -260,7 +284,7 @@ class Win(cli.Cli):
 
         self.thread(self.init_notification)
 
-        self.unix_songtime = time.time()
+        # self.unix_songtime = time.time()
         # 是否是红心歌曲
         if song['like'] == 1:
             love = self.love
@@ -271,7 +295,7 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + ' ' + title + ' • ' + albumtitle + ' • ' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -slave -nolirc -really-quiet -softvol -volume {volume} {song_url}'
+        cmd = 'mplayer -slave -nolirc -quiet -softvol -volume {volume} {song_url}'
         volume = 0 if self.lock_muted else self.volume
         cmd = cmd.format(volume=volume, song_url=song['url'])
         logger.debug('Starting process: ' + cmd)
@@ -281,7 +305,7 @@ class Win(cli.Cli):
             # I/O 重定向
             # 不在命令中直接使用管道符，避免产生多余的 sh 进程
             stdin=subprocess.PIPE,      # open a pipe for input
-            stdout=self.FNULL,          # >/dev/null
+            stdout=subprocess.PIPE,          # >/dev/null
             stderr=subprocess.STDOUT    # 2>&1
         )
         self.lock_pause = False
@@ -296,11 +320,11 @@ class Win(cli.Cli):
     def pause_play(self):
         '''暂停歌曲'''
         if self.lock_pause:
-            self.unix_songtime += time.time() - self.pause_time
+            # self.unix_songtime += time.time() - self.pause_time
             self.lock_pause = False
             self.send_notify(content='开始播放')
         else:
-            self.pause_time = time.time()
+            # self.pause_time = time.time()
             self.send_notify(content='暂停播放')
             self.lock_pause = True
         try:
@@ -490,7 +514,7 @@ class Lrc(cli.Cli):
         # 歌曲总长度
         self.length = int(win.douban.playingsong['length'])
         # 歌曲播放秒数
-        self.song_time = int(time.time() - self.win.unix_songtime)
+        self.song_time = self.win.get_songtime()
 
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
         self.screenline = win.screenline  # shell高度
@@ -519,7 +543,7 @@ class Lrc(cli.Cli):
             if self.playingsong != self.win.douban.playingsong:
                 break
             self.display()
-            self.song_time = int(time.time() - self.win.unix_songtime)
+            self.song_time = self.win.get_songtime()
             if self.song_time < self.length:
                 # 查找歌词在self.sort_lrc_dict中的位置
                 locate = \
