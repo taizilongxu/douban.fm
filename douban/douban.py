@@ -162,7 +162,7 @@ class Win(cli.Cli):
             if self.q:  # 退出
                 break
             if not self.lock_pause and self.p and self.douban.playingsong:
-                self.songtime = self.get_songtime() if self.get_songtime() else self.songtime
+                self.songtime = self.get_songtime() if self.get_songtime() else 0
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
@@ -209,7 +209,7 @@ class Win(cli.Cli):
         song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
         logger.debug(song_time)
         if song_time:
-            return int(float(song_time))
+            return int(round(float(song_time)))
 
     def display(self):
         '''显示主控制界面'''
