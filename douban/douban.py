@@ -161,7 +161,7 @@ class Win(cli.Cli):
         while True:
             if self.q:  # 退出
                 break
-            if not self.lock_pause and self.p:
+            if not self.lock_pause and self.p and self.douban.playingsong:
                 self.songtime = self.get_songtime() if self.get_songtime() else 0
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
