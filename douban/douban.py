@@ -526,7 +526,6 @@ class Lrc(cli.Cli):
         while self.win.lock_lrc:
             if self.playingsong != self.win.douban.playingsong:
                 break
-            self.display()
             self.song_time = self.win.songtime
             if self.song_time < self.length:
                 # 查找歌词在self.sort_lrc_dict中的位置
@@ -537,8 +536,6 @@ class Lrc(cli.Cli):
                     self.markline = locate[0]
                     self.display()
                 time.sleep(1)
-            else:
-                break
 
     def is_cn_char(self, i):
         '''判断中文字符'''
