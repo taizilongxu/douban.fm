@@ -227,13 +227,8 @@ class Win(cli.Cli):
             self.volume += 5
         else:
             self.volume -= 5
-        if self.volume > 100:
-            self.volume = 100
-        if self.volume <= 0:
-            self.lock_muted = True
-            self.volume = 0
-        else:
-            self.lock_muted = False
+        self.volume = max(min(self.volume, 100),0)
+        self.lock_muted = True if self.volume == 0 else False
         try:
             self.p.stdin.write('volume %d 1\n' % self.volume)
         except IOError as e:
