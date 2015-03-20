@@ -191,7 +191,11 @@ class Win(cli.Cli):
     def perform_command(self, p, cmd, expect):
         '''myplayer 读取mplayer输出'''
         import select
-        p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
+        try:
+            p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
+        except IOError,e:
+            logger.debug(e)
+            return
         while select.select([p.stdout], [], [], 1)[0] and p.returncode!=0: # give mplayer time to answer...
             output = p.stdout.readline()
             logger.debug("output: {}".format(output.rstrip()))
