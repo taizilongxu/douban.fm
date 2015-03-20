@@ -161,8 +161,8 @@ class Win(cli.Cli):
         while True:
             if self.q:  # 退出
                 break
-            if not self.lock_pause:
-                self.songtime = self.get_songtime()
+            if not self.lock_pause and self.p:
+                self.songtime = self.get_songtime() if self.get_songtime() else 0
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
@@ -191,12 +191,8 @@ class Win(cli.Cli):
     def perform_command(self, p, cmd, expect):
         '''myplayer 读取mplayer输出'''
         import select
-        try:
-            p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
-        except IOError, e:
-            logger.debug(e)
-            return
-        while select.select([p.stdout], [], [], 0.5)[0]: # give mplayer time to answer...
+        p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
+        while select.select([p.stdout], [], [], 1)[0] and p.returncode!=0: # give mplayer time to answer...
             output = p.stdout.readline()
             logger.debug("output: {}".format(output.rstrip()))
             split_output = output.split(expect + '=', 1)
@@ -206,12 +202,10 @@ class Win(cli.Cli):
 
     def get_songtime(self):
         '''在mplayer里获取歌曲播放时间'''
-        if self.p:
-            song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
-            logger.debug(song_time)
-            if song_time:
-                return int(float(song_time))
-        return 0
+        song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
+        logger.debug(song_time)
+        if song_time:
+            return int(float(song_time))
 
     def display(self):
         '''显示主控制界面'''
