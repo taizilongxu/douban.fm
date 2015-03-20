@@ -272,7 +272,7 @@ class Win(cli.Cli):
             self.douban.get_song()
         song = self.douban.playingsong
 
-        self.thread(self.init_notification)
+        self.thread(self.init_notification)  # 桌面通知
 
         if song['like'] == 1:
             love = self.love
@@ -629,5 +629,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-############################################################################

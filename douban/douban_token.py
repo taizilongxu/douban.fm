@@ -45,11 +45,13 @@ class Doubanfm(object):
         '''
         self.douban_login()  # 登陆
         self.login_lastfm()  # 登陆 last.fm
+        print '\033[31m♥\033[0m Get channels ',
         self.get_channels()  # 获取频道列表
-        print 'Get channels ...'
+        print '[\033[32m ok \033[0m]'
         self.get_channellines()  # 重构列表用以显示
-        print 'Check if pro ..'
+        print '\033[31m♥\033[0m Check pro ',
         self.is_pro()
+        print '[\033[32m ok \033[0m]'
         if self.pro == 1:
             self.login_data['kbps'] = 192  # 128 64 歌曲kbps的选择
 
@@ -76,7 +78,7 @@ class Doubanfm(object):
             r, err = self.scrobbler.handshake()
             if r:
                 logger.info("Last.fm logged success!")
-                print 'Loging Last.fm : %s' % self.last_fm_username
+                print '\033[31m♥\033[0m Loging Last.fm : %s' % self.last_fm_username
             else:
                 logger.error("Last.fm 登录失败: " + err)
                 self.lastfm = False
@@ -129,7 +131,7 @@ class Doubanfm(object):
                         if 'volume' in self.login_data else 50
                 self.default_channel = int(self.login_data['channel'])\
                         if 'channel' in self.login_data else 0
-            print 'Get local token - user_name: %s ...' % self.user_name
+            print '\033[31m♥\033[0m Get local token - user_name: \033[33m%s\033[0m' % self.user_name
         else:
             # 未登陆
             logger.info('First time logging in douban.fm')
@@ -196,7 +198,7 @@ class Doubanfm(object):
         # 配置文件
         path_config = os.path.expanduser('~/.doubanfm_config')
         if not os.path.exists(path_config):
-            print 'Get default config ...'
+            print '\033[31m♥\033[0m Get default config [\033[32m ok \033[0m]'
             config = '''[key]
 UP = k
 DOWN = j
@@ -215,7 +217,7 @@ LRC = o
             with open(path_config, 'w') as F:
                 F.write(config)
         else:
-            print 'Get local config ...'
+            print '\033[31m♥\033[0m Get local config [\033[32m ok \033[0m]'
 
     def get_channels(self):
         '''获取channel，存入self.channels'''
