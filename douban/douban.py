@@ -59,6 +59,7 @@ class Win(cli.Cli):
         self.lock_muted = False  # 静音锁
         self.lock_pause = True   # 暂停锁
         self.q = False           # 退出
+        self.songtime = 0        # 歌曲时间
 
         self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
@@ -161,9 +162,9 @@ class Win(cli.Cli):
             if self.q:  # 退出
                 break
             if not self.lock_pause:
+                self.songtime = self.get_songtime()
                 rest_time = \
-                    int(self.douban.playingsong['length']) - \
-                    self.get_songtime()
+                    int(self.douban.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
@@ -501,7 +502,7 @@ class Lrc(cli.Cli):
         # 歌曲总长度
         self.length = int(win.douban.playingsong['length'])
         # 歌曲播放秒数
-        self.song_time = self.win.get_songtime()
+        self.song_time = self.win.songtime
 
         self.screenline_char = win.screenline_char  # shell每行字符数,居中用
         self.screenline = win.screenline  # shell高度
@@ -530,7 +531,7 @@ class Lrc(cli.Cli):
             if self.playingsong != self.win.douban.playingsong:
                 break
             self.display()
-            self.song_time = self.win.get_songtime()
+            self.song_time = self.win.songtime
             if self.song_time < self.length:
                 # 查找歌词在self.sort_lrc_dict中的位置
                 locate = \
