@@ -74,8 +74,6 @@ class Win(cli.Cli):
         self.TITLE += ' \ ' + self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
 
         self.lrc_dict = {}  # 歌词
-        # self.unix_songtime = -1  # unix 时间戳,歌词同步用
-        # self.pause_time = -1
 
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
@@ -162,16 +160,10 @@ class Win(cli.Cli):
         while True:
             if self.q:  # 退出
                 break
-            if self.douban.playingsong:
-                if not self.lock_pause:
-                    rest_time = \
-                        int(self.douban.playingsong['length']) - \
-                        self.get_songtime()
-                    # rest_time = \
-                    #     int(self.douban.playingsong['length']) - \
-                    #     int(time.time() - self.unix_songtime)
-                if rest_time < 0:
-                    rest_time = 0
+            if not self.lock_pause:
+                rest_time = \
+                    int(self.douban.playingsong['length']) - \
+                    self.get_songtime()
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
@@ -198,8 +190,12 @@ class Win(cli.Cli):
     def perform_command(self, p, cmd, expect):
         '''myplayer 读取mplayer输出'''
         import select
-        p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
-        while select.select([p.stdout], [], [], 0.05)[0]: # give mplayer time to answer...
+        try:
+            p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
+        except IOError, e:
+            logger.debug(e)
+            return
+        while select.select([p.stdout], [], [], 0.5)[0]: # give mplayer time to answer...
             output = p.stdout.readline()
             logger.debug("output: {}".format(output.rstrip()))
             split_output = output.split(expect + '=', 1)
@@ -208,13 +204,13 @@ class Win(cli.Cli):
                 return value.rstrip()
 
     def get_songtime(self):
-        '''获取歌曲播放时间'''
-        song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
-        logger.debug(song_time)
-        if song_time:
-            return int(float(song_time))
-        else:
-            return 0
+        '''在mplayer里获取歌曲播放时间'''
+        if self.p:
+            song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
+            logger.debug(song_time)
+            if song_time:
+                return int(float(song_time))
+        return 0
 
     def display(self):
         '''显示主控制界面'''
@@ -279,8 +275,6 @@ class Win(cli.Cli):
 
         self.thread(self.init_notification)
 
-        # self.unix_songtime = time.time()
-        # 是否是红心歌曲
         if song['like'] == 1:
             love = self.love
         else:
@@ -315,11 +309,9 @@ class Win(cli.Cli):
     def pause_play(self):
         '''暂停歌曲'''
         if self.lock_pause:
-            # self.unix_songtime += time.time() - self.pause_time
             self.lock_pause = False
             self.send_notify(content='开始播放')
         else:
-            # self.pause_time = time.time()
             self.send_notify(content='暂停播放')
             self.lock_pause = True
         try:
