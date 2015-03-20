@@ -161,7 +161,9 @@ class Win(cli.Cli):
         while True:
             if self.q:  # 退出
                 break
-            if not self.lock_pause and self.p and self.douban.playingsong:
+            if self.lock_pause:
+                continue
+            if self.p and self.douban.playingsong:
                 self.songtime = self.get_songtime() if self.get_songtime() else 0
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
@@ -198,7 +200,6 @@ class Win(cli.Cli):
             return
         while select.select([p.stdout], [], [], 1)[0] and p.returncode!=0: # give mplayer time to answer...
             output = p.stdout.readline()
-            logger.debug("output: {}".format(output.rstrip()))
             split_output = output.split(expect + '=', 1)
             if len(split_output) == 2 and split_output[0] == '': # we have found it
                 value = split_output[1]
@@ -207,7 +208,6 @@ class Win(cli.Cli):
     def get_songtime(self):
         '''在mplayer里获取歌曲播放时间'''
         song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
-        logger.debug(song_time)
         if song_time:
             return int(round(float(song_time)))
 
@@ -333,16 +333,18 @@ class Win(cli.Cli):
         while True:
             self.display()
             c = getch.getch()
-            if self.lock_lrc or self.lock_help:  # 歌词界面截断
-                if c == self.KEYS['QUIT']:
-                    self.lock_lrc = False
-                    self.lock_help = False
-                continue
-            if c == self.KEYS['UP']:
-                self.updown(-1)
-            elif c == self.KEYS['DOWN']:
-                self.updown(1)
-            elif c == self.KEYS['HELP']:
+            if not self.lock_lrc:  # 歌词模式下除了方向键都可以用
+                if c == self.KEYS['UP']:
+                    self.updown(-1)
+                elif c == self.KEYS['DOWN']:
+                    self.updown(1)
+                elif c == self.KEYS['TOP']:      # g键返回顶部
+                    self.markline = 0
+                    self.topline = 0
+                elif c == self.KEYS['BOTTOM']:   # G键返回底部
+                    self.markline = self.screen_height
+                    self.topline = len(self.lines) - self.screen_height - 1
+            if c == self.KEYS['HELP']:     # help界面
                 Help(self)
             elif c == self.KEYS['LRC']:      # o歌词
                 self.set_lrc()
@@ -351,12 +353,6 @@ class Win(cli.Cli):
                 self.thread(self.set_rate)
             elif c == self.KEYS['NEXT']:     # n下一首
                 self.set_next()
-            elif c == self.KEYS['TOP']:      # g键返回顶部
-                self.markline = 0
-                self.topline = 0
-            elif c == self.KEYS['BOTTOM']:   # G键返回底部
-                self.markline = self.screen_height
-                self.topline = len(self.lines) - self.screen_height - 1
             elif c == ' ':                   # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     self.displaysong()
@@ -372,7 +368,12 @@ class Win(cli.Cli):
             elif c == self.KEYS['LOOP']:     # l单曲循环
                 self.set_loop()
             elif c == self.KEYS['QUIT']:     # q退出程序
-                self.set_quit()
+                if self.lock_lrc:
+                    self.lock_lrc = False
+                elif self.lock_help :
+                    self.lock_help = False
+                else:
+                    self.set_quit()
             elif c == '=' or c == '+':       # 提高音量
                 self.change_volume(1)
             elif c == '-' or c == '_':       # 降低音量
@@ -526,6 +527,7 @@ class Lrc(cli.Cli):
         while self.win.lock_lrc:
             if self.playingsong != self.win.douban.playingsong:
                 break
+            self.display()
             self.song_time = self.win.songtime
             if self.song_time < self.length:
                 # 查找歌词在self.sort_lrc_dict中的位置
