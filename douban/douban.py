@@ -162,7 +162,7 @@ class Win(cli.Cli):
             if self.q:  # 退出
                 break
             if not self.lock_pause and self.p and self.douban.playingsong:
-                self.songtime = self.get_songtime() if self.get_songtime() else 0
+                self.songtime = self.get_songtime() if self.get_songtime() else self.songtime
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
@@ -355,8 +355,8 @@ class Win(cli.Cli):
                 self.markline = 0
                 self.topline = 0
             elif c == self.KEYS['BOTTOM']:   # G键返回底部
-                self.markline = self.screenline
-                self.topline = len(self.lines) - self.screenline - 1
+                self.markline = self.screen_height
+                self.topline = len(self.lines) - self.screen_height - 1
             elif c == ' ':                   # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     self.displaysong()
@@ -502,8 +502,6 @@ class Lrc(cli.Cli):
         # 歌曲播放秒数
         self.song_time = self.win.songtime
 
-        self.screenline_char = win.screenline_char  # shell每行字符数,居中用
-        self.screenline = win.screenline  # shell高度
 
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x: x[0])
         self.lines = [line[1] for line in self.sort_lrc_dict if line[1]]
@@ -548,19 +546,20 @@ class Lrc(cli.Cli):
 
     def display(self):
         '''输出界面'''
+        self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
         subprocess.call('clear')
         print
         print self.win.TITLE
         print
-        for linenum in range(self.screenline - 2):
-            if self.screenline/2 - linenum > self.markline - self.topline or \
-                    linenum - self.screenline/2 >= len(self.lines) - self.markline:
+        for linenum in range(self.screen_height - 2):
+            if self.screen_height/2 - linenum > self.markline - self.topline or \
+                    linenum - self.screen_height/2 >= len(self.lines) - self.markline:
                 print
             else:
-                line = self.lines[self.markline - (self.screenline/2 - linenum)].strip()
+                line = self.lines[self.markline - (self.screen_height/2 - linenum)].strip()
                 l = self.center_num(line)
-                flag_num = (self.screenline_char - l) / 2
-                if linenum == self.screenline/2:
+                flag_num = (self.screen_width - l) / 2
+                if linenum == self.screen_height/2:
                     i = colored(line, 'blue')
                     print ' ' * flag_num + i + '\r'
                 else:
@@ -574,7 +573,7 @@ class Lrc(cli.Cli):
         l = self.center_num(tmp) + 7  # 7个固定字符
         if song['like']:
             l += 2
-        flag_num = (self.screenline_char - l) / 2
+        flag_num = (self.screen_width - l) / 2
         self.title = ' ' * flag_num + self.win.SUFFIX_SELECTED + '\r'  # 歌词页面标题
         print self.title
 

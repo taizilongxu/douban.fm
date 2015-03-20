@@ -27,7 +27,7 @@ class Cli(object):
         self.markline = 0  # 箭头行 初始化设置默认频道
         self.topline = 0  # lines
         self.displayline = self.markline  # 初始化歌曲信息显示行
-        self.screenline, self.screenline_char = self.linesnum()  # 屏幕显示行数
+        self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
         subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
 
     def linesnum(self):
@@ -38,11 +38,12 @@ class Cli(object):
 
     def display(self):
         '''展示窗口'''
+        self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
         subprocess.call('clear', shell=True)  # 清屏
         print
         print self.TITLE
         top = self.topline
-        bottom = self.topline + self.screenline + 1
+        bottom = self.topline + self.screen_height + 1
         for index, i in enumerate(self.lines[top:bottom]):
             # 箭头指向
             if index == self.markline:
@@ -79,12 +80,12 @@ class Cli(object):
         # paging
         if increment == -1 and self.markline == 0 and self.topline != 0:
             self.topline -= 1
-        elif increment == 1 and self.markline + self.topline != len(self.lines) - 1 and self.markline == self.screenline:
+        elif increment == 1 and self.markline + self.topline != len(self.lines) - 1 and self.markline == self.screen_height:
             self.topline += 1
         # scroll
         if increment == -1 and self.markline != 0:
             self.markline -= 1
-        elif increment == 1 and self.markline != self.screenline:
+        elif increment == 1 and self.markline != self.screen_height:
             self.markline += 1
 
 
