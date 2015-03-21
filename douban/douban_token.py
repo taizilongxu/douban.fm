@@ -311,7 +311,8 @@ LRC = o
                 for key, value in lrc_dic.iteritems():
                     lrc_dic[key] = value.decode('utf-8')
                 self.lrc_dic = lrc_dic
-                logger.debug('Get lyric success!')
+                if lrc_dic:
+                    logger.debug('Get lyric success!')
                 return lrc_dic
             except requests.exceptions.RequestException:
                 logger.error('Get lyric failed!')

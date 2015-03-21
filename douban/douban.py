@@ -60,6 +60,7 @@ class Win(cli.Cli):
         self.lock_pause = True   # 暂停锁
         self.q = False           # 退出
         self.songtime = 0        # 歌曲时间
+        self.playingsong = None  # 当前播放歌曲
 
         self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
@@ -164,7 +165,7 @@ class Win(cli.Cli):
             if self.lock_pause:
                 continue
             if self.p and self.douban.playingsong:
-                self.songtime = self.get_songtime() if self.get_songtime() else 0
+                self.songtime = self.get_songtime()
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
@@ -198,18 +199,22 @@ class Win(cli.Cli):
         except IOError,e:
             logger.debug(e)
             return
-        while select.select([p.stdout], [], [], 1)[0] and p.returncode!=0: # give mplayer time to answer...
+        while select.select([p.stdout], [], [], 0.05)[0]:
             output = p.stdout.readline()
             split_output = output.split(expect + '=', 1)
             if len(split_output) == 2 and split_output[0] == '': # we have found it
                 value = split_output[1]
                 return value.rstrip()
+        return
 
     def get_songtime(self):
         '''在mplayer里获取歌曲播放时间'''
         song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
         if song_time:
+            logger.info(song_time)
             return int(round(float(song_time)))
+        else:
+            return self.songtime
 
     def display(self):
         '''显示主控制界面'''
@@ -268,6 +273,7 @@ class Win(cli.Cli):
     def play(self):
         '''播放歌曲'''
         self.lrc_dict = {}  # 歌词清空
+        self.songtime = 0  # 重置歌曲时间
         if not self.lock_loop:
             self.douban.get_song()
         song = self.douban.playingsong
