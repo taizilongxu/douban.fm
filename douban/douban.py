@@ -274,13 +274,13 @@ class Win(cli.Cli):
                     self.play()
             time.sleep(1)
 
-    def play(self):
+    def play(self, playingsong=None):
         '''播放歌曲'''
         self.lrc_dict = {}  # 歌词清空
         self.songtime = 0  # 重置歌曲时间
-        if not self.lock_loop:
+        if not self.lock_loop and not playingsong:
             self.douban.get_song()
-        song = self.douban.playingsong
+        song = playingsong or self.douban.playingsong
         self.douban.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         self.history.insert(0, self.douban.playingsong)
 
@@ -479,7 +479,7 @@ class Win(cli.Cli):
         self.play()
 
     @info('正在加载请稍后...')
-    def set_next(self):
+    def set_next(self, playingsong=None):
         '''开始下一曲'''
         if self.douban.playingsong:
             self.lock_loop = False
@@ -490,7 +490,7 @@ class Win(cli.Cli):
             if self.cover_file is not None:
                 self.cover_file.close()
             self.has_cover = False
-            self.play()
+            self.play(playingsong)
 
     @info('不再播放，切换下一首...')
     def set_bye(self):
@@ -643,14 +643,25 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         self.win.lock_history = True
-        self.lines = [i['time'] + ' ' + i['title'] for i in self.win.history] if self.win.history else []
+        self.love = colored(' ♥', 'red')
+        self.get_lines()
         super(History, self).__init__(self.lines)
         self.win.thread(self.display_help)
         self.run()
         self.win.lock_history = False
 
+    def get_lines(self):
+        """因为历史列表动态更新,需要刷新"""
+        self.lines = []
+        for i in self.win.history:
+            line = i['time'] + ' ' + colored(i['title'], 'green')
+            if i['like'] == 1:
+                line += self.love
+            self.lines.append(line)
+
     def display_help(self):
         while self.win.lock_history:
+            self.get_lines()
             self.display()
             time.sleep(1)
 
@@ -667,8 +678,10 @@ class History(cli.Cli):
                 self.updown(-1)
             elif c == self.KEYS['DOWN']:
                 self.updown(1)
-            elif c == 'q':
+            elif c == self.KEYS['QUIT']:
                 break
+            elif c == ' ':
+                self.play()
             elif c == self.KEYS['TOP']:      # g键返回顶部
                 self.markline = 0
                 self.topline = 0
@@ -678,6 +691,10 @@ class History(cli.Cli):
                 else:
                     self.markline = self.screen_height
                     self.topline = len(self.lines) - self.screen_height - 1
+
+    def play(self):
+        pass
+
 
 def main():
     douban = douban_token.Doubanfm()

@@ -61,8 +61,6 @@ class Doubanfm(object):
         self.get_song()
         if int(self.playingsong['kbps']) != 64:
             self.pro = 1
-        # self.playingsong = {}  # 清空列表
-        # self.playlist = []
 
     def win_login(self):
         '''登陆界面'''
