@@ -30,6 +30,8 @@ logger = logging.getLogger()
 
 class Win(cli.Cli):
     '''窗体及播放控制'''
+    PATH_HISTORY = os.path.expanduser('~/.douban_history')
+    PATH_TOKEN = os.path.expanduser('~/.douban_token.txt')
     KEYS = {
         'UP': 'k',
         'DOWN': 'j',
@@ -62,7 +64,12 @@ class Win(cli.Cli):
         self.q = False           # 退出
         self.songtime = 0        # 歌曲时间
         self.playingsong = None  # 当前播放歌曲
-        self.history = []
+
+        try:
+            with open(self.PATH_HISTORY, 'r') as f:
+                self.history = pickle.load(f)
+        except IOError:
+            self.history = []
 
         self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
@@ -195,8 +202,9 @@ class Win(cli.Cli):
         except IOError,e:
             logger.debug(e)
             return
-        while select.select([p.stdout], [], [], 0.5)[0]:
+        while select.select([p.stdout], [], [], 0.01)[0]:
             output = p.stdout.readline()
+            logger.debug(output)
             split_output = output.split(expect + '=', 1)
             if len(split_output) == 2 and split_output[0] == '': # we have found it
                 value = split_output[1]
@@ -287,7 +295,7 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -slave -nolirc -quiet -softvol -volume {volume} {song_url}'
+        cmd = 'mplayer -slave -nolirc -quiet -softvol -cache 5120 -cache-min 1 -volume {volume} {song_url}'
         volume = 0 if self.lock_muted else self.volume
         cmd = cmd.format(volume=volume, song_url=song['url'])
         logger.debug('Starting process: ' + cmd)
@@ -449,12 +457,13 @@ class Win(cli.Cli):
             os.rmdir(self._tempdir)
         except OSError:
             pass
-        path_token = os.path.expanduser('~/.douban_token.txt')
-        with open(path_token, 'r') as f:
+        with open(self.PATH_HISTORY, 'w') as f:
+            pickle.dump(self.history, f)
+        with open(self.PATH_TOKEN, 'r') as f:
             data = pickle.load(f)
             data['volume'] = self.volume
             data['channel'] = self.displayline
-        with open(path_token, 'w') as f:
+        with open(self.PATH_TOKEN, 'w') as f:
             pickle.dump(data, f)
         exit()
 
@@ -632,8 +641,9 @@ class History(cli.Cli):
     '''历史记录'''
     def __init__(self, win):
         self.win = win
+        self.KEYS = self.win.KEYS
         self.win.lock_history = True
-        self.lines = [i['title'] + ' ' + i['time'] for i in self.win.history] if self.win.history else []
+        self.lines = [i['time'] + ' ' + i['title'] for i in self.win.history] if self.win.history else []
         super(History, self).__init__(self.lines)
         self.win.thread(self.display_help)
         self.run()
@@ -651,19 +661,18 @@ class History(cli.Cli):
     def run(self):
         '''界面执行程序'''
         while True:
-            logger.debug('History.run()')
             self.display()
             c = getch.getch()
-            if c == 'k':
+            if c == self.KEYS['UP']:
                 self.updown(-1)
-            elif c == 'j':
+            elif c == self.KEYS['DOWN']:
                 self.updown(1)
             elif c == 'q':
                 break
-            elif c == self.win.KEYS['TOP']:      # g键返回顶部
+            elif c == self.KEYS['TOP']:      # g键返回顶部
                 self.markline = 0
                 self.topline = 0
-            elif c == self.win.KEYS['BOTTOM']:   # G键返回底部
+            elif c == self.KEYS['BOTTOM']:   # G键返回底部
                 if len(self.lines) < self.screen_height - 1:
                     self.markline = len(self.lines) - 1
                 else:
