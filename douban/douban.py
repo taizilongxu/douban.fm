@@ -47,7 +47,7 @@ class Win(cli.Cli):
         'HELP': 'h'
         }
     FNULL = open(os.devnull, 'w')
-    RATE = ['★ '*i for i in range(1, 6)]  # 歌曲评分
+    RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
 
     def __init__(self, douban):
         # 线程锁
@@ -73,7 +73,7 @@ class Win(cli.Cli):
             else colored(' Last.fm ', 'yellow')
         PRO = '' if self.douban.pro == 0 else colored(' PRO ', attrs=['reverse'])
 
-        self.TITLE += ' \ ' + self.douban.user_name + ' ' + PRO + ' ' + ' >>\r'
+        self.TITLE += '\ ' + self.douban.user_name + PRO + ' >>\r'
 
         self.lrc_dict = {}  # 歌词
 
@@ -173,11 +173,11 @@ class Win(cli.Cli):
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
                 self.TITLE = \
-                    self.TITLE[:length - 1] + '  ' + \
-                    self.douban.playingsong['kbps'] + 'kbps  ' + \
-                    colored(show_time, 'cyan') + '  rate: ' + \
-                    colored(self.RATE[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
-                self.TITLE += '✖' if self.lock_muted else str(self.volume) + '%'
+                    self.TITLE[:length - 1] + ' ' + \
+                    self.douban.playingsong['kbps'] + 'kbps ' + \
+                    colored(show_time, 'cyan') + ' rate:' + \
+                    colored(self.RATE[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + ' vol:'
+                self.TITLE += colored('✖', 'red') if self.lock_muted else str(self.volume) + '%'
                 self.TITLE += '  ' + colored('↺', 'red') if self.lock_loop else '  ' + colored('→', 'red')
                 self.TITLE += '\r'
                 self.display()
