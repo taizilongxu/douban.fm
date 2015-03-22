@@ -54,19 +54,20 @@ class Win(cli.Cli):
         self.lock_start = False  # 播放锁,play之前需要加
         self.lock_lrc = False    # 是否显示歌词
         self.lock_rate = False   # 加心锁
-        self.lock_help = False   # 帮助锁
+        self.lock_help = False   # 是否现实帮助
+        self.lock_history = False  # 是否现实历史记录
         self.lock_loop = False   # 循环锁
         self.lock_muted = False  # 静音锁
         self.lock_pause = True   # 暂停锁
         self.q = False           # 退出
         self.songtime = 0        # 歌曲时间
         self.playingsong = None  # 当前播放歌曲
+        self.history = []
 
         self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
         self.douban = douban
 
-        self.thread(self.run)
 
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
@@ -109,6 +110,7 @@ class Win(cli.Cli):
         self.thread(self.play)          # 播放控制
         self.thread(self.watchdog)      # 播放器守护线程
         self.thread(self.display_time)  # 时间显示
+        self.run()
 
     def thread(self, target):
         '''启动新线程'''
@@ -193,7 +195,7 @@ class Win(cli.Cli):
         except IOError,e:
             logger.debug(e)
             return
-        while select.select([p.stdout], [], [], 0.05)[0]:
+        while select.select([p.stdout], [], [], 0.5)[0]:
             output = p.stdout.readline()
             split_output = output.split(expect + '=', 1)
             if len(split_output) == 2 and split_output[0] == '': # we have found it
@@ -212,7 +214,7 @@ class Win(cli.Cli):
 
     def display(self):
         '''显示主控制界面'''
-        if not self.lock_lrc and self.lock_start and not self.lock_help:
+        if not self.lock_history and not self.lock_lrc and self.lock_start and not self.lock_help:
             cli.Cli.display(self)
 
     def change_volume(self, increment):
@@ -271,6 +273,7 @@ class Win(cli.Cli):
         if not self.lock_loop:
             self.douban.get_song()
         song = self.douban.playingsong
+        self.history.append(self.douban.playingsong)
 
         self.thread(self.init_notification)  # 桌面通知
 
@@ -349,6 +352,9 @@ class Win(cli.Cli):
             elif c == self.KEYS['LRC']:      # o歌词
                 self.set_lrc()
                 self.thread(self.display_lrc)
+            elif c =='e':
+                History(self)
+
             elif c == self.KEYS['RATE']:     # r标记红心/取消标记
                 self.thread(self.set_rate)
             elif c == self.KEYS['NEXT']:     # n下一首
@@ -372,6 +378,8 @@ class Win(cli.Cli):
                     self.lock_lrc = False
                 elif self.lock_help :
                     self.lock_help = False
+                elif self.lock_history:
+                    self.lock_history = False
                 else:
                     self.set_quit()
             elif c == '=' or c == '+':       # 提高音量
@@ -619,6 +627,34 @@ class Help(cli.Cli):
         print ' '*5 + colored('歌词', 'green') + '\r'
         print ' '*5 + '[%(LRC)s] ---> 歌词' % keys + '\r'
 
+class History(cli.Cli):
+    '''历史记录'''
+    def __init__(self, win):
+        self.win = win
+        self.win.lock_history = True
+        self.lines = [i['title'] for i in self.win.history] if self.win.history else []
+        super(History, self).__init__(self.lines)
+        self.display()
+        self.run()
+        self.win.lock_history = False
+
+    def display_help(self):
+        while self.win.lock_history:
+            self.display()
+            time.sleep(1)
+
+    def run(self):
+        '''界面执行程序'''
+        while True:
+            logger.debug('History.run()')
+            self.display()
+            c = getch.getch()
+            if c == 'k':
+                self.updown(-1)
+            if c == 'j':
+                self.updown(1)
+            if c == 'q':
+                break
 
 def main():
     douban = douban_token.Doubanfm()
