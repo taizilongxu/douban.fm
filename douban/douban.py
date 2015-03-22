@@ -656,10 +656,19 @@ class History(cli.Cli):
             c = getch.getch()
             if c == 'k':
                 self.updown(-1)
-            if c == 'j':
+            elif c == 'j':
                 self.updown(1)
-            if c == 'q':
+            elif c == 'q':
                 break
+            elif c == self.win.KEYS['TOP']:      # g键返回顶部
+                self.markline = 0
+                self.topline = 0
+            elif c == self.win.KEYS['BOTTOM']:   # G键返回底部
+                if len(self.lines) < self.screen_height - 1:
+                    self.markline = len(self.lines) - 1
+                else:
+                    self.markline = self.screen_height
+                    self.topline = len(self.lines) - self.screen_height - 1
 
 def main():
     douban = douban_token.Doubanfm()
