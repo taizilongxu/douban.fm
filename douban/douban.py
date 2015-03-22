@@ -177,14 +177,8 @@ class Win(cli.Cli):
                     self.douban.playingsong['kbps'] + 'kbps  ' + \
                     colored(show_time, 'cyan') + '  rate: ' + \
                     colored(self.RATE[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + '  vol: '
-                if self.lock_muted:
-                    self.TITLE += '✖'
-                else:
-                    self.TITLE += str(self.volume) + '%'
-                if self.lock_loop:
-                    self.TITLE += '  ' + colored('↺', 'red')
-                else:
-                    self.TITLE += '  ' + colored('→', 'red')
+                self.TITLE += '✖' if self.lock_muted else str(self.volume) + '%'
+                self.TITLE += '  ' + colored('↺', 'red') if self.lock_loop else '  ' + colored('→', 'red')
                 self.TITLE += '\r'
                 self.display()
             else:
