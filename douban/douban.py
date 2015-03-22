@@ -273,7 +273,8 @@ class Win(cli.Cli):
         if not self.lock_loop:
             self.douban.get_song()
         song = self.douban.playingsong
-        self.history.append(self.douban.playingsong)
+        self.douban.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        self.history.insert(0, self.douban.playingsong)
 
         self.thread(self.init_notification)  # 桌面通知
 
@@ -632,7 +633,7 @@ class History(cli.Cli):
     def __init__(self, win):
         self.win = win
         self.win.lock_history = True
-        self.lines = [i['title'] for i in self.win.history] if self.win.history else []
+        self.lines = [i['title'] + ' ' + i['time'] for i in self.win.history] if self.win.history else []
         super(History, self).__init__(self.lines)
         self.win.thread(self.display_help)
         self.run()
