@@ -85,7 +85,7 @@ class Cli(object):
         # scroll
         if increment == -1 and self.markline != 0:
             self.markline -= 1
-        elif increment == 1 and self.markline != self.screen_height:
+        elif increment == 1 and self.markline != self.screen_height and self.markline < len(self.lines) - 1:
             self.markline += 1
 
 

@@ -634,7 +634,7 @@ class History(cli.Cli):
         self.win.lock_history = True
         self.lines = [i['title'] for i in self.win.history] if self.win.history else []
         super(History, self).__init__(self.lines)
-        self.display()
+        self.win.thread(self.display_help)
         self.run()
         self.win.lock_history = False
 
@@ -642,6 +642,10 @@ class History(cli.Cli):
         while self.win.lock_history:
             self.display()
             time.sleep(1)
+
+    def display(self):
+        self.TITLE = self.win.TITLE
+        cli.Cli.display(self)
 
     def run(self):
         '''界面执行程序'''
