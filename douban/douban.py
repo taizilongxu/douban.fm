@@ -643,6 +643,7 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         self.win.lock_history = True
+        self.rate_line = False  # 是否只现实加星歌曲
         self.love = colored(' ♥', 'red')
         self.get_lines()
         super(History, self).__init__(self.lines)
@@ -657,7 +658,11 @@ class History(cli.Cli):
             line = i['time'] + ' ' + colored(i['title'], 'green')
             if i['like'] == 1:
                 line += self.love
-            self.lines.append(line)
+            if self.rate_line:
+                if i['like'] == 1:
+                    self.lines.append(line)
+            else:
+                self.lines.append(line)
 
     def display_help(self):
         while self.win.lock_history:
@@ -680,13 +685,15 @@ class History(cli.Cli):
                 self.updown(1)
             elif c == self.KEYS['QUIT']:
                 break
+            elif c == self.KEYS['RATE']:
+                self.rate_line = False if self.rate_line == True else True
             elif c == ' ':
                 self.play()
             elif c == self.KEYS['TOP']:      # g键返回顶部
                 self.markline = 0
                 self.topline = 0
             elif c == self.KEYS['BOTTOM']:   # G键返回底部
-                if len(self.lines) < self.screen_height - 1:
+                if len(self.lines) < self.screen_height:
                     self.markline = len(self.lines) - 1
                 else:
                     self.markline = self.screen_height
