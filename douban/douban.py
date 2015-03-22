@@ -211,7 +211,7 @@ class Win(cli.Cli):
         '''在mplayer里获取歌曲播放时间'''
         song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
         if song_time:
-            logger.info(song_time)
+            # logger.info(song_time)
             return int(round(float(song_time)))
         else:
             return self.songtime

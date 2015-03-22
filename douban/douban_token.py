@@ -297,6 +297,7 @@ LRC = o
     def get_lrc(self):
         '''获取歌词'''
         if not self.find_lrc:
+            self.find_lrc = True
             try:
                 url = "http://api.douban.com/v2/fm/lyric"
                 postdata = {
@@ -306,16 +307,15 @@ LRC = o
                 s = requests.session()
                 response = s.post(url, data=postdata)
                 lyric = eval(response.text)
-                lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
+                logger.debug(response.text)
+                self.lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
                 # 原歌词用的unicode,为了兼容
-                for key, value in lrc_dic.iteritems():
-                    lrc_dic[key] = value.decode('utf-8')
-                self.lrc_dic = lrc_dic
-                if lrc_dic:
+                for key, value in self.lrc_dic.iteritems():
+                    self.lrc_dic[key] = value.decode('utf-8')
+                if self.lrc_dic:
                     logger.debug('Get lyric success!')
-                return lrc_dic
+                return self.lrc_dic
             except requests.exceptions.RequestException:
                 logger.error('Get lyric failed!')
                 return 0
-        self.find_lrc = True
-        return lrc_dic
+        return self.lrc_dic
