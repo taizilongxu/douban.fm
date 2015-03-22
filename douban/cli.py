@@ -22,7 +22,7 @@ class Cli(object):
     TITLE = PREFIX_DESELECTED  # 标题
 
     def __init__(self, lines):
-        self.love = colored('♥ ', 'red')
+        self.love = colored('♥', 'red')
         self.lines = lines
         self.markline = 0  # 箭头行 初始化设置默认频道
         self.topline = 0  # lines
