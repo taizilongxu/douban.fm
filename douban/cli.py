@@ -88,6 +88,17 @@ class Cli(object):
         elif increment == 1 and self.markline != self.screen_height and self.markline < len(self.lines) - 1:
             self.markline += 1
 
+    def is_cn_char(self, i):
+        '''判断中文字符'''
+        return 0x4e00 <= ord(i) < 0x9fa6
+
+    def center_num(self, tmp):
+        ''' 考虑英文和中文在终端上所占字块 '''
+        l = 0
+        for i in tmp:
+            l += 2 if self.is_cn_char(i) else 1
+        return l
+
 
 def main():
     lines = [str(i) for i in range(30)]

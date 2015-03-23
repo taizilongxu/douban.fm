@@ -274,17 +274,18 @@ class Win(cli.Cli):
                     self.play()
             time.sleep(1)
 
-    def play(self, playingsong=None):
+    def play(self):
         '''播放歌曲'''
         self.lrc_dict = {}  # 歌词清空
         self.songtime = 0  # 重置歌曲时间
-        if not self.lock_loop and not playingsong:
+        if not self.lock_loop and not self.lock_history:
             self.douban.get_song()
-        song = playingsong or self.douban.playingsong
-        self.douban.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        self.history.insert(0, self.douban.playingsong)
+            self.douban.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            self.history.insert(0, self.douban.playingsong)
+        song = self.douban.playingsong
 
         self.thread(self.init_notification)  # 桌面通知
+        # logger.debug(song)
 
         if song['like'] == 1:
             love = self.love
@@ -306,7 +307,7 @@ class Win(cli.Cli):
             # 不在命令中直接使用管道符，避免产生多余的 sh 进程
             stdin=subprocess.PIPE,      # open a pipe for input
             stdout=subprocess.PIPE,          # >/dev/null
-            stderr=subprocess.STDOUT    # 2>&1
+            stderr=None    # 2>&1
         )
         self.lock_pause = False
         self.display()
@@ -334,7 +335,8 @@ class Win(cli.Cli):
     def kill_mplayer(self):
         '''结束mplayer'''
         try:
-            self.p.stdin.write('quit 0\n')
+            # self.p.stdin.write('quit 0\n')
+            self.p.kill()
         except IOError as e:
             if e.errno != errno.EPIPE:
                 raise e
@@ -479,18 +481,19 @@ class Win(cli.Cli):
         self.play()
 
     @info('正在加载请稍后...')
-    def set_next(self, playingsong=None):
+    def set_next(self):
         '''开始下一曲'''
         if self.douban.playingsong:
             self.lock_loop = False
             self.lock_start = False
+            self.douban.find_lrc = False
             self.kill_mplayer()
-            self.douban.skip_song()
-            self.douban.playingsong = {}
+            if not self.lock_history:
+                self.douban.skip_song()
             if self.cover_file is not None:
                 self.cover_file.close()
             self.has_cover = False
-            self.play(playingsong)
+            self.play()
 
     @info('不再播放，切换下一首...')
     def set_bye(self):
@@ -520,7 +523,6 @@ class Lrc(cli.Cli):
         self.length = int(win.douban.playingsong['length'])
         # 歌曲播放秒数
         self.song_time = self.win.songtime
-
 
         self.sort_lrc_dict = sorted(lrc_dict.iteritems(), key=lambda x: x[0])
         self.lines = [line[1] for line in self.sort_lrc_dict if line[1]]
@@ -557,10 +559,6 @@ class Lrc(cli.Cli):
                     self.display()
                 time.sleep(1)
 
-    def is_cn_char(self, i):
-        '''判断中文字符'''
-        return 0x4e00 <= ord(i) < 0x9fa6
-
     def display(self):
         '''输出界面'''
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
@@ -593,13 +591,6 @@ class Lrc(cli.Cli):
         flag_num = (self.screen_width - l) / 2
         self.title = ' ' * flag_num + self.win.SUFFIX_SELECTED + '\r'  # 歌词页面标题
         print self.title
-
-    # 需要考虑中文和英文的居中
-    def center_num(self, tmp):
-        l = 0
-        for i in tmp:
-            l += 2 if self.is_cn_char(i) else 1
-        return l
 
 
 class Help(cli.Cli):
@@ -645,17 +636,22 @@ class History(cli.Cli):
         self.win.lock_history = True
         self.rate_line = False  # 是否只现实加星歌曲
         self.love = colored(' ♥', 'red')
+        self.screen_height, self.screen_width = self.linesnum()
         self.get_lines()
         super(History, self).__init__(self.lines)
         self.win.thread(self.display_help)
         self.run()
-        self.win.lock_history = False
 
     def get_lines(self):
         """因为历史列表动态更新,需要刷新"""
         self.lines = []
         for i in self.win.history:
-            line = i['time'] + ' ' + colored(i['title'], 'green')
+            width = self.screen_width - 24
+            line = i['time'][5:] + ' '
+            if i['title'] < width:
+                line += colored(i['title'], 'green')
+            else:
+                line += colored(i['title'][:width], 'green')
             if i['like'] == 1:
                 line += self.love
             if self.rate_line:
@@ -684,11 +680,13 @@ class History(cli.Cli):
             elif c == self.KEYS['DOWN']:
                 self.updown(1)
             elif c == self.KEYS['QUIT']:
+                self.win.lock_history = False
                 break
             elif c == self.KEYS['RATE']:
                 self.rate_line = False if self.rate_line == True else True
             elif c == ' ':
-                self.play()
+                self.displaysong()
+                self.playsong()
             elif c == self.KEYS['TOP']:      # g键返回顶部
                 self.markline = 0
                 self.topline = 0
@@ -699,8 +697,10 @@ class History(cli.Cli):
                     self.markline = self.screen_height
                     self.topline = len(self.lines) - self.screen_height - 1
 
-    def play(self):
-        pass
+    def playsong(self):
+        playingsong = self.win.history[self.displayline]
+        self.win.douban.playingsong = playingsong
+        self.win.set_next()
 
 
 def main():
