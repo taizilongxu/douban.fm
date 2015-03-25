@@ -17,7 +17,6 @@ import ConfigParser
 import logging
 import errno
 import pickle
-# from mplayer import async
 import mplayer
 import asyncore
 
@@ -104,7 +103,6 @@ class Win(cli.Cli):
         self.lock_start = True
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
-        self.lock_start = False
         while True:
             try:
                 # 设置默认频率
@@ -264,6 +262,7 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
 
+        logger.debug('send to mplayer' + song['url'])
         self.player.spawn(song['url'])
         logger.debug(song['url'].replace('\\', ''))
         volume = 0 if self.lock_muted else self.volume
@@ -403,8 +402,10 @@ class Win(cli.Cli):
             os.rmdir(self._tempdir)
         except OSError:
             pass
+        # store the history of playlist
         with open(self.PATH_HISTORY, 'w') as f:
             pickle.dump(self.history, f)
+        # stroe the token and the default info
         with open(self.PATH_TOKEN, 'r') as f:
             data = pickle.load(f)
             data['volume'] = self.volume
@@ -416,10 +417,10 @@ class Win(cli.Cli):
     @info('正在加载请稍后...')
     def set_play(self):
         '''开始播放'''
-        self.lock_start = False
+        self.lock_start = True
         if self.douban.playingsong:
             self.douban.playingsong = {}
-            self.kill_mplayer()
+            self.player.quit()
         self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
         self.douban.get_playlist()
         self.play()
@@ -444,7 +445,7 @@ class Win(cli.Cli):
         '''不再播放并进入下一曲'''
         if self.douban.playingsong:
             self.lock_start =  True # 每个play前需self.start置0
-            self.kill_mplayer()
+            self.player.quit()
             self.douban.bye()
             self.douban.playingsong = {}
             self.play()
@@ -627,7 +628,7 @@ class History(cli.Cli):
                 self.win.lock_history = False
                 break
             elif c == self.KEYS['RATE']:
-                self.rate_line = False if self.rate_line == True else True
+                self.rate_line = False if self.rate_line else True
             elif c == ' ':
                 self.displaysong()
                 self.playsong()
