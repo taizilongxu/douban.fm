@@ -17,6 +17,9 @@ import ConfigParser
 import logging
 import errno
 import pickle
+# from mplayer import async
+import mplayer
+import asyncore
 
 # 设置logger
 logging.basicConfig(
@@ -71,6 +74,7 @@ class Win(cli.Cli):
         except IOError:
             self.history = []
 
+        self.player = mplayer.Player()
         self.volume = douban.default_volume  # 默认音量
         self.get_config()  # 快捷键配置
         self.douban = douban
@@ -121,7 +125,7 @@ class Win(cli.Cli):
 
     def thread(self, target):
         '''启动新线程'''
-        threading.Thread(target=target).start()
+        t = threading.Thread(target=target).start()
 
     def get_config(self):
         '''获取配置'''
@@ -173,8 +177,12 @@ class Win(cli.Cli):
                 break
             if self.lock_pause:
                 continue
-            if self.p and self.douban.playingsong:
-                self.songtime = self.get_songtime()
+            # logger.debug(self.player.filename)
+            if self.douban.playingsong:
+                songtime = self.player.time_pos
+                logger.debug(self.player._proc.poll())
+                if songtime:
+                    self.songtime = songtime
                 rest_time = \
                     int(self.douban.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
@@ -260,19 +268,46 @@ class Win(cli.Cli):
         while True:
             if self.q:
                 break
-            if self.p is not None:
-                logger.debug("Watching mplayer[%d]", self.p.pid)
-                self.p.wait()
-                if self.p.returncode is not None:
-                    logger.debug("mplayer exits with code %d", self.p.returncode)
-                if self.q:
-                    break
-                if self.p.returncode == 0 and not self.lock_loop and self.douban.playingsong:
-                    self.thread(self.douban.end_music)  # 发送完成
-                    self.thread(self.douban.submit_current_song)
-                if self.lock_start:
-                    self.play()
+            self.player._proc.wait()
+            logger.debug('pass')
+            # def handle_data(line):
+            #     if line.startswith('EOF code'):
+            #         # player.quit()
+            #         logger.debug('handle_data')
+            #         pass
+            # Called for every line read from stderr
+            # def log_error(msg):
+            #     print('ERROR: {0}'.format(msg))
+            # Connect subscribers
+            # self.player.stdout.connect(handle_data)
+            # player.stderr.connect(log_error)
+
+            # Print time_pos every 1.0 second, just to demonstrate multithreading
+            # def status(p):
+            #     while p.is_alive():
+            #         print('time_pos = {0}'.format(p.time_pos))
+            #         time.sleep(1.0)
+
+            # t = Thread(target=status, args=(player,))
+            # t.daemon = True
+            # t.start()
+            # Enter loop
+            # asyncore.loop()
             time.sleep(1)
+
+            # if self.p is not None:
+            #     logger.debug("Watching mplayer[%d]", self.p.pid)
+            #     self.p.wait()
+            #     if self.p.returncode is not None:
+            #         logger.debug("mplayer exits with code %d", self.p.returncode)
+            #     if self.q:
+            #         break
+            #     if self.p.returncode == 0 and not self.lock_loop and self.douban.playingsong:
+            #         self.thread(self.douban.end_music)  # 发送完成
+            #         self.thread(self.douban.submit_current_song)
+            #     if self.lock_start:
+            #         self.play()
+            # time.sleep(1)
 
     def play(self):
         '''播放歌曲'''
@@ -296,19 +331,23 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        cmd = 'mplayer -slave -nolirc -quiet -softvol -cache 5120 -cache-min 1 -volume {volume} {song_url}'
+        # cmd = '-slave -nolirc -really-quiet -softvol -cache 5120 -cache-min 1 -volume {volume} {song_url}'
+        # cmd = cmd.format(volume=volume, song_url=song['url'])
+        logger.debug('1')
+        # logger.debug('Starting process: ' + cmd)
+        self.player.loadfile(song['url'].replace('\\', ''))
+        logger.debug(song['url'].replace('\\', ''))
         volume = 0 if self.lock_muted else self.volume
-        cmd = cmd.format(volume=volume, song_url=song['url'])
-        logger.debug('Starting process: ' + cmd)
-        self.p = subprocess.Popen(
-            cmd,
-            shell=True,
-            # I/O 重定向
-            # 不在命令中直接使用管道符，避免产生多余的 sh 进程
-            stdin=subprocess.PIPE,      # open a pipe for input
-            stdout=subprocess.PIPE,          # >/dev/null
-            stderr=None    # 2>&1
-        )
+        self.player.volume = volume
+        # self.p = subprocess.Popen(
+        #     cmd,
+        #     shell=True,
+        #     # I/O 重定向
+        #     # 不在命令中直接使用管道符，避免产生多余的 sh 进程
+        #     stdin=subprocess.PIPE,      # open a pipe for input
+        #     stdout=subprocess.PIPE,          # >/dev/null
+        #     stderr=None    # 2>&1
+        # )
         self.lock_pause = False
         self.display()
 
