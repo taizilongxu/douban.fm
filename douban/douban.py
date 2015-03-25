@@ -216,11 +216,6 @@ class Win(cli.Cli):
         self.volume = max(min(self.volume, 100),0)
         self.lock_muted = True if self.volume == 0 else False
         self.player.set_volume(self.volume)
-        # try:
-        #     self.p.stdin.write('volume %d 1\n' % self.volume)
-        # except IOError as e:
-        #     if e.errno != errno.EPIPE:
-        #         raise e
 
     def mute(self):
         '''静音'''
@@ -232,11 +227,7 @@ class Win(cli.Cli):
         else:
             self.lock_muted = True
             volume = 0
-        try:
-            self.p.stdin.write('volume %d 1\n' % volume)
-        except IOError as e:
-            if e.errno != errno.EPIPE:
-                raise e
+        self.player.set_volume(volume)
 
     def watchdog(self):
         '''守护线程，检查歌曲是否播放完毕'''
