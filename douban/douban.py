@@ -76,6 +76,7 @@ class Win(cli.Cli):
 
         self.player = mplayer.Player()
         self.volume = douban.default_volume  # 默认音量
+        logger.debug(self.volume)
         self.get_config()  # 快捷键配置
         self.douban = douban
 
@@ -178,9 +179,9 @@ class Win(cli.Cli):
             if self.lock_pause:
                 continue
             # logger.debug(self.player.filename)
-            if self.douban.playingsong:
+            if self.player.is_alive():
                 songtime = self.player.time_pos
-                logger.debug(self.player._proc.poll())
+                logger.debug('songtime=' + str(songtime))
                 if songtime:
                     self.songtime = songtime
                 rest_time = \
@@ -202,35 +203,9 @@ class Win(cli.Cli):
                 self.TITLE = self.TITLE[:length]
             time.sleep(1)
 
-    def perform_command(self, p, cmd, expect):
-        '''myplayer 读取mplayer输出'''
-        import select
-        try:
-            p.stdin.write(cmd + '\n') # there's no need for a \n at the beginning
-        except IOError,e:
-            logger.debug(e)
-            return
-        while select.select([p.stdout], [], [], 0.01)[0]:
-            output = p.stdout.readline()
-            logger.debug(output)
-            split_output = output.split(expect + '=', 1)
-            if len(split_output) == 2 and split_output[0] == '': # we have found it
-                value = split_output[1]
-                return value.rstrip()
-        return
-
-    def get_songtime(self):
-        '''在mplayer里获取歌曲播放时间'''
-        song_time = self.perform_command(self.p, 'get_time_pos', 'ANS_TIME_POSITION')
-        if song_time:
-            # logger.info(song_time)
-            return int(round(float(song_time)))
-        else:
-            return self.songtime
-
     def display(self):
         '''显示主控制界面'''
-        if not self.lock_history and not self.lock_lrc and self.lock_start and not self.lock_help:
+        if not self.lock_history and not self.lock_lrc and not self.lock_help:
             cli.Cli.display(self)
 
     def change_volume(self, increment):
@@ -241,11 +216,12 @@ class Win(cli.Cli):
             self.volume -= 5
         self.volume = max(min(self.volume, 100),0)
         self.lock_muted = True if self.volume == 0 else False
-        try:
-            self.p.stdin.write('volume %d 1\n' % self.volume)
-        except IOError as e:
-            if e.errno != errno.EPIPE:
-                raise e
+        self.player.set_volume(self.volume)
+        # try:
+        #     self.p.stdin.write('volume %d 1\n' % self.volume)
+        # except IOError as e:
+        #     if e.errno != errno.EPIPE:
+        #         raise e
 
     def mute(self):
         '''静音'''
@@ -265,52 +241,19 @@ class Win(cli.Cli):
 
     def watchdog(self):
         '''守护线程，检查歌曲是否播放完毕'''
-        while True:
-            if self.q:
-                break
-            self.player._proc.wait()
-            logger.debug('pass')
-            # def handle_data(line):
-            #     if line.startswith('EOF code'):
-            #         # player.quit()
-            #         logger.debug('handle_data')
-            #         pass
-            # Called for every line read from stderr
-            # def log_error(msg):
-            #     print('ERROR: {0}'.format(msg))
-            # Connect subscribers
-            # self.player.stdout.connect(handle_data)
-            # player.stderr.connect(log_error)
-
-            # Print time_pos every 1.0 second, just to demonstrate multithreading
-            # def status(p):
-            #     while p.is_alive():
-            #         print('time_pos = {0}'.format(p.time_pos))
-            #         time.sleep(1.0)
-
-            # t = Thread(target=status, args=(player,))
-            # t.daemon = True
-            # t.start()
-            # Enter loop
-            # asyncore.loop()
-            time.sleep(1)
-
-            # if self.p is not None:
-            #     logger.debug("Watching mplayer[%d]", self.p.pid)
-            #     self.p.wait()
-            #     if self.p.returncode is not None:
-            #         logger.debug("mplayer exits with code %d", self.p.returncode)
-            #     if self.q:
-            #         break
-            #     if self.p.returncode == 0 and not self.lock_loop and self.douban.playingsong:
-            #         self.thread(self.douban.end_music)  # 发送完成
-            #         self.thread(self.douban.submit_current_song)
-            #     if self.lock_start:
-            #         self.play()
-            # time.sleep(1)
+        while not self.q:
+            if self.player.is_alive():
+                # wait the mplayer process until killed
+                self.player._proc.wait()
+                logger.debug('pass')
+                # if self.q == True ,just quit
+                # if some thread called play() just pass
+                if not self.q and not self.lock_start:
+                    self.play()
 
     def play(self):
         '''播放歌曲'''
+        self.lock_start = True
         self.lrc_dict = {}  # 歌词清空
         self.songtime = 0  # 重置歌曲时间
         if not self.lock_loop and not self.lock_history:
@@ -331,29 +274,16 @@ class Win(cli.Cli):
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
 
-        # cmd = '-slave -nolirc -really-quiet -softvol -cache 5120 -cache-min 1 -volume {volume} {song_url}'
-        # cmd = cmd.format(volume=volume, song_url=song['url'])
-        logger.debug('1')
-        # logger.debug('Starting process: ' + cmd)
-        self.player.loadfile(song['url'].replace('\\', ''))
+        self.player.spawn(song['url'])
         logger.debug(song['url'].replace('\\', ''))
         volume = 0 if self.lock_muted else self.volume
-        self.player.volume = volume
-        # self.p = subprocess.Popen(
-        #     cmd,
-        #     shell=True,
-        #     # I/O 重定向
-        #     # 不在命令中直接使用管道符，避免产生多余的 sh 进程
-        #     stdin=subprocess.PIPE,      # open a pipe for input
-        #     stdout=subprocess.PIPE,          # >/dev/null
-        #     stderr=None    # 2>&1
-        # )
+
         self.lock_pause = False
         self.display()
 
         if self.lock_lrc:  # 获取歌词
             self.thread(self.display_lrc)
-        self.lock_start = True
+        self.lock_start = False
         # Will do nothing if not log into Last.fm
         self.thread(self.douban.scrobble_now_playing)
 
@@ -371,14 +301,14 @@ class Win(cli.Cli):
             if e.errno != errno.EPIPE:
                 raise e
 
-    def kill_mplayer(self):
-        '''结束mplayer'''
-        try:
-            # self.p.stdin.write('quit 0\n')
-            self.p.kill()
-        except IOError as e:
-            if e.errno != errno.EPIPE:
-                raise e
+    # def kill_mplayer(self):
+    #     '''结束mplayer'''
+    #     try:
+    #         # self.p.stdin.write('quit 0\n')
+    #         self.p.kill()
+    #     except IOError as e:
+    #         if e.errno != errno.EPIPE:
+    #             raise e
 
 
     def run(self):
@@ -489,8 +419,7 @@ class Win(cli.Cli):
     def set_quit(self):
         '''退出播放'''
         self.q = True
-        if self.lock_start:
-            self.kill_mplayer()
+        self.player.quit()
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
         try:
             if self.cover_file is not None:
@@ -522,11 +451,11 @@ class Win(cli.Cli):
     @info('正在加载请稍后...')
     def set_next(self):
         '''开始下一曲'''
-        if self.douban.playingsong:
+        if self.player.is_alive():
             self.lock_loop = False
-            self.lock_start = False
             self.douban.find_lrc = False
-            self.kill_mplayer()
+            self.lock_start = True
+            self.player.quit()
             if not self.lock_history:
                 self.douban.skip_song()
             if self.cover_file is not None:
@@ -538,7 +467,7 @@ class Win(cli.Cli):
     def set_bye(self):
         '''不再播放并进入下一曲'''
         if self.douban.playingsong:
-            self.lock_start = False  # 每个play前需self.start置0
+            self.lock_start =  True # 每个play前需self.start置0
             self.kill_mplayer()
             self.douban.bye()
             self.douban.playingsong = {}
