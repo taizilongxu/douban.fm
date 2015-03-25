@@ -9,11 +9,11 @@ import lrc2dic
 import getpass
 import pickle
 import urllib
-import logging
+import logger
 import sys
 import os
 
-logger = logging.getLogger()
+logger = logger.log
 
 
 class Doubanfm(object):
