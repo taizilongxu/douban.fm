@@ -75,7 +75,7 @@ class Win(cli.Cli):
         self.player = mplayer.Player()
 
         # default volume
-        self.volume = douban.default_volume
+        self._volume = douban.default_volume
         self.get_config()  # 快捷键配置
 
         self.douban = douban
@@ -83,9 +83,9 @@ class Win(cli.Cli):
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
             else colored(' Last.fm ', 'yellow')
-        PRO = '' if self.douban.pro == 0 else colored(' PRO ', attrs=['reverse'])
+        # PRO = '' if self.douban.pro == 0 else colored(' PRO ', attrs=['reverse'])
 
-        self.TITLE += '\ ' + self.douban.user_name + PRO + ' >>\r'
+        self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
 
         self.lrc_dict = {}  # 歌词
 
@@ -93,11 +93,14 @@ class Win(cli.Cli):
         self.cover_file = None
         self.has_cover = False
 
-
-        self.lines = self.douban.channels
+        # 存储歌曲信息
+        self._lines = self.douban.channels
         self._channel = self.douban.default_channel
+        self.playingsong = None
+        self.playlist = None
+        self.find_lrc = False
 
-        super(Win, self).__init__(self.lines)
+        super(Win, self).__init__(self._lines)
 
         # 启动自动播放
         self.markline = self.displayline = self._channel
@@ -123,9 +126,9 @@ class Win(cli.Cli):
         self.thread(self.display_time)  # 时间显示
         self.run()
 
-    def thread(self, target):
+    def thread(self, target, args=()):
         '''启动新线程'''
-        threading.Thread(target=target).start()
+        threading.Thread(target=target, args=args).start()
 
     def get_config(self):
         '''获取配置'''
@@ -140,21 +143,21 @@ class Win(cli.Cli):
 
     def init_notification(self):
         '''第一次桌面通知时加入图片'''
-        old_title = self.douban.playingsong['title']
+        old_title = self.playingsong['title']
         self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
-        if not self.douban.get_pic(self.cover_file.name):
+        if not self.douban.get_pic(self.playingsong, self.cover_file.name):
             return
-        title = self.douban.playingsong['title']
+        title = self.playingsong['title']
         if old_title != title:
             # 已切换至下一首歌
             return
         self.has_cover = True
-        content = self.douban.playingsong['artist'] + ' - ' \
-            + self.douban.playingsong['albumtitle']
+        content = self.playingsong['artist'] + ' - ' \
+            + self.playingsong['albumtitle']
         notification.send_notification(title, content, self.cover_file.name)
 
     def send_notify(self, content):
-        title = self.douban.playingsong['title']
+        title = self.playingsong['title']
         if self.has_cover:
             notification.send_notification(title, content, self.cover_file.name)
         else:
@@ -163,7 +166,9 @@ class Win(cli.Cli):
     def display_lrc(self):
         '''歌词显示线程'''
         # TODO
-        self.lrc_dict = self.douban.get_lrc()
+        if not self.find_lrc:
+            self.find_lrc = True
+            self.lrc_dict = self.douban.get_lrc(self.playingsong)
         if self.lrc_dict:
             Lrc(self.lrc_dict, self)
         else:
@@ -183,17 +188,17 @@ class Win(cli.Cli):
                 if songtime:
                     self.songtime = songtime
                 rest_time = \
-                    int(self.douban.playingsong['length']) - self.songtime
+                    int(self.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
                 self.TITLE = \
                     self.TITLE[:length - 1] + ' ' + \
-                    self.douban.playingsong['kbps'] + 'kbps ' + \
+                    self.playingsong['kbps'] + 'kbps ' + \
                     colored(show_time, 'cyan') + ' rate:' + \
-                    colored(self.RATE[int(round(self.douban.playingsong['rating_avg'])) - 1], 'red') + ' vol:'
-                self.TITLE += colored('✖', 'red') if self.lock_muted else str(self.volume) + '%'
+                    colored(self.RATE[int(round(self.playingsong['rating_avg'])) - 1], 'red') + ' vol:'
+                self.TITLE += colored('✖', 'red') if self.lock_muted else str(self._volume) + '%'
                 self.TITLE += '  ' + colored('↺', 'red') if self.lock_loop else '  ' + colored('→', 'red')
                 self.TITLE += '\r'
                 self.display()
@@ -209,20 +214,20 @@ class Win(cli.Cli):
     def change_volume(self, increment):
         '''调整音量大小'''
         if increment == 1:
-            self.volume += 5
+            self._volume += 5
         else:
-            self.volume -= 5
-        self.volume = max(min(self.volume, 100),0)
-        self.lock_muted = True if self.volume == 0 else False
-        self.player.set_volume(self.volume)
+            self._volume -= 5
+        self._volume = max(min(self._volume, 100),0)
+        self.lock_muted = True if self._volume == 0 else False
+        self.player.set_volume(self._volume)
 
     def mute(self):
         '''静音'''
         if self.lock_muted:
             self.lock_muted = False
-            if self.volume == 0:
-                self.volume = 10
-            volume = self.volume
+            if self._volume == 0:
+                self._volume = 10
+            volume = self._volume
         else:
             self.lock_muted = True
             volume = 0
@@ -238,18 +243,28 @@ class Win(cli.Cli):
                 # if self.q == True ,just quit
                 # if some thread called play() just pass
                 if not self.q and not self.lock_start:
+                    self.thread(self.douban.end_music,self.playingsong)
                     self.play()
+
+    def get_playlist(self):
+        self.playlist = self.douban.get_playlist(self._channel)
+
+    def get_song(self):
+        if not self.playlist:
+            self.get_playlist()
+        return self.playlist.pop(0)
 
     def play(self):
         '''播放歌曲'''
         self.lock_start = True
+        self.find_lrc = False
         self.lrc_dict = {}  # 歌词清空
         self.songtime = 0  # 重置歌曲时间
         if not self.lock_loop and not self.lock_history:
-            self.douban.get_song(self._channel)
-            self.douban.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            self.history.insert(0, self.douban.playingsong)
-        song = self.douban.playingsong
+            self.playingsong = self.get_song()
+            self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            self.history.insert(0, self.playingsong)
+        song = self.playingsong
 
         self.thread(self.init_notification)  # 桌面通知
 
@@ -261,7 +276,7 @@ class Win(cli.Cli):
         albumtitle = colored(song['albumtitle'], 'yellow')
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
-        volume = 0 if self.lock_muted else self.volume
+        volume = 0 if self.lock_muted else self._volume
 
         # add the volume when the song is start
         self.player.spawn(song['url'], volume)
@@ -300,7 +315,7 @@ class Win(cli.Cli):
                     self.topline = 0
                 elif c == self.KEYS['BOTTOM']:   # G键返回底部
                     self.markline = self.screen_height
-                    self.topline = len(self.lines) - self.screen_height - 1
+                    self.topline = len(self._lines) - self.screen_height - 1
             if c == self.KEYS['HELP']:     # help界面
                 Help(self)
             elif c == self.KEYS['LRC']:      # o歌词
@@ -359,18 +374,18 @@ class Win(cli.Cli):
             if self.q:
                 return
         self.lock_rate = True
-        if self.douban.playingsong:
-            if not self.douban.playingsong['like']:
+        if self.playingsong:
+            if not self.playingsong['like']:
                 self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
                 self.display()
-                self.douban.rate_music()
-                self.douban.playingsong['like'] = 1
+                self.douban.rate_music(self.playingsong)
+                self.playingsong['like'] = 1
                 self.send_notify(content='标记红心')
             else:
                 self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
                 self.display()
-                self.douban.unrate_music()
-                self.douban.playingsong['like'] = 0
+                self.douban.unrate_music(self.playingsong)
+                self.playingsong['like'] = 0
                 self.send_notify(content='取消标记红心')
         self.lock_rate = False
 
@@ -386,7 +401,7 @@ class Win(cli.Cli):
     def set_url(self):
         '''打开豆瓣网页'''
         import webbrowser
-        url = "http://music.douban.com" + self.douban.playingsong['album'].replace('\/', '/')
+        url = "http://music.douban.com" + self.playingsong['album'].replace('\/', '/')
         webbrowser.open(url)
         self.display()
 
@@ -407,8 +422,8 @@ class Win(cli.Cli):
         # stroe the token and the default info
         with open(self.PATH_TOKEN, 'r') as f:
             data = pickle.load(f)
-            data['volume'] = self.volume
-            data['channel'] = self.displayline
+            data['volume'] = self._volume
+            data['channel'] = self._channel
         with open(self.PATH_TOKEN, 'w') as f:
             pickle.dump(data, f)
         exit()
@@ -416,10 +431,13 @@ class Win(cli.Cli):
     @info('正在加载请稍后...')
     def set_play(self):
         '''开始播放'''
+        logger.debug(str(self.displayline) + str(self._channel))
+        self._channel = self.displayline
         self.lock_start = True
-        self.douban.playingsong = {}
+        # self.playingsong = {}
         self.player.quit()
-        self._channel = self.markline + self.topline
+        self._channel = self.displayline
+        self.get_playlist()
         self.play()
 
     @info('正在加载请稍后...')
@@ -427,11 +445,10 @@ class Win(cli.Cli):
         '''开始下一曲'''
         if self.player.is_alive():
             self.lock_loop = False
-            self.douban.find_lrc = False
             self.lock_start = True
             self.player.quit()
             if not self.lock_history:
-                self.douban.skip_song()
+                self.playlist = self.douban.skip_song(self.playingsong)
             if self.cover_file is not None:
                 self.cover_file.close()
             self.has_cover = False
@@ -440,11 +457,10 @@ class Win(cli.Cli):
     @info('不再播放，切换下一首...')
     def set_bye(self):
         '''不再播放并进入下一曲'''
-        if self.douban.playingsong:
+        if self.playingsong:
             self.lock_start =  True # 每个play前需self.start置0
             self.player.quit()
-            self.douban.bye()
-            self.douban.playingsong = {}
+            self.playlist = self.douban.bye(self.playingsong)
             self.play()
 
     @info('正在查找歌词...')
@@ -459,10 +475,10 @@ class Lrc(cli.Cli):
         self.win = win
         self.lrc_dict = lrc_dict
 
-        self.playingsong = win.douban.playingsong
+        self.playingsong = win.playingsong
 
         # 歌曲总长度
-        self.length = int(win.douban.playingsong['length'])
+        self.length = int(win.playingsong['length'])
         # 歌曲播放秒数
         self.song_time = self.win.songtime
 
@@ -487,7 +503,7 @@ class Lrc(cli.Cli):
     def display_line(self):
         '''显示歌词'''
         while self.win.lock_lrc:
-            if self.playingsong != self.win.douban.playingsong:
+            if self.playingsong != self.win.playingsong:
                 break
             self.display()
             self.song_time = self.win.songtime
@@ -511,7 +527,7 @@ class Lrc(cli.Cli):
         for linenum in range(self.screen_height - 2):
             if self.screen_height/2 - linenum > self.markline - self.topline or \
                     linenum - self.screen_height/2 >= len(self.lines) - self.markline:
-                print
+                print '\r'
             else:
                 line = self.lines[self.markline - (self.screen_height/2 - linenum)].strip()
                 l = self.center_num(line)
@@ -524,7 +540,7 @@ class Lrc(cli.Cli):
         print '\r'
 
         # 歌曲信息居中
-        song = self.win.douban.playingsong
+        song = self.win.playingsong
         tmp = (song['title'] + song['albumtitle'] + song['artist'] + song['public_time']).replace('\\', '').strip()
         tmp = unicode(tmp, 'utf-8')
         l = self.center_num(tmp) + 7  # 7个固定字符
@@ -593,7 +609,7 @@ class History(cli.Cli):
         for i in self.win.history:
             width = self.screen_width - 24
             line = i['time'][5:] + ' '
-            if i['title'] < width:
+            if len(i['title']) < width:
                 line += colored(i['title'], 'green')
             else:
                 line += colored(i['title'][:width], 'green')
@@ -646,7 +662,7 @@ class History(cli.Cli):
         self.displaysong()
         playingsong = self.win.history[self.displayline]
 
-        self.win.douban.playingsong = playingsong
+        self.win.playingsong = playingsong
         self.win.set_next()
 
 

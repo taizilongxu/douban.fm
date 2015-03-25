@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 豆瓣FM的网络连接部分
+主要完成登录部分
+例如:
+douban = douban_token.Doubanfm()
+douban.init_login()  #登录
+
+self.login_data只保存登录返回的信息
 """
 from functools import wraps
 from scrobbler import Scrobbler
@@ -19,13 +25,7 @@ logger = logger.log
 class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
-        self.channel_id = 0
-        self.pro = 0
-        self.playlist = []  # 播放列表
-        self.playingsong = {}  # 当前播放歌曲
-        self.find_lrc = False  # 是否查找过歌词
         self.lastfm = True  # lastfm 登陆
-        self.lrc_dic = {}  # 歌词
 
     def init_login(self):
         print '''
@@ -123,6 +123,10 @@ class Doubanfm(object):
                         if 'volume' in self.login_data else 50
                 self.default_channel = int(self.login_data['channel'])\
                         if 'channel' in self.login_data else 1
+
+                # 存储的default_channel是行数而不是真正发送数据的channel_id
+                # 这里需要进行转化一下
+                self.set_channel(self.default_channel)
             print '\033[31m♥\033[0m Get local token - user_name: \033[33m%s\033[0m' % self.user_name
         else:
             # 未登陆
@@ -228,7 +232,7 @@ LRC = o
         return lines
 
     def requests_url(self, ptype, **data):
-        '''发送post_data'''
+        '''这里包装了一个函数,发送post_data'''
         post_data = self.login_data.copy()
         post_data['type'] = ptype
         for x in data:
@@ -238,51 +242,45 @@ LRC = o
         return s.text
 
     def set_channel(self, channel):
+        '''把行数转化成channel_id'''
         self.default_channel = channel
         channel = -3 if channel == 0 else channel - 1
         self.login_data['channel'] = channel
 
-    def get_playlist(self):
-        '''当playlist为空时，获取播放列表'''
-        s = self.requests_url('n')
-        self.playlist = eval(s)['song']
-
-    def skip_song(self):
-        '''下一首'''
-        s = self.requests_url('s', sid=self.playingsong['sid'])
-        self.playlist = eval(s)['song']
-
-    def bye(self):
-        '''不再播放'''
-        s = self.requests_url('b', sid=self.playingsong['sid'])
-        self.playlist = eval(s)['song']
-
-    def get_song(self, channel):
-        '''获得歌曲'''
-        self.find_lrc = False
-        self.lrc_dic = {}
-        if self.default_channel != channel or not self.playlist:
+    def get_playlist(self, channel):
+        '''获取播放列表,返回一个list'''
+        if self.default_channel != channel:
             self.set_channel(channel)
-            self.get_playlist()
-        self.playingsong = self.playlist.pop(0)
+        s = self.requests_url('n')
+        return eval(s)['song']
 
-    def rate_music(self):
+    def skip_song(self, playingsong):
+        '''下一首,返回一个list'''
+        s = self.requests_url('s', sid=playingsong['sid'])
+        return eval(s)['song']
+
+    def bye(self, playingsong):
+        '''不再播放,返回一个list'''
+        s = self.requests_url('b', sid=playingsong['sid'])
+        return eval(s)['song']
+
+    def rate_music(self, playingsong):
         '''标记喜欢歌曲'''
-        s = self.requests_url('r', sid=self.playingsong['sid'])
-        self.playlist = eval(s)['song']
+        s = self.requests_url('r', sid=playingsong['sid'])
+        # self.playlist = eval(s)['song']
 
-    def unrate_music(self):
+    def unrate_music(self, playingsong):
         '''取消标记喜欢歌曲'''
-        s = self.requests_url('u', sid=self.playingsong['sid'])
-        self.playlist = eval(s)['song']
+        s = self.requests_url('u', sid=playingsong['sid'])
+        # self.playlist = eval(s)['song']
 
-    def end_music(self):
+    def end_music(self, playingsong):
         '''歌曲结束标记'''
-        self.requests_url('e', sid=self.playingsong['sid'])
+        self.requests_url('e', sid=playingsong['sid'])
 
-    def get_pic(self, tempfile_path):
+    def get_pic(self, playingsong, tempfile_path):
         '''获取专辑封面'''
-        url = self.playingsong['picture'].replace('\\', '')
+        url = playingsong['picture'].replace('\\', '')
         for i in range(3):
             try:
                 urllib.urlretrieve(url, tempfile_path)
@@ -293,28 +291,25 @@ LRC = o
         logger.error('Get cover art failed!')
         return False
 
-    def get_lrc(self):
+    def get_lrc(self, playingsong):
         '''获取歌词'''
-        if not self.find_lrc:
-            self.find_lrc = True
-            try:
-                url = "http://api.douban.com/v2/fm/lyric"
-                postdata = {
-                    'sid': self.playingsong['sid'],
-                    'ssid': self.playingsong['ssid'],
-                }
-                s = requests.session()
-                response = s.post(url, data=postdata)
-                lyric = eval(response.text)
-                logger.debug(response.text)
-                self.lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
-                # 原歌词用的unicode,为了兼容
-                for key, value in self.lrc_dic.iteritems():
-                    self.lrc_dic[key] = value.decode('utf-8')
-                if self.lrc_dic:
-                    logger.debug('Get lyric success!')
-                return self.lrc_dic
-            except requests.exceptions.RequestException:
-                logger.error('Get lyric failed!')
-                return 0
-        return self.lrc_dic
+        try:
+            url = "http://api.douban.com/v2/fm/lyric"
+            postdata = {
+                'sid': playingsong['sid'],
+                'ssid': playingsong['ssid'],
+            }
+            s = requests.session()
+            response = s.post(url, data=postdata)
+            lyric = eval(response.text)
+            logger.debug(response.text)
+            lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
+            # 原歌词用的unicode,为了兼容
+            for key, value in lrc_dic.iteritems():
+                lrc_dic[key] = value.decode('utf-8')
+            if lrc_dic:
+                logger.debug('Get lyric success!')
+            return lrc_dic
+        except requests.exceptions.RequestException:
+            logger.error('Get lyric failed!')
+            return 0
