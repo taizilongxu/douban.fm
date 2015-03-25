@@ -44,17 +44,17 @@ class Doubanfm(object):
         print '[\033[32m ok \033[0m]'
         # self.get_channellines()  # 重构列表用以显示
         print '\033[31m♥\033[0m Check pro ',
-        self.is_pro()
+        # self.is_pro()
         print '[\033[32m ok \033[0m]'
-        if self.pro == 1:
-            self.login_data['kbps'] = 192  # 128 64 歌曲kbps的选择
+        # if self.pro == 1:
+        #     self.login_data['kbps'] = 192  # 128 64 歌曲kbps的选择
 
-    def is_pro(self):
-        '''查看是否是pro用户'''
-        self.get_playlist()
-        self.get_song()
-        if int(self.playingsong['kbps']) != 64:
-            self.pro = 1
+    # def is_pro(self):
+    #     '''查看是否是pro用户'''
+    #     self.get_playlist()
+    #     self.get_song()
+    #     if int(self.playingsong['kbps']) != 64:
+    #         self.pro = 1
 
     def win_login(self):
         '''登陆界面'''
@@ -122,7 +122,7 @@ class Doubanfm(object):
                 self.default_volume = int(self.login_data['volume'])\
                         if 'volume' in self.login_data else 50
                 self.default_channel = int(self.login_data['channel'])\
-                        if 'channel' in self.login_data else 0
+                        if 'channel' in self.login_data else 1
             print '\033[31m♥\033[0m Get local token - user_name: \033[33m%s\033[0m' % self.user_name
         else:
             # 未登陆
@@ -146,7 +146,7 @@ class Doubanfm(object):
                     self.user_id = dic['user_id']
                     self.expire = dic['expire']
                     self.default_volume = 50
-                    self.default_channel = 0
+                    self.default_channel = 1
                     self.login_data = {
                         'app_name': 'radio_desktop_win',
                         'version': '100',
@@ -237,9 +237,13 @@ LRC = o
         s = requests.get(url)
         return s.text
 
+    def set_channel(self, channel):
+        self.default_channel = channel
+        channel = -3 if channel == 0 else channel - 1
+        self.login_data['channel'] = channel
+
     def get_playlist(self):
         '''当playlist为空时，获取播放列表'''
-        self.login_data['channel'] = self.channel_id
         s = self.requests_url('n')
         self.playlist = eval(s)['song']
 
@@ -253,15 +257,12 @@ LRC = o
         s = self.requests_url('b', sid=self.playingsong['sid'])
         self.playlist = eval(s)['song']
 
-    def set_channel(self, num):
-        '''选择频道'''
-        self.channel_id = num
-
-    def get_song(self):
+    def get_song(self, channel):
         '''获得歌曲'''
         self.find_lrc = False
         self.lrc_dic = {}
-        if not self.playlist:
+        if self.default_channel != channel or not self.playlist:
+            self.set_channel(channel)
             self.get_playlist()
         self.playingsong = self.playlist.pop(0)
 

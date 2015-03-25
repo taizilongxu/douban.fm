@@ -73,9 +73,11 @@ class Win(cli.Cli):
 
         # mplayer controler
         self.player = mplayer.Player()
+
         # default volume
         self.volume = douban.default_volume
         self.get_config()  # 快捷键配置
+
         self.douban = douban
 
         self.TITLE += \
@@ -91,31 +93,31 @@ class Win(cli.Cli):
         self.cover_file = None
         self.has_cover = False
 
-        # subprocess
-        self.p = None
 
         self.lines = self.douban.channels
+        self._channel = self.douban.default_channel
+
         super(Win, self).__init__(self.lines)
 
         # 启动自动播放
-        self.markline = self.displayline = self.douban.default_channel
+        self.markline = self.displayline = self._channel
         self.lock_start = True
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
-        while True:
-            try:
-                # 设置默认频率
-                self.douban.set_channel(self.lines[self.markline])
-                break
-            except IndexError as e:
-                # 默认频道不存在，重置为红心兆赫
-                if self.markline == 0:
-                    raise e
-                self.markline = self.displayline = 0
-            except KeyError:
-                # 无红心兆赫进入下一个频道
-                self.markline += 1
-                self.displayline += 1
+        # while True:
+        #     try:
+        #         # 设置默认频率
+        #         self.douban.set_channel(self.lines[self.markline])
+        #         break
+        #     except IndexError as e:
+        #         # 默认频道不存在，重置为红心兆赫
+        #         if self.markline == 0:
+        #             raise e
+        #         self.markline = self.displayline = 0
+        #     except KeyError:
+        #         # 无红心兆赫进入下一个频道
+        #         self.markline += 1
+        #         self.displayline += 1
         self.thread(self.play)          # 播放控制
         self.thread(self.watchdog)      # 播放器守护线程
         self.thread(self.display_time)  # 时间显示
@@ -244,7 +246,7 @@ class Win(cli.Cli):
         self.lrc_dict = {}  # 歌词清空
         self.songtime = 0  # 重置歌曲时间
         if not self.lock_loop and not self.lock_history:
-            self.douban.get_song()
+            self.douban.get_song(self._channel)
             self.douban.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             self.history.insert(0, self.douban.playingsong)
         song = self.douban.playingsong
@@ -417,8 +419,7 @@ class Win(cli.Cli):
         self.lock_start = True
         self.douban.playingsong = {}
         self.player.quit()
-        self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
-        self.douban.get_playlist()
+        self._channel = self.markline + self.topline
         self.play()
 
     @info('正在加载请稍后...')
