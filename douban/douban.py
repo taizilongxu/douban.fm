@@ -181,7 +181,6 @@ class Win(cli.Cli):
             # logger.debug(self.player.filename)
             if self.player.is_alive():
                 songtime = self.player.time_pos
-                logger.debug('songtime=' + str(songtime))
                 if songtime:
                     self.songtime = songtime
                 rest_time = \
