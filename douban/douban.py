@@ -14,13 +14,20 @@ import time
 import os
 import tempfile
 import ConfigParser
-import logger
+import logging
 import errno
 import pickle
 import mplayer
 import asyncore
 
-logger = logger.log
+logging.basicConfig(
+    format='%(asctime)s - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%I:%S',
+    filename=os.path.expanduser('~/.doubanfm.log'),
+    level=logging.DEBUG
+)
+
+logger = logging.getLogger()
 
 
 class Win(cli.Cli):
