@@ -20,12 +20,6 @@ class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
         self.channel_id = 0
-        self.lines = []  # 要输出到终端的行
-        # 红心兆赫需要手动添加
-        self.channels = [{
-            'name': '红心兆赫',
-            'channel_id': -3
-        }]
         self.pro = 0
         self.playlist = []  # 播放列表
         self.playingsong = {}  # 当前播放歌曲
@@ -46,9 +40,9 @@ class Doubanfm(object):
         self.douban_login()  # 登陆
         self.login_lastfm()  # 登陆 last.fm
         print '\033[31m♥\033[0m Get channels ',
-        self.get_channels()  # 获取频道列表
+        # self.get_channels()  # 获取频道列表
         print '[\033[32m ok \033[0m]'
-        self.get_channellines()  # 重构列表用以显示
+        # self.get_channellines()  # 重构列表用以显示
         print '\033[31m♥\033[0m Check pro ',
         self.is_pro()
         print '[\033[32m ok \033[0m]'
@@ -217,15 +211,21 @@ LRC = o
         else:
             print '\033[31m♥\033[0m Get local config [\033[32m ok \033[0m]'
 
-    def get_channels(self):
+    @property
+    def channels(self):
         '''获取channel，存入self.channels'''
+        # 红心兆赫需要手动添加
+        channels = [{
+            'name': '红心兆赫',
+            'channel_id': -3
+        }]
         r = requests.get('http://www.douban.com/j/app/radio/channels')
-        self.channels += eval(r.text)['channels']
-
-    def get_channellines(self):
-        '''格式化频道列表，以便display'''
-        for channel in self.channels:
-            self.lines.append(channel['name'])
+        channels += eval(r.text)['channels']
+        # 格式化频道列表，以便display
+        lines = []
+        for channel in channels:
+            lines.append(channel['name'])
+        return lines
 
     def requests_url(self, ptype, **data):
         '''发送post_data'''

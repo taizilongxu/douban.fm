@@ -71,12 +71,12 @@ class Win(cli.Cli):
         except IOError:
             self.history = []
 
+        # mplayer controler
         self.player = mplayer.Player()
-        self.volume = douban.default_volume  # 默认音量
-        logger.debug(self.volume)
+        # default volume
+        self.volume = douban.default_volume
         self.get_config()  # 快捷键配置
         self.douban = douban
-
 
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
@@ -94,7 +94,8 @@ class Win(cli.Cli):
         # subprocess
         self.p = None
 
-        super(Win, self).__init__(self.douban.lines)
+        self.lines = self.douban.channels
+        super(Win, self).__init__(self.lines)
 
         # 启动自动播放
         self.markline = self.displayline = self.douban.default_channel
@@ -104,7 +105,7 @@ class Win(cli.Cli):
         while True:
             try:
                 # 设置默认频率
-                self.douban.set_channel(self.douban.channels[self.markline]['channel_id'])
+                self.douban.set_channel(self.lines[self.markline])
                 break
             except IndexError as e:
                 # 默认频道不存在，重置为红心兆赫
@@ -159,6 +160,7 @@ class Win(cli.Cli):
 
     def display_lrc(self):
         '''歌词显示线程'''
+        # TODO
         self.lrc_dict = self.douban.get_lrc()
         if self.lrc_dict:
             Lrc(self.lrc_dict, self)
@@ -413,9 +415,8 @@ class Win(cli.Cli):
     def set_play(self):
         '''开始播放'''
         self.lock_start = True
-        if self.douban.playingsong:
-            self.douban.playingsong = {}
-            self.player.quit()
+        self.douban.playingsong = {}
+        self.player.quit()
         self.douban.set_channel(self.douban.channels[self.markline + self.topline]['channel_id'])
         self.douban.get_playlist()
         self.play()
@@ -574,7 +575,10 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         self.win.lock_history = True
-        self.rate_line = False  # 是否只现实加星歌曲
+        # display the rate song
+        self.rate_line = False
+        # the playlist of the history
+        self.playlist = []
         self.love = colored(' ♥', 'red')
         self.screen_height, self.screen_width = self.linesnum()
         self.get_lines()
@@ -625,7 +629,6 @@ class History(cli.Cli):
             elif c == self.KEYS['RATE']:
                 self.rate_line = False if self.rate_line else True
             elif c == ' ':
-                self.displaysong()
                 self.playsong()
             elif c == self.KEYS['TOP']:      # g键返回顶部
                 self.markline = 0
@@ -638,7 +641,10 @@ class History(cli.Cli):
                     self.topline = len(self.lines) - self.screen_height - 1
 
     def playsong(self):
+        # get the line num of the list
+        self.displaysong()
         playingsong = self.win.history[self.displayline]
+
         self.win.douban.playingsong = playingsong
         self.win.set_next()
 
