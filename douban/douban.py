@@ -15,10 +15,8 @@ import os
 import tempfile
 import ConfigParser
 import logging
-import errno
 import pickle
 import mplayer
-import asyncore
 
 logging.basicConfig(
     format='%(asctime)s - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
@@ -124,7 +122,7 @@ class Win(cli.Cli):
 
     def thread(self, target):
         '''启动新线程'''
-        t = threading.Thread(target=target).start()
+        threading.Thread(target=target).start()
 
     def get_config(self):
         '''获取配置'''
@@ -176,7 +174,6 @@ class Win(cli.Cli):
                 break
             if self.lock_pause:
                 continue
-            # logger.debug(self.player.filename)
             if self.player.is_alive():
                 songtime = self.player.time_pos
                 if songtime:
@@ -232,7 +229,7 @@ class Win(cli.Cli):
         while not self.q:
             if self.player.is_alive():
                 # wait the mplayer process until killed
-                self.player._proc.wait()
+                self.player.proc.wait()
                 logger.debug('pass')
                 # if self.q == True ,just quit
                 # if some thread called play() just pass
@@ -251,7 +248,6 @@ class Win(cli.Cli):
         song = self.douban.playingsong
 
         self.thread(self.init_notification)  # 桌面通知
-        # logger.debug(song)
 
         if song['like'] == 1:
             love = self.love
@@ -261,11 +257,10 @@ class Win(cli.Cli):
         albumtitle = colored(song['albumtitle'], 'yellow')
         artist = colored(song['artist'], 'white')
         self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
-
-        logger.debug('send to mplayer' + song['url'])
-        self.player.spawn(song['url'])
-        logger.debug(song['url'].replace('\\', ''))
         volume = 0 if self.lock_muted else self.volume
+
+        # add the volume when the song is start
+        self.player.spawn(song['url'], volume)
 
         self.lock_pause = False
         self.display()

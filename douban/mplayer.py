@@ -11,8 +11,6 @@ logger = logging.getLogger()
 
 class Player(object):
 
-    # _base_args = ['-slave', '-really-quiet',\
-    #                 '-input', 'nodefault-bindings', '-noconfig', 'all']
     _cmd = ['mplayer', '-slave', '-nolirc', '-quiet', '-softvol',\
             '-cache', '5120', '-cache-min', '1']
     cmd_prefix = ''
@@ -20,38 +18,35 @@ class Player(object):
     def __init__(self, autospawn=False):
         """Arguments:
         """
-        # print self.args
-        self._proc = None
-        # Terminate the MPlayer process when Python terminates
+        self.proc = None
         if autospawn:
             self.spawn()
 
-    def spawn(self, url=''):
+    def spawn(self, url='', volume=None):
         """Spawn the underlying MPlayer process."""
-        self.args = self._cmd + [url.replace('\\', '')]
+        if not url:
+            return False
+        self.args = self._cmd + ['-softvol', '-volume', str(volume)]\
+                if volume else self.cmd
+        self.args += [url.replace('\\', '')]
         if self.is_alive():
             self.quit()
         # Start the MPlayer process
-        self._proc = subprocess.Popen(self.args,
+        self.proc = subprocess.Popen(self.args,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT)
 
-    # def __del__(self):
-    #     # Terminate the MPlayer process when instance is about to be destroyed
-    #     if self.is_alive():
-    #         self.quit()
-
     def __repr__(self):
         if self.is_alive():
-            status = 'with pid = {0}'.format(self._proc.pid)
+            status = 'with pid = {0}'.format(self.proc.pid)
         else:
             status = 'not running'
         return '<{0} {1}>'.format(self.__class__.__name__, status)
 
     def is_alive(self):
-        if self._proc is not None:
-            if self._proc.poll() is None:
+        if self.proc is not None:
+            if self.proc.poll() is None:
                 return True
             else:
                 return False
@@ -59,8 +54,8 @@ class Player(object):
             return False
 
     def quit(self):
-        if self._proc:
-            self._proc.kill()
+        if self.proc:
+            self.proc.kill()
 
     @property
     def time_pos(self):
@@ -94,15 +89,15 @@ class Player(object):
         # will be raised if cmd is unicode. In both cases, encoding the string
         # will fix the problem.
         try:
-            self._proc.stdin.write(cmd)
+            self.proc.stdin.write(cmd)
         except (TypeError, UnicodeEncodeError):
-            self._proc.stdin.write(cmd.encode('utf-8', 'ignore'))
-        # self._proc.stdin.flush()
+            self.proc.stdin.write(cmd.encode('utf-8', 'ignore'))
+        # self.proc.stdin.flush()
         # Expect a response for 'get_property' only
         if expect:
-            while select.select([self._proc.stdout], [], [], 0.01)[0]:
+            while select.select([self.proc.stdout], [], [], 0.01)[0]:
                 # The reponses for properties start with 'ANS_<property name>='
-                output = self._proc.stdout.readline()
+                output = self.proc.stdout.readline()
                 split_output = output.split(expect + '=', 1)
                 if len(split_output) == 2 and split_output[0] == '': # we have found it
                     value = split_output[1]
