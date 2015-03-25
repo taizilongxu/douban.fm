@@ -5,6 +5,9 @@ from threading import Thread
 import Queue
 import time
 import select
+import logger
+
+logger = logger.log
 
 class Player(object):
 
