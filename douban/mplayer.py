@@ -72,6 +72,9 @@ class Player(object):
         """the num is int and return nothing"""
         self._run_command('volume {0} 1'.format(num))
 
+    def set_pause(self):
+        self._run_command('pause')
+
 
     def _run_command(self, cmd, expect=None):
         """Send a command to MPlayer. The result, if any, is returned.

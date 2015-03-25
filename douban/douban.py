@@ -277,7 +277,7 @@ class Win(cli.Cli):
         # Will do nothing if not log into Last.fm
         self.thread(self.douban.scrobble_now_playing)
 
-    def pause_play(self):
+    def pause(self):
         '''暂停歌曲'''
         if self.lock_pause:
             self.lock_pause = False
@@ -285,21 +285,7 @@ class Win(cli.Cli):
         else:
             self.send_notify(content='暂停播放')
             self.lock_pause = True
-        try:
-            self.p.stdin.write('pause\n')
-        except IOError as e:
-            if e.errno != errno.EPIPE:
-                raise e
-
-    # def kill_mplayer(self):
-    #     '''结束mplayer'''
-    #     try:
-    #         # self.p.stdin.write('quit 0\n')
-    #         self.p.kill()
-    #     except IOError as e:
-    #         if e.errno != errno.EPIPE:
-    #             raise e
-
+        self.player.set_pause()
 
     def run(self):
         '''主交互逻辑 (key event loop)'''
@@ -338,7 +324,7 @@ class Win(cli.Cli):
             elif c == self.KEYS['BYE']:      # b不再播放
                 self.set_bye()
             elif c == self.KEYS['PAUSE']:    # p暂停
-                self.pause_play()
+                self.pause()
             elif c == self.KEYS['MUTE']:     # m静音
                 self.mute()
             elif c == self.KEYS['LOOP']:     # l单曲循环
