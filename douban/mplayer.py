@@ -2,7 +2,6 @@
 # encoding: utf-8
 import subprocess
 from threading import Thread
-import Queue
 import time
 import select
 import logging
@@ -54,7 +53,7 @@ class Player(object):
             return False
 
     def quit(self):
-        if self.proc:
+        if self.is_alive():
             self.proc.kill()
 
     @property
@@ -83,7 +82,7 @@ class Player(object):
         if cmd in ['quit', 'pause', 'stop']:
             cmd.pop(0)
         cmd = ' '.join(cmd)
-        logger.debug(cmd)
+        # logger.debug(cmd)
         # In Py3k, TypeErrors will be raised because cmd is a string but stdin
         # expects bytes. In Python 2.x on the other hand, UnicodeEncodeErrors
         # will be raised if cmd is unicode. In both cases, encoding the string

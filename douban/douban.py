@@ -15,7 +15,7 @@ import os
 import tempfile
 import ConfigParser
 import logging
-import pickle
+import cPickle as pickle
 import mplayer
 
 logging.basicConfig(
@@ -107,20 +107,7 @@ class Win(cli.Cli):
         self.lock_start = True
         self.SUFFIX_SELECTED = '正在加载请稍后...'
         self.display()
-        # while True:
-        #     try:
-        #         # 设置默认频率
-        #         self.douban.set_channel(self.lines[self.markline])
-        #         break
-        #     except IndexError as e:
-        #         # 默认频道不存在，重置为红心兆赫
-        #         if self.markline == 0:
-        #             raise e
-        #         self.markline = self.displayline = 0
-        #     except KeyError:
-        #         # 无红心兆赫进入下一个频道
-        #         self.markline += 1
-        #         self.displayline += 1
+
         self.thread(self.play)          # 播放控制
         self.thread(self.watchdog)      # 播放器守护线程
         self.thread(self.display_time)  # 时间显示
@@ -260,8 +247,8 @@ class Win(cli.Cli):
         self.find_lrc = False
         self.lrc_dict = {}  # 歌词清空
         self.songtime = 0  # 重置歌曲时间
-        if not self.lock_loop and not self.lock_history:
-            self.playingsong = self.get_song()
+        self.playingsong = self.get_song()
+        if not self.lock_loop:
             self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             self.history.insert(0, self.playingsong)
         song = self.playingsong
@@ -598,6 +585,12 @@ class History(cli.Cli):
         self.playlist = []
         self.love = colored(' ♥', 'red')
         self.screen_height, self.screen_width = self.linesnum()
+
+        # 3个列表, history rate playlist
+        # 分别对应状态 0 1 2
+        self.state = 0
+        self.subtitle = ['history_          rate', 'history           rate_']
+
         self.get_lines()
         super(History, self).__init__(self.lines)
         self.win.thread(self.display_help)
@@ -606,20 +599,24 @@ class History(cli.Cli):
     def get_lines(self):
         """因为历史列表动态更新,需要刷新"""
         self.lines = []
-        for i in self.win.history:
-            width = self.screen_width - 24
-            line = i['time'][5:] + ' '
-            if len(i['title']) < width:
-                line += colored(i['title'], 'green')
-            else:
-                line += colored(i['title'][:width], 'green')
-            if i['like'] == 1:
-                line += self.love
-            if self.rate_line:
+        width = self.screen_width - 24
+        if self.state == 0:
+            for index, i in enumerate(self.win.history):
+                line = i['title'] if len(i['title']) < width else i['title'][:width]
+                line = colored(line, 'green')
+                line = str(index) + ' ' + line
                 if i['like'] == 1:
-                    self.lines.append(line)
-            else:
+                    line += self.love
                 self.lines.append(line)
+        elif self.state == 1:
+            for index, i in enumerate(self.win.history):
+                line = i['title'] if len(i['title']) < width else i['title'][:width]
+                line = colored(line, 'green')
+                line = str(index) + ' ' + line
+                if i['like'] == 1:
+                    line += self.love
+                    self.lines.append(line)
+        self.lines.insert(0, self.subtitle[self.state])
 
     def display_help(self):
         while self.win.lock_history:
@@ -656,13 +653,16 @@ class History(cli.Cli):
                 else:
                     self.markline = self.screen_height
                     self.topline = len(self.lines) - self.screen_height - 1
+            elif c =='h' or c == 'l':
+                self.state = 0 if self.state else 1
+                self.get_lines()
+
 
     def playsong(self):
         # get the line num of the list
         self.displaysong()
-        playingsong = self.win.history[self.displayline]
-
-        self.win.playingsong = playingsong
+        self.win.playlist = self.win.history[self.displayline-1:]
+        # self.win.playingsong = playingsong
         self.win.set_next()
 
 
