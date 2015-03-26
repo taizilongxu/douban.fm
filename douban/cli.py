@@ -9,6 +9,20 @@ SUFFIX_SELECTED:对选中行进行标记
 SUFFIX_DESELECTED:暂时无用
 TITLE:界面标题的设定
 '''
+#######################################################################
+#            self.TITLE
+#            4 displayline
+# markline > 5
+#            6
+#            7
+#            8
+#            9
+#######################################################################
+# topline = 3      # start with 0
+# markline = 1
+# displayline = 0
+#######################################################################
+
 import subprocess
 from termcolor import colored
 import getch

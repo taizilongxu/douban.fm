@@ -579,10 +579,7 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         self.win.lock_history = True
-        # display the rate song
-        self.rate_line = False
         # the playlist of the history
-        self.playlist = []
         self.love = colored(' ♥', 'red')
         self.screen_height, self.screen_width = self.linesnum()
 
@@ -590,6 +587,9 @@ class History(cli.Cli):
         # 分别对应状态 0 1 2
         self.state = 0
         self.subtitle = ['history_          rate', 'history           rate_']
+        # hitory 使用win.history
+        self.rate = []
+        self.playlist = []
 
         self.get_lines()
         super(History, self).__init__(self.lines)
@@ -609,13 +609,24 @@ class History(cli.Cli):
                     line += self.love
                 self.lines.append(line)
         elif self.state == 1:
-            for index, i in enumerate(self.win.history):
+            self.rate = []
+            for i in reversed(self.win.history):
+                if i['like'] == 1:
+                    if i in self.rate:
+                        self.rate.remove(i)
+                        self.rate.insert(0, i)
+                    else:
+                        self.rate.insert(0, i)
+            for index, i in enumerate(self.rate):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
                 line = colored(line, 'green')
                 line = str(index) + ' ' + line
-                if i['like'] == 1:
-                    line += self.love
-                    self.lines.append(line)
+                line += self.love
+
+                self.lines.append(line)
+        elif self.state == 2:
+            # TODO
+            pass
         self.lines.insert(0, self.subtitle[self.state])
 
     def display_help(self):
@@ -640,8 +651,6 @@ class History(cli.Cli):
             elif c == self.KEYS['QUIT']:
                 self.win.lock_history = False
                 break
-            elif c == self.KEYS['RATE']:
-                self.rate_line = False if self.rate_line else True
             elif c == ' ':
                 self.playsong()
             elif c == self.KEYS['TOP']:      # g键返回顶部
@@ -661,8 +670,14 @@ class History(cli.Cli):
     def playsong(self):
         # get the line num of the list
         self.displaysong()
-        self.win.playlist = self.win.history[self.displayline-1:]
-        # self.win.playingsong = playingsong
+        if self.state == 0:
+            # 如果在历史列表里播放,只在win.playlist里插入一首歌曲
+            # 播放完毕继续
+            self.win.playlist.insert(0, self.win.history[self.displayline-1])
+        elif self.state == 1:
+            self.win.playlist = self.rate[self.displayline-1:]
+        elif self.state == 2:
+            pass
         self.win.set_next()
 
 
