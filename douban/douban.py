@@ -27,7 +27,6 @@ logging.basicConfig(
 
 logger = logging.getLogger()
 
-
 class Win(cli.Cli):
     '''窗体及播放控制'''
     PATH_HISTORY = os.path.expanduser('~/.douban_history')
@@ -62,14 +61,9 @@ class Win(cli.Cli):
         self.songtime = 0        # 歌曲时间
         self.playingsong = None  # 当前播放歌曲
 
-        # state
-        # 0   main
-        # 1   lrc
-        # 2   help
-        # 3   history
-        # 4   quit
+        # state  0    1   2    3       4
+        #        main lrc help history quit
         self.state = 0
-        self.threads = []
 
         try:
             with open(self.PATH_HISTORY, 'r') as f:
@@ -93,8 +87,6 @@ class Win(cli.Cli):
 
         self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
 
-        self.lrc_dict = {}  # 歌词
-
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
         self.has_cover = False
@@ -105,6 +97,7 @@ class Win(cli.Cli):
         self.playingsong = None
         self.playlist = None
         self.find_lrc = False
+        self.lrc_dict = {}  # 歌词
 
         super(Win, self).__init__(self._lines)
 
@@ -121,8 +114,7 @@ class Win(cli.Cli):
 
     def thread(self, target, args=()):
         '''启动新线程'''
-        t = threading.Thread(target=target, args=args).start()
-        self.threads.append(t)
+        threading.Thread(target=target, args=args).start()
 
     def get_config(self):
         '''获取配置'''
@@ -343,7 +335,8 @@ class Win(cli.Cli):
                 self.set_loop()
             elif c == self.KEYS['QUIT']:     # q退出程序
                 if self.state == 0:
-                    self.set_quit()
+                    self.state = 4
+                    Quit(self)
                 else:
                     self.state =0
             elif c == '=' or c == '+':       # 提高音量
@@ -592,6 +585,29 @@ class Help(cli.Cli):
         print ' '*5 + colored('歌词', 'green') + '\r'
         print ' '*5 + '[%(LRC)s] ---> 歌词' % keys + '\r'
 
+class Quit(Help):
+    '''退出界面'''
+
+    def __init__(self, win):
+        self.win = win
+        subprocess.check_call('clear', shell=True)
+        self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
+        self.display()
+        self.run()
+
+    def display(self):
+        for i in range(self.screen_height):
+            if i == self.screen_height / 2:
+                print ' '*((self.screen_width - 18)/2) + colored('Are you sure?(y/n)', 'red'),
+            else:
+                print
+
+    def run(self):
+        '''界面执行程序'''
+        c = getch.getch()
+        if c == 'y':
+            self.win.set_quit()
+
 class History(cli.Cli):
     '''历史记录'''
     def __init__(self, win):
@@ -696,7 +712,6 @@ class History(cli.Cli):
                 self.state = 0 if self.state else 1
                 self.get_lines()
 
-
     def playsong(self):
         # get the line num of the list
         self.displaysong()
@@ -710,7 +725,6 @@ class History(cli.Cli):
             # TODO
             pass
         self.win.set_next()
-
 
 def main():
     douban = douban_token.Doubanfm()
