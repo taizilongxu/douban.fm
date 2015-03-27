@@ -312,7 +312,7 @@ class Win(cli.Cli):
                 self.set_lrc()
                 self.state = 1
                 self.thread(self.display_lrc)
-            elif c =='e':
+            elif c =='p':
                 self.state = 3
                 History(self)
             elif c == self.KEYS['RATE']:     # r标记红心/取消标记
@@ -617,14 +617,14 @@ class History(cli.Cli):
         self.love = colored(' ♥', 'red')
         self.screen_height, self.screen_width = self.linesnum()
 
-        # 3个tab, history rate playlist
+        # 3个tab, playlist thistory rate
         # 分别对应状态 0 1 2
         self.state = 0
-        self.subtitle = ['history_          rate', 'history           rate_']
         self.play_tag = '♬♬♬♬♬♬'
         self.subtitle = [
-                colored('HISTORY', 'white', 'on_cyan') + '      RATE',
-                'HISTORY      ' + colored('RATE', 'white', 'on_cyan')
+                colored('Playlist', 'white', 'on_cyan') + ' '*5 + 'History' + ' '*5 + 'Rate',
+                'Playlist' + ' '*5 + colored('History', 'white', 'on_cyan') + ' '*5 + 'Rate',
+                'Playlist' + ' '*5 + 'History' + ' '*5 + colored('Rate', 'white', 'on_cyan')
                 ]
         # hitory 使用win.history
         self.rate = []
@@ -643,6 +643,16 @@ class History(cli.Cli):
         self.lines = []
         width = self.screen_width - 24
         if self.state == 0:
+            for index, i in enumerate(self.win.playlist):
+                line = i['title'] if len(i['title']) < width else i['title'][:width]
+                line = colored(line, 'green')
+                line = str(index) + ' ' + line
+                if i['like'] == 1:
+                    line += self.love
+                if i == self.win.playingsong:
+                    line += self.play_tag
+                self.lines.append(line)
+        elif self.state == 1:
             for index, i in enumerate(self.win.history):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
                 line = colored(line, 'green')
@@ -652,7 +662,7 @@ class History(cli.Cli):
                 if i == self.win.playingsong:
                     line += self.play_tag
                 self.lines.append(line)
-        elif self.state == 1:
+        elif self.state == 2:
             self.rate = []
             for i in reversed(self.win.history):
                 if i['like'] == 1:
@@ -670,9 +680,6 @@ class History(cli.Cli):
                     line += self.play_tag
 
                 self.lines.append(line)
-        elif self.state == 2:
-            # TODO
-            pass
         self.lines.insert(0, self.subtitle[self.state])
 
     def display_help(self):
@@ -708,8 +715,11 @@ class History(cli.Cli):
                 else:
                     self.markline = self.screen_height
                     self.topline = len(self.lines) - self.screen_height - 1
-            elif c =='h' or c == 'l':
-                self.state = 0 if self.state else 1
+            elif c =='h':
+                self.state -= 1 if self.state != 0 else -2
+                self.get_lines()
+            elif c == 'l':
+                self.state += 1 if self.state != 2 else -2
                 self.get_lines()
 
     def playsong(self):
