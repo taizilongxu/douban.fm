@@ -54,16 +54,22 @@ class Win(cli.Cli):
     def __init__(self, douban):
         # 线程锁
         self.lock_start = False  # 播放锁,play之前需要加
-        self.lock_lrc = False    # 是否显示歌词
         self.lock_rate = False   # 加心锁
-        self.lock_help = False   # 是否现实帮助
-        self.lock_history = False  # 是否现实历史记录
         self.lock_loop = False   # 循环锁
         self.lock_muted = False  # 静音锁
         self.lock_pause = True   # 暂停锁
         self.q = False           # 退出
         self.songtime = 0        # 歌曲时间
         self.playingsong = None  # 当前播放歌曲
+
+        # state
+        # 0   main
+        # 1   lrc
+        # 2   help
+        # 3   history
+        # 4   quit
+        self.state = 0
+        self.threads = []
 
         try:
             with open(self.PATH_HISTORY, 'r') as f:
@@ -115,7 +121,8 @@ class Win(cli.Cli):
 
     def thread(self, target, args=()):
         '''启动新线程'''
-        threading.Thread(target=target, args=args).start()
+        t = threading.Thread(target=target, args=args).start()
+        self.threads.append(t)
 
     def get_config(self):
         '''获取配置'''
@@ -159,7 +166,7 @@ class Win(cli.Cli):
         if self.lrc_dict:
             Lrc(self.lrc_dict, self)
         else:
-            self.lock_lrc = False
+            self.state = 0
 
     def get_title(self, time=None, rate=None, vol=None, state=None):
         # if not time:
@@ -170,9 +177,7 @@ class Win(cli.Cli):
         '''时间/音量显示线程'''
         length = len(self.TITLE)
         rest_time = 0
-        while True:
-            if self.q:  # 退出
-                break
+        while not self.q:
             if self.lock_pause:
                 continue
             if self.player.is_alive():
@@ -200,7 +205,7 @@ class Win(cli.Cli):
 
     def display(self):
         '''显示主控制界面'''
-        if not self.lock_history and not self.lock_lrc and not self.lock_help:
+        if self.state == 0:
             cli.Cli.display(self)
 
     def change_volume(self, increment):
@@ -235,7 +240,7 @@ class Win(cli.Cli):
                 # if self.q == True ,just quit
                 # if some thread called play() just pass
                 if not self.q and not self.lock_start:
-                    self.thread(self.douban.submit_music,self.playingsong)
+                    self.thread(self.douban.submit_music,args=(self.playingsong))
                     self.play()
 
     def get_playlist(self):
@@ -276,7 +281,7 @@ class Win(cli.Cli):
         self.lock_pause = False
         self.display()
 
-        if self.lock_lrc:  # 获取歌词
+        if self.state == 1:  # 获取歌词
             self.thread(self.display_lrc)
         self.lock_start = False
         # Will do nothing if not log into Last.fm
@@ -297,7 +302,7 @@ class Win(cli.Cli):
         while True:
             self.display()
             c = getch.getch()
-            if not self.lock_lrc:  # 歌词模式下除了方向键都可以用
+            if not self.state == 1:  # 歌词模式下除了方向键都可以用
                 if c == self.KEYS['UP']:
                     self.updown(-1)
                 elif c == self.KEYS['DOWN']:
@@ -309,13 +314,15 @@ class Win(cli.Cli):
                     self.markline = self.screen_height
                     self.topline = len(self._lines) - self.screen_height - 1
             if c == self.KEYS['HELP']:     # help界面
+                self.state = 2
                 Help(self)
             elif c == self.KEYS['LRC']:      # o歌词
                 self.set_lrc()
+                self.state = 1
                 self.thread(self.display_lrc)
             elif c =='e':
+                self.state = 3
                 History(self)
-
             elif c == self.KEYS['RATE']:     # r标记红心/取消标记
                 self.thread(self.set_rate)
             elif c == self.KEYS['NEXT']:     # n下一首
@@ -335,14 +342,10 @@ class Win(cli.Cli):
             elif c == self.KEYS['LOOP']:     # l单曲循环
                 self.set_loop()
             elif c == self.KEYS['QUIT']:     # q退出程序
-                if self.lock_lrc:
-                    self.lock_lrc = False
-                elif self.lock_help :
-                    self.lock_help = False
-                elif self.lock_history:
-                    self.lock_history = False
-                else:
+                if self.state == 0:
                     self.set_quit()
+                else:
+                    self.state =0
             elif c == '=' or c == '+':       # 提高音量
                 self.change_volume(1)
             elif c == '-' or c == '_':       # 降低音量
@@ -400,25 +403,32 @@ class Win(cli.Cli):
     def set_quit(self):
         '''退出播放'''
         self.q = True
+        logger.debug('finish 1')
         self.player.quit()
+        logger.debug('finish 2')
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
+        logger.debug('finish 3')
         try:
+            logger.debug('finish 4')
             if self.cover_file is not None:
                 self.cover_file.close()
             os.rmdir(self._tempdir)
         except OSError:
             pass
         # store the history of playlist
+        logger.debug('finish 5')
         with open(self.PATH_HISTORY, 'w') as f:
             pickle.dump(self.history, f)
         # stroe the token and the default info
+        logger.debug('finish 6')
         with open(self.PATH_TOKEN, 'r') as f:
             data = pickle.load(f)
             data['volume'] = self._volume
             data['channel'] = self._channel
         with open(self.PATH_TOKEN, 'w') as f:
             pickle.dump(data, f)
-        exit()
+        os._exit(0)
+
 
     @info('正在加载请稍后...')
     def set_play(self):
@@ -439,7 +449,7 @@ class Win(cli.Cli):
             self.lock_loop = False
             self.lock_start = True
             self.player.quit()
-            if not self.lock_history:
+            if self.state != 3:
                 self.playlist = self.douban.skip_song(self.playingsong)
             if self.cover_file is not None:
                 self.cover_file.close()
@@ -458,7 +468,7 @@ class Win(cli.Cli):
     @info('正在查找歌词...')
     def set_lrc(self):
         '''显示歌词'''
-        self.lock_lrc = True
+        self.state = 1
 
 
 class Lrc(cli.Cli):
@@ -492,9 +502,12 @@ class Lrc(cli.Cli):
                 return locate[0]
         return 0
 
+    def __del__(self):
+        self.win.state = 0
+
     def display_line(self):
         '''显示歌词'''
-        while self.win.lock_lrc:
+        while self.win.state == 1:
             if self.playingsong != self.win.playingsong:
                 break
             self.display()
@@ -547,14 +560,15 @@ class Help(cli.Cli):
     '''帮助界面，查看快捷键'''
     def __init__(self, win):
         self.win = win
-        self.win.lock_help = True
         self.win.thread(self.display_help)
 
     def display_help(self):
-        while self.win.lock_help:
+        while self.win.state == 2:
             self.display()
             time.sleep(1)
-        self.win.lock_help = False
+
+    def __del__(self):
+        self.win.state = 0
 
     def display(self):
         keys = self.win.KEYS
@@ -583,7 +597,6 @@ class History(cli.Cli):
     def __init__(self, win):
         self.win = win
         self.KEYS = self.win.KEYS
-        self.win.lock_history = True
         # the playlist of the history
         self.love = colored(' ♥', 'red')
         self.screen_height, self.screen_width = self.linesnum()
@@ -606,7 +619,6 @@ class History(cli.Cli):
         # 默认箭头指向第二排
         # 为tab留出空余
         self.markline = 1
-        self.display()
         self.win.thread(self.display_help)
         self.run()
 
@@ -648,7 +660,7 @@ class History(cli.Cli):
         self.lines.insert(0, self.subtitle[self.state])
 
     def display_help(self):
-        while self.win.lock_history:
+        while self.win.state == 3:
             self.get_lines()
             self.display()
             time.sleep(1)
@@ -667,7 +679,7 @@ class History(cli.Cli):
             elif c == self.KEYS['DOWN']:
                 self.updown(1)
             elif c == self.KEYS['QUIT']:
-                self.win.lock_history = False
+                self.win.state = 0
                 break
             elif c == ' ':
                 self.playsong()
