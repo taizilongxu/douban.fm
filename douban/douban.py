@@ -232,7 +232,7 @@ class Win(cli.Cli):
                 # if self.q == True ,just quit
                 # if some thread called play() just pass
                 if not self.q and not self.lock_start:
-                    self.thread(self.douban.submit_music,args=(self.playingsong))
+                    self.thread(self.douban.submit_music,args=(self.playingsong,))
                     self.play()
 
     def get_playlist(self):
@@ -312,7 +312,7 @@ class Win(cli.Cli):
                 self.set_lrc()
                 self.state = 1
                 self.thread(self.display_lrc)
-            elif c =='p':
+            elif c =='e':
                 self.state = 3
                 History(self)
             elif c == self.KEYS['RATE']:     # r标记红心/取消标记
