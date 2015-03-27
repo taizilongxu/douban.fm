@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# encoding: utf-8
 """
 豆瓣FM的网络连接部分
 主要完成登录部分
@@ -6,7 +7,27 @@
 douban = douban_token.Doubanfm()
 douban.init_login()  #登录
 
-self.login_data只保存登录返回的信息
+playingsong =
+{
+    "album": "/subject/5952615/",
+    "picture": "http://img3.douban.com/mpic/s4616653.jpg",
+    "ssid": "e1b2",
+    "artist": "Bruno Mars / B.o.B",
+    "url": "http://mr3.douban.com/201308250247/4a3de2e8016b5d659821ec76e6a2f35d/view/song/small/p1562725.mp3",
+    "company": "EMI",
+    "title": "Nothin' On You",
+    "rating_avg": 4.04017,
+    "length": 267,
+    "subtype": "",
+    "public_time": "2011",
+    "sid": "1562725",
+    "aid": "5952615",
+    "sha256": "2422b6fa22611a7858060fd9c238e679626b3173bb0d161258b4175d69f17473",
+    "kbps": "64",
+    "albumtitle": "2011 Grammy Nominees",
+    "like": 1
+}
+
 """
 from functools import wraps
 from scrobbler import Scrobbler
@@ -313,3 +334,13 @@ LRC = o
         except requests.exceptions.RequestException:
             logger.error('Get lyric failed!')
             return 0
+
+def main():
+    douban = Doubanfm()
+    douban.init_login()  #登录
+    print douban.login_data
+    print douban.channels
+    print douban.get_playlist(-3)
+
+if __name__ == '__main__':
+    main()
