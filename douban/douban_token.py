@@ -274,7 +274,7 @@ LRC = o
         s = self.requests_url('u', sid=playingsong['sid'])
         # self.playlist = eval(s)['song']
 
-    def end_music(self, playingsong):
+    def submit_music(self, playingsong):
         '''歌曲结束标记'''
         self.requests_url('e', sid=playingsong['sid'])
 

@@ -235,7 +235,7 @@ class Win(cli.Cli):
                 # if self.q == True ,just quit
                 # if some thread called play() just pass
                 if not self.q and not self.lock_start:
-                    self.thread(self.douban.end_music,self.playingsong)
+                    self.thread(self.douban.submit_music,self.playingsong)
                     self.play()
 
     def get_playlist(self):
@@ -606,6 +606,7 @@ class History(cli.Cli):
         # 默认箭头指向第二排
         # 为tab留出空余
         self.markline = 1
+        self.display()
         self.win.thread(self.display_help)
         self.run()
 
