@@ -76,7 +76,8 @@ class Win(cli.Cli):
 
         # default volume
         self._volume = douban.default_volume
-        self.get_config()  # 快捷键配置
+        # 快捷键配置
+        self.get_config()
 
         self.douban = douban
 
@@ -87,6 +88,7 @@ class Win(cli.Cli):
 
         self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
 
+        # 桌面通知
         self._tempdir = tempfile.mkdtemp()
         self.cover_file = None
         self.has_cover = False
@@ -312,7 +314,7 @@ class Win(cli.Cli):
                 self.set_lrc()
                 self.state = 1
                 self.thread(self.display_lrc)
-            elif c =='e':
+            elif c =='e' and self.state == 0:
                 self.state = 3
                 History(self)
             elif c == self.KEYS['RATE']:     # r标记红心/取消标记
