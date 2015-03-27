@@ -161,6 +161,11 @@ class Win(cli.Cli):
         else:
             self.lock_lrc = False
 
+    def get_title(self, time=None, rate=None, vol=None, state=None):
+        # if not time:
+            # time = 
+        pass
+
     def display_time(self):
         '''时间/音量显示线程'''
         length = len(self.TITLE)
@@ -588,6 +593,10 @@ class History(cli.Cli):
         self.state = 0
         self.subtitle = ['history_          rate', 'history           rate_']
         self.play_tag = '♬♬♬♬♬♬'
+        self.subtitle = [
+                colored('HISTORY', 'white', 'on_cyan') + '      RATE',
+                'HISTORY      ' + colored('RATE', 'white', 'on_cyan')
+                ]
         # hitory 使用win.history
         self.rate = []
         self.playlist = []
@@ -685,6 +694,7 @@ class History(cli.Cli):
         elif self.state == 1:
             self.win.playlist = self.rate[self.displayline-1:]
         elif self.state == 2:
+            # TODO
             pass
         self.win.set_next()
 
