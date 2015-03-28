@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""
-豆瓣FM主程序
+""" 豆瓣FM主程序
 """
 import cli  # UI
 import douban_token  # network
@@ -22,7 +21,7 @@ logging.basicConfig(
     format='%(asctime)s - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%I:%S',
     filename=os.path.expanduser('~/.doubanfm.log'),
-    level=logging.DEBUG
+    level=logging.CRITICAL
 )
 
 logger = logging.getLogger()
@@ -163,8 +162,6 @@ class Win(cli.Cli):
             self.state = 0
 
     def get_title(self, time=None, rate=None, vol=None, state=None):
-        # if not time:
-            # time = 
         pass
 
     def display_time(self):
@@ -209,7 +206,7 @@ class Win(cli.Cli):
         else:
             self._volume -= 5
         self._volume = max(min(self._volume, 100),0)
-        self.lock_muted = True if self._volume == 0 else False
+        self.lock_muted = True if self._volume else False
         self.player.set_volume(self._volume)
 
     def mute(self):
@@ -728,14 +725,13 @@ class History(cli.Cli):
         # get the line num of the list
         self.displaysong()
         if self.state == 0:
+            return
+        elif self.state == 1:
             # 如果在历史列表里播放,只在win.playlist里插入一首歌曲
             # 播放完毕继续
             self.win.playlist.insert(0, self.win.history[self.markline + self.topline -1])
-        elif self.state == 1:
-            self.win.playlist = self.rate[self.displayline-1:]
         elif self.state == 2:
-            # TODO
-            pass
+            self.win.playlist = self.rate[self.displayline-1:]
         self.win.set_next()
 
 def main():

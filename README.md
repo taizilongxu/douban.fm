@@ -2,18 +2,43 @@
 
 终端上的豆瓣FM
 
-### Screenshots
+### Features
 
-![screenshot](https://raw.githubusercontent.com/taizilongxu/douban.fm/master/img/doubanfm.gif)
+V0.3.0
+
+主界面
+
+![](img/3.1.png)
+
+歌词
+
+![](img/3.2.png)
+
+按键设置
+
+![](img/3.3.png)
+
+这里默认e键进入playlist
+
+![](img/3.4.png)
+
+可以按hl进行左右标签页切换,同时g和G切换到顶部和底部.注意这里按空格会播放选中歌曲,播放完毕后切换回频道歌曲.
+
+![](img/3.5.png)
+
+这里空格键将会播放选中歌曲以下的所有歌曲,播放完毕返回频道
+
+![](img/3.6.png)
+
+退出界面
+
+![](img/3.7.png)
 
 
 ### Support
 
 Linux / OS X
 
-### Do something cool!
-
-其实Node.js版本已经很好了,功能齐全,但是我发现在我的zsh + tmux环境下颜色竟然显示不出来,感觉很蛋疼.
 
 ### Installation
 
@@ -156,7 +181,7 @@ HELP = h     # 查看帮助
 
 ###Log
 
-V0.2.16 beta 音量调节转换为 mplayer 音量内部调节
+V0.3.0 改进mplayer交互,歌词匹配更准确,增加了Playlist,History,Rate几个标签页,音量调节转换为 mplayer 音量内部调节,退出时会保存频道和音量,等等
 
 V0.2.15 支持 last.fm ,增加显示
 
