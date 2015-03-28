@@ -206,7 +206,7 @@ class Win(cli.Cli):
         else:
             self._volume -= 5
         self._volume = max(min(self._volume, 100),0)
-        self.lock_muted = True if self._volume else False
+        self.lock_muted = False if self._volume else True
         self.player.set_volume(self._volume)
 
     def mute(self):
