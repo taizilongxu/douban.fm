@@ -18,10 +18,11 @@ import cPickle as pickle
 import mplayer
 
 logging.basicConfig(
-    format='%(asctime)s - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%d %H:%I:%S',
-    filename=os.path.expanduser('~/.doubanfm.log'),
-    level=logging.CRITICAL
+    format = '%(asctime)s\
+        - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
+    datefmt = '%Y-%m-%d %H:%I:%S',
+    filename = os.path.expanduser('~/.doubanfm.log'),
+    level = logging.CRITICAL
 )
 
 logger = logging.getLogger()
@@ -132,7 +133,8 @@ class Win(cli.Cli):
     def init_notification(self):
         '''第一次桌面通知时加入图片'''
         old_title = self.playingsong['title']
-        self.cover_file = tempfile.NamedTemporaryFile(suffix='.jpg', dir=self._tempdir)
+        self.cover_file = tempfile.NamedTemporaryFile(
+                suffix='.jpg', dir=self._tempdir)
         if not self.douban.get_pic(self.playingsong, self.cover_file.name):
             return
         title = self.playingsong['title']
@@ -162,13 +164,15 @@ class Win(cli.Cli):
         else:
             self.state = 0
 
-    def get_title(self, time=None, rate=None, vol=None, state=None):
+    def get_title(self, songtime=None, kbps=None, vol=None, state=None):
         pass
 
     def display_time(self):
         '''时间/音量显示线程'''
         length = len(self.TITLE)
         rest_time = 0
+        cyan = lambda x: colored(x, 'cyan')
+        red = lambda x: colored(x, 'red')
         while not self.q:
             if self.lock_pause:
                 continue
@@ -176,6 +180,7 @@ class Win(cli.Cli):
                 songtime = self.player.time_pos
                 if songtime:
                     self.songtime = songtime
+                # 181s -> 03:01
                 rest_time = \
                     int(self.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
@@ -185,10 +190,10 @@ class Win(cli.Cli):
                 self.TITLE = \
                     self.TITLE[:length - 1] + ' ' + \
                     self.playingsong['kbps'] + 'kbps ' + \
-                    colored(show_time, 'cyan') + ' rate:' + \
-                    colored(self.RATE[int(round(self.playingsong['rating_avg'])) - 1], 'red') + ' vol:'
-                self.TITLE += colored('✖', 'red') if self.lock_muted else str(self._volume) + '%'
-                self.TITLE += '  ' + colored('↺', 'red') if self.lock_loop else '  ' + colored('→', 'red')
+                    cyan(show_time) + ' rate:' + \
+                    red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1]) + ' vol:'
+                self.TITLE += red('✖') if self.lock_muted else str(self._volume) + '%'
+                self.TITLE += '  ' + red('↺') if self.lock_loop else '  ' + red('→')
                 self.TITLE += '\r'
                 self.display()
             else:
@@ -251,7 +256,8 @@ class Win(cli.Cli):
         self.songtime = 0  # 重置歌曲时间
         self.playingsong = self.get_song()
         if not self.lock_loop:
-            self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S",\
+                    time.localtime())
             self.history.insert(0, self.playingsong)
         song = self.playingsong
 
@@ -264,7 +270,11 @@ class Win(cli.Cli):
         title = colored(song['title'], 'green')
         albumtitle = colored(song['albumtitle'], 'yellow')
         artist = colored(song['artist'], 'white')
-        self.SUFFIX_SELECTED = (love + title + ' •' + albumtitle + ' •' + artist + ' ' + song['public_time']).replace('\\', '')
+        self.SUFFIX_SELECTED = (love +\
+                title + ' •' +\
+                albumtitle + ' •' +\
+                artist + ' ' +\
+                song['public_time']).replace('\\', '')
         volume = 0 if self.lock_muted else self._volume
 
         # add the volume when the song is start
@@ -389,7 +399,8 @@ class Win(cli.Cli):
     def set_url(self):
         '''打开豆瓣网页'''
         import webbrowser
-        url = "http://music.douban.com" + self.playingsong['album'].replace('\/', '/')
+        url = "http://music.douban.com" +\
+                self.playingsong['album'].replace('\/', '/')
         webbrowser.open(url)
         self.display()
 
@@ -489,7 +500,8 @@ class Lrc(cli.Cli):
     def find_line(self):
         '''第一次载入时查找歌词'''
         for now_time in reversed(range(self.song_time)):
-            locate = [index for index, i in enumerate(self.sort_lrc_dict) if i[0] == now_time]  # 查找歌词在self.sort_lrc_dict中的位置
+            locate = [index for index, i in enumerate(self.sort_lrc_dict)\
+                    if i[0] == now_time]  # 查找歌词在self.sort_lrc_dict中的位置
             if locate:
                 return locate[0]
         return 0
@@ -526,7 +538,8 @@ class Lrc(cli.Cli):
                     linenum - self.screen_height/2 >= len(self.lines) - self.markline:
                 print '\r'
             else:
-                line = self.lines[self.markline - (self.screen_height/2 - linenum)].strip()
+                line = self.lines[self.markline -\
+                        (self.screen_height/2 - linenum)].strip()
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
                 if linenum == self.screen_height/2:
@@ -538,7 +551,10 @@ class Lrc(cli.Cli):
 
         # 歌曲信息居中
         song = self.win.playingsong
-        tmp = (song['title'] + song['albumtitle'] + song['artist'] + song['public_time']).replace('\\', '').strip()
+        tmp = (song['title'] +\
+               song['albumtitle'] +\
+               song['artist'] +\
+               song['public_time']).replace('\\', '').strip()
         tmp = unicode(tmp, 'utf-8')
         l = self.center_num(tmp) + 7  # 7个固定字符
         if song['like']:
@@ -731,7 +747,8 @@ class History(cli.Cli):
         elif self.state == 1:
             # 如果在历史列表里播放,只在win.playlist里插入一首歌曲
             # 播放完毕继续
-            self.win.playlist.insert(0, self.win.history[self.markline + self.topline - 1])
+            self.win.playlist.insert(0,\
+                    self.win.history[self.markline + self.topline - 1])
         elif self.state == 2:
             self.win.playlist = self.rate[self.displayline-1:]
         self.win.set_next()
