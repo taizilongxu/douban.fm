@@ -597,14 +597,15 @@ class Quit(Help):
     def display(self):
         for i in range(self.screen_height):
             if i == self.screen_height / 2:
-                print ' '*((self.screen_width - 18)/2) + colored('Are you sure?(y/n)', 'red'),
+                print ' ' * ((self.screen_width - 18)/2) \
+                    + colored('Are you sure? (y/n)', 'red'),
             else:
                 print
 
     def run(self):
         '''界面执行程序'''
         c = getch.getch()
-        if c == 'y':
+        if c == 'y' or c == 'Y':
             self.win.set_quit()
 
 
