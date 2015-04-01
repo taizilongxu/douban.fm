@@ -26,6 +26,7 @@ logging.basicConfig(
 
 logger = logging.getLogger()
 
+
 class Win(cli.Cli):
     '''窗体及播放控制'''
     PATH_HISTORY = os.path.expanduser('~/.douban_history')
@@ -205,7 +206,7 @@ class Win(cli.Cli):
             self._volume += 5
         else:
             self._volume -= 5
-        self._volume = max(min(self._volume, 100),0)
+        self._volume = max(min(self._volume, 100), 0)
         self.lock_muted = True if self._volume else False
         self.player.set_volume(self._volume)
 
@@ -231,7 +232,7 @@ class Win(cli.Cli):
                 # if self.q == True ,just quit
                 # if some thread called play() just pass
                 if not self.q and not self.lock_start:
-                    self.thread(self.douban.submit_music,args=(self.playingsong,))
+                    self.thread(self.douban.submit_music, args=(self.playingsong,))
                     self.play()
 
     def get_playlist(self):
@@ -311,7 +312,7 @@ class Win(cli.Cli):
                 self.set_lrc()
                 self.state = 1
                 self.thread(self.display_lrc)
-            elif c =='e' and self.state == 0:
+            elif c == 'e' and self.state == 0:
                 self.state = 3
                 History(self)
             elif c == self.KEYS['RATE']:     # r标记红心/取消标记
@@ -337,7 +338,7 @@ class Win(cli.Cli):
                     self.state = 4
                     Quit(self)
                 else:
-                    self.state =0
+                    self.state = 0
             elif c == '=' or c == '+':       # 提高音量
                 self.change_volume(1)
             elif c == '-' or c == '_':       # 降低音量
@@ -421,7 +422,6 @@ class Win(cli.Cli):
             pickle.dump(data, f)
         os._exit(0)
 
-
     @info('正在加载请稍后...')
     def set_play(self):
         '''开始播放'''
@@ -452,7 +452,7 @@ class Win(cli.Cli):
     def set_bye(self):
         '''不再播放并进入下一曲'''
         if self.playingsong:
-            self.lock_start =  True # 每个play前需self.start置0
+            self.lock_start = True  # 每个play前需self.start置0
             self.player.quit()
             self.playlist = self.douban.bye(self.playingsong)
             self.play()
@@ -584,9 +584,9 @@ class Help(cli.Cli):
         print ' '*5 + colored('歌词', 'green') + '\r'
         print ' '*5 + '[%(LRC)s] ---> 歌词' % keys + '\r'
 
+
 class Quit(Help):
     '''退出界面'''
-
     def __init__(self, win):
         self.win = win
         subprocess.check_call('clear', shell=True)
@@ -606,6 +606,7 @@ class Quit(Help):
         c = getch.getch()
         if c == 'y':
             self.win.set_quit()
+
 
 class History(cli.Cli):
     '''历史记录'''
@@ -714,7 +715,7 @@ class History(cli.Cli):
                 else:
                     self.markline = self.screen_height
                     self.topline = len(self.lines) - self.screen_height - 1
-            elif c =='h':
+            elif c == 'h':
                 self.state -= 1 if self.state != 0 else -2
                 self.get_lines()
             elif c == 'l':
@@ -729,14 +730,15 @@ class History(cli.Cli):
         elif self.state == 1:
             # 如果在历史列表里播放,只在win.playlist里插入一首歌曲
             # 播放完毕继续
-            self.win.playlist.insert(0, self.win.history[self.markline + self.topline -1])
+            self.win.playlist.insert(0, self.win.history[self.markline + self.topline - 1])
         elif self.state == 2:
             self.win.playlist = self.rate[self.displayline-1:]
         self.win.set_next()
 
+
 def main():
     douban = douban_token.Doubanfm()
-    douban.init_login()  #登录
+    douban.init_login()  # 登录
     Win(douban)
 
 if __name__ == '__main__':

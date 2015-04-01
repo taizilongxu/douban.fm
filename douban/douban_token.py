@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # encoding: utf-8
 """
 豆瓣FM的网络连接部分
@@ -62,11 +62,11 @@ class Doubanfm(object):
         self.login_lastfm()  # 登陆 last.fm
         print '\033[31m♥\033[0m Get channels ',
         # self.get_channels()  # 获取频道列表
-        print '[\033[32m ok \033[0m]'
+        print '[\033[32m OK \033[0m]'
         # self.get_channellines()  # 重构列表用以显示
-        print '\033[31m♥\033[0m Check pro ',
+        print '\033[31m♥\033[0m Check PRO ',
         # self.is_pro()
-        print '[\033[32m ok \033[0m]'
+        print '[\033[32m OK \033[0m]'
         # if self.pro == 1:
         #     self.login_data['kbps'] = 192  # 128 64 歌曲kbps的选择
 
@@ -79,27 +79,27 @@ class Doubanfm(object):
 
     def win_login(self):
         '''登陆界面'''
-        email = raw_input('email:')
-        password = getpass.getpass('password:')
+        email = raw_input('Email:')
+        password = getpass.getpass('Password:')
         return email, password
 
     def login_lastfm(self):
-        '''last.fm登陆'''
+        '''Last.fm登陆'''
         if self.lastfm and self.last_fm_username and self.last_fm_password:
             self.scrobbler = Scrobbler(
                 self.last_fm_username, self.last_fm_password)
             r, err = self.scrobbler.handshake()
             if r:
-                logger.info("Last.fm logged success!")
-                print '\033[31m♥\033[0m Loging Last.fm : %s' % self.last_fm_username
+                logger.info("Last.fm login succeeds!")
+                print '\033[31m♥\033[0m Last.fm logged in: %s' % self.last_fm_username
             else:
-                logger.error("Last.fm 登录失败: " + err)
+                logger.error("Last.fm login fails: " + err)
                 self.lastfm = False
         else:
             self.lastfm = False
 
     def last_fm_account_required(fun):
-        '''装饰器，用于需要登录last.fm后才能使用的接口'''
+        '''装饰器，用于需要登录Last.fm后才能使用的接口'''
         @wraps(fun)
         def wrapper(self, *args, **kwds):
             if not self.lastfm:
@@ -141,25 +141,25 @@ class Doubanfm(object):
                 self.user_id = self.login_data['user_id']
                 self.expire = self.login_data['expire']
                 self.default_volume = int(self.login_data['volume'])\
-                        if 'volume' in self.login_data else 50
+                    if 'volume' in self.login_data else 50
                 self.default_channel = int(self.login_data['channel'])\
-                        if 'channel' in self.login_data else 1
+                    if 'channel' in self.login_data else 1
 
                 # 存储的default_channel是行数而不是真正发送数据的channel_id
                 # 这里需要进行转化一下
                 self.set_channel(self.default_channel)
-            print '\033[31m♥\033[0m Get local token - user_name: \033[33m%s\033[0m' % self.user_name
+            print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' % self.user_name
         else:
             # 未登陆
-            logger.info('First time logging in douban.fm')
+            logger.info('First time logging in Douban.fm')
             while True:
                 self.email, self.password = self.win_login()
                 login_data = {
-                        'app_name': 'radio_desktop_win',
-                        'version': '100',
-                        'email': self.email,
-                        'password': self.password
-                        }
+                    'app_name': 'radio_desktop_win',
+                    'version': '100',
+                    'email': self.email,
+                    'password': self.password
+                }
                 s = requests.post('http://www.douban.com/j/app/login', login_data)
                 dic = eval(s.text)
                 if dic['r'] == 1:
@@ -215,7 +215,7 @@ class Doubanfm(object):
         # 配置文件
         path_config = os.path.expanduser('~/.doubanfm_config')
         if not os.path.exists(path_config):
-            print '\033[31m♥\033[0m Get default config [\033[32m ok \033[0m]'
+            print '\033[31m♥\033[0m Get default config [\033[32m OK \033[0m]'
             config = '''[key]
 UP = k
 DOWN = j
@@ -234,7 +234,7 @@ LRC = o
             with open(path_config, 'w') as F:
                 F.write(config)
         else:
-            print '\033[31m♥\033[0m Get local config [\033[32m ok \033[0m]'
+            print '\033[31m♥\033[0m Get local config [\033[32m OK \033[0m]'
 
     @property
     def channels(self):
@@ -335,9 +335,10 @@ LRC = o
             logger.error('Get lyric failed!')
             return 0
 
+
 def main():
     douban = Doubanfm()
-    douban.init_login()  #登录
+    douban.init_login()  # 登录
     print douban.login_data
     print douban.channels
     print douban.get_playlist(-3)
