@@ -181,20 +181,20 @@ class Win(cli.Cli):
                 if songtime:
                     self.songtime = songtime
                 # 181s -> 03:01
-                rest_time = \
-                    int(self.playingsong['length']) - self.songtime
+                rest_time = int(self.playingsong['length']) - self.songtime
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
+                kbps = self.playingsong['kbps'] + 'kbps'
+                show_time = cyan(show_time)
+                rate = red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1])
+                vol = red('✖') if self.lock_muted else str(self._volume) + '%'
+                loop = red('↺') if self.lock_loop else red('→')
+                title =[kbps, show_time, rate, vol, loop]
+
                 self.TITLE = \
-                    self.TITLE[:length - 1] + ' ' + \
-                    self.playingsong['kbps'] + 'kbps ' + \
-                    cyan(show_time) + ' rate:' + \
-                    red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1]) + ' vol:'
-                self.TITLE += red('✖') if self.lock_muted else str(self._volume) + '%'
-                self.TITLE += '  ' + red('↺') if self.lock_loop else '  ' + red('→')
-                self.TITLE += '\r'
+                        self.TITLE[:length - 1] + ' ' + ' '.join(title) + '\r'
                 self.display()
             else:
                 self.TITLE = self.TITLE[:length]
@@ -660,6 +660,7 @@ class History(cli.Cli):
         self.lines = []
         width = self.screen_width - 24
         if self.state == 0:
+            # 播放列表
             for index, i in enumerate(self.win.playlist):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
                 line = colored(line, 'green')
@@ -670,6 +671,7 @@ class History(cli.Cli):
                     line += self.play_tag
                 self.lines.append(line)
         elif self.state == 1:
+            # 历史列表
             for index, i in enumerate(self.win.history):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
                 line = colored(line, 'green')
@@ -680,6 +682,7 @@ class History(cli.Cli):
                     line += self.play_tag
                 self.lines.append(line)
         elif self.state == 2:
+            # 红心列表
             self.rate = []
             for i in reversed(self.win.history):
                 if i['like'] == 1:
@@ -691,8 +694,7 @@ class History(cli.Cli):
             for index, i in enumerate(self.rate):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
                 line = colored(line, 'green')
-                line = str(index) + ' ' + line
-                line += self.love
+                line = str(index) + ' ' + line + self.love
                 if i == self.win.playingsong:
                     line += self.play_tag
 
