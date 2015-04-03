@@ -50,6 +50,7 @@ class Win(cli.Cli):
         }
     FNULL = open(os.devnull, 'w')
     RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
+    PRO = colored(' PRO ', attrs=['reverse'])
 
     def __init__(self, douban):
         # 线程锁
@@ -85,7 +86,6 @@ class Win(cli.Cli):
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
             else colored(' Last.fm ', 'yellow')
-        # PRO = '' if self.douban.pro == 0 else colored(' PRO ', attrs=['reverse'])
 
         self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
 
@@ -181,18 +181,23 @@ class Win(cli.Cli):
                 if songtime:
                     self.songtime = songtime
                 # 181s -> 03:01
-                rest_time = int(self.playingsong['length']) - self.songtime
+                rest_time = int(self.playingsong['length']) - self.songtime - 1
                 minute = int(rest_time) / 60
                 sec = int(rest_time) % 60
                 show_time = str(minute).zfill(2) + ':' + str(sec).zfill(2)
 
-                kbps = self.playingsong['kbps'] + 'kbps'
-                show_time = cyan(show_time)
-                rate = red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1])
-                vol = red('✖') if self.lock_muted else str(self._volume) + '%'
-                loop = red('↺') if self.lock_loop else red('→')
-                title =[kbps, show_time, rate, vol, loop]
-
+                title_pro = '' if self.playingsong['kbps'] == '64' else self.PRO
+                title_kbps = self.playingsong['kbps'] + 'kbps'
+                title_time = cyan(show_time)
+                title_rate = red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1])
+                title_vol = red('✖') if self.lock_muted else str(self._volume) + '%'
+                title_loop = red('↺') if self.lock_loop else red('→')
+                title =[title_pro,\
+                        title_kbps,\
+                        title_time,\
+                        title_rate,\
+                        title_vol,\
+                        title_loop]
                 self.TITLE = \
                         self.TITLE[:length - 1] + ' ' + ' '.join(title) + '\r'
                 self.display()

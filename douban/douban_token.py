@@ -67,15 +67,6 @@ class Doubanfm(object):
         print '\033[31m♥\033[0m Check PRO ',
         # self.is_pro()
         print '[\033[32m OK \033[0m]'
-        # if self.pro == 1:
-        #     self.login_data['kbps'] = 192  # 128 64 歌曲kbps的选择
-
-    # def is_pro(self):
-    #     '''查看是否是pro用户'''
-    #     self.get_playlist()
-    #     self.get_song()
-    #     if int(self.playingsong['kbps']) != 64:
-    #         self.pro = 1
 
     def win_login(self):
         '''登陆界面'''
