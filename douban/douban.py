@@ -282,7 +282,7 @@ class Win(cli.Cli):
         self.thread(self.init_notification)  # 桌面通知
 
         if song['like'] == 1:
-            love = self.love
+            love = self.love + ' '
         else:
             love = ''
         title = colored(song['title'], 'green')
