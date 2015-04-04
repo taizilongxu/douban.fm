@@ -1,13 +1,11 @@
 # Scrobbler protocol v1.2
 # See http://www.audioscrobbler.net/development/protocol/
-import logging
-
 from hashlib import md5
 from time import time
-
+import logging
 import requests
 
-logger = logging.getLogger()
+logger = logging.getLogger('doubanfm.scrobbler')
 
 
 class Scrobbler(object):

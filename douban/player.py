@@ -9,7 +9,7 @@ import abc
 import fcntl
 import os
 
-logger = logging.getLogger('douban.fm')
+logger = logging.getLogger('doubanfm.player')
 
 
 class NotPlayingError(Exception):

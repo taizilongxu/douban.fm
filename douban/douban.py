@@ -2,30 +2,36 @@
 # -*- coding: utf-8 -*-
 """ 豆瓣FM主程序
 """
-import cli  # UI
-import douban_token  # network
-import getch  # get char
+# Local
+import cli              # UI
+import douban_token     # network
+import getch            # getchar
+import player           # player
+import notification     # desktop notification
+# System
 import subprocess
 from termcolor import colored
-import notification
 import threading
 import time
 import os
+import sys
 import tempfile
 import ConfigParser
 import logging
 import cPickle as pickle
-import player
 
+# root logger config
 logging.basicConfig(
     format="%(asctime)s - \
 [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s",
     datefmt='%Y-%m-%d %H:%I:%S',
     filename=os.path.expanduser('~/.doubanfm.log'),
-    level=logging.DEBUG
+    level=logging.WARNING
 )
 
-logger = logging.getLogger()
+# Set up our own logger
+logger = logging.getLogger('doubanfm')
+logger.setLevel(logging.INFO)
 
 
 class Win(cli.Cli):
@@ -291,7 +297,7 @@ class Win(cli.Cli):
         ).replace('\\', '')
         volume = 0 if self.lock_muted else self._volume
 
-        # add the volume when the song is start
+        logger.debug("Start playing %s - %s." % (song['artist'], song['title']))
         self.player.start(song['url'].replace('\\', ''))
 
         self.lock_pause = False
@@ -421,31 +427,29 @@ class Win(cli.Cli):
     def set_quit(self):
         '''退出播放'''
         self.q = True
-        logger.debug('finish 1')
         self.player.quit()
-        logger.debug('finish 2')
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
-        logger.debug('finish 3')
+        logger.debug('Terminal reset.')
         try:
-            logger.debug('finish 4')
             if self.cover_file is not None:
                 self.cover_file.close()
             os.rmdir(self._tempdir)
+            logger.debug('Temporary files removed.')
         except OSError:
             pass
         # store the history of playlist
-        logger.debug('finish 5')
         with open(self.PATH_HISTORY, 'w') as f:
             pickle.dump(self.history, f)
+        logger.debug('History saved.')
         # stroe the token and the default info
-        logger.debug('finish 6')
         with open(self.PATH_TOKEN, 'r') as f:
             data = pickle.load(f)
             data['volume'] = self._volume
             data['channel'] = self._channel
         with open(self.PATH_TOKEN, 'w') as f:
             pickle.dump(data, f)
-        os._exit(0)
+        logger.debug('Settings saved.')
+        sys.exit(0)
 
     @info('正在加载请稍后...')
     def set_play(self):
@@ -647,7 +651,7 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         # the playlist of the history
-        self.love = colored(' ♥', 'red')
+        self.love = colored(' ♥ ', 'red')
         self.screen_height, self.screen_width = self.linesnum()
 
         # 3个tab, playlist thistory rate
