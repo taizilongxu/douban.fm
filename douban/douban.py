@@ -2,30 +2,36 @@
 # -*- coding: utf-8 -*-
 """ 豆瓣FM主程序
 """
-import cli  # UI
-import douban_token  # network
-import getch  # get char
+# Local
+import cli              # UI
+import douban_token     # network
+import getch            # getchar
+import player           # player
+import notification     # desktop notification
+# System
 import subprocess
 from termcolor import colored
-import notification
 import threading
 import time
 import os
+import sys
 import tempfile
 import ConfigParser
 import logging
 import cPickle as pickle
-import mplayer
 
+# root logger config
 logging.basicConfig(
-    format = '%(asctime)s\
-        - [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s',
-    datefmt = '%Y-%m-%d %H:%I:%S',
-    filename = os.path.expanduser('~/.doubanfm.log'),
-    level = logging.CRITICAL
+    format="%(asctime)s - \
+[%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s",
+    datefmt='%Y-%m-%d %H:%I:%S',
+    filename=os.path.expanduser('~/.doubanfm.log'),
+    level=logging.WARNING
 )
 
-logger = logging.getLogger()
+# Set up our own logger
+logger = logging.getLogger('doubanfm')
+logger.setLevel(logging.INFO)
 
 
 class Win(cli.Cli):
@@ -73,15 +79,17 @@ class Win(cli.Cli):
         except IOError:
             self.history = []
 
-        # mplayer controler
-        self.player = mplayer.Player()
+        self.douban = douban
 
         # default volume
         self._volume = douban.default_volume
+
+        # player controler
+        self._player_exit_event = threading.Event()
+        self.player = player.MPlayer(self._player_exit_event, self._volume)
+
         # 快捷键配置
         self.get_config()
-
-        self.douban = douban
 
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
@@ -176,7 +184,7 @@ class Win(cli.Cli):
         while not self.q:
             if self.lock_pause:
                 continue
-            if self.player.is_alive():
+            if self.player.is_alive:
                 songtime = self.player.time_pos
                 if songtime:
                     self.songtime = songtime
@@ -192,14 +200,16 @@ class Win(cli.Cli):
                 title_rate = red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1])
                 title_vol = red('✖') if self.lock_muted else str(self._volume) + '%'
                 title_loop = red('↺') if self.lock_loop else red('→')
-                title =[title_pro,\
-                        title_kbps,\
-                        title_time,\
-                        title_rate,\
-                        title_vol,\
-                        title_loop]
+                title = [
+                    title_pro,
+                    title_kbps,
+                    title_time,
+                    title_rate,
+                    title_vol,
+                    title_loop
+                ]
                 self.TITLE = \
-                        self.TITLE[:length - 1] + ' ' + ' '.join(title) + '\r'
+                    self.TITLE[:length - 1] + ' ' + ' '.join(title) + '\r'
                 self.display()
             else:
                 self.TITLE = self.TITLE[:length]
@@ -216,7 +226,7 @@ class Win(cli.Cli):
             self._volume += 5
         else:
             self._volume -= 5
-        self._volume = max(min(self._volume, 100),0)
+        self._volume = max(min(self._volume, 100), 0)
         self.lock_muted = False if self._volume else True
         self.player.set_volume(self._volume)
 
@@ -235,15 +245,18 @@ class Win(cli.Cli):
     def watchdog(self):
         '''守护线程，检查歌曲是否播放完毕'''
         while not self.q:
-            if self.player.is_alive():
-                # wait the mplayer process until killed
-                self.player.proc.wait()
-                logger.debug('pass')
-                # if self.q == True ,just quit
-                # if some thread called play() just pass
-                if not self.q and not self.lock_start:
-                    self.thread(self.douban.submit_music, args=(self.playingsong,))
-                    self.play()
+            if not self.player.is_alive:
+                # Reduce some CPU use (useful when player not yet started)
+                time.sleep(1)
+            logger.debug('Wait till player exit.')
+            self._player_exit_event.wait()      # Wait for event
+            self._player_exit_event.clear()     # Clear the event
+            logger.debug('Noticed player exit.')
+            # If self.q (about to quit), just quit
+            # If some thread has already called play(), just pass
+            if not self.q and not self.lock_start:
+                self.thread(self.douban.submit_music, args=(self.playingsong,))
+                self.play()
 
     def get_playlist(self):
         self.playlist = self.douban.get_playlist(self._channel)
@@ -261,29 +274,31 @@ class Win(cli.Cli):
         self.songtime = 0  # 重置歌曲时间
         self.playingsong = self.get_song()
         if not self.lock_loop:
-            self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S",\
-                    time.localtime())
+            self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S",
+                                                     time.localtime())
             self.history.insert(0, self.playingsong)
         song = self.playingsong
 
         self.thread(self.init_notification)  # 桌面通知
 
         if song['like'] == 1:
-            love = self.love
+            love = self.love + ' '
         else:
             love = ''
         title = colored(song['title'], 'green')
         albumtitle = colored(song['albumtitle'], 'yellow')
         artist = colored(song['artist'], 'white')
-        self.SUFFIX_SELECTED = (love +\
-                title + ' •' +\
-                albumtitle + ' •' +\
-                artist + ' ' +\
-                song['public_time']).replace('\\', '')
+        self.SUFFIX_SELECTED = (
+            love +
+            title + ' •' +
+            albumtitle + ' •' +
+            artist + ' ' +
+            song['public_time']
+        ).replace('\\', '')
         volume = 0 if self.lock_muted else self._volume
 
-        # add the volume when the song is start
-        self.player.spawn(song['url'], volume)
+        logger.debug("Start playing %s - %s." % (song['artist'], song['title']))
+        self.player.start(song['url'].replace('\\', ''))
 
         self.lock_pause = False
         self.display()
@@ -302,7 +317,7 @@ class Win(cli.Cli):
         else:
             self.send_notify(content='暂停播放')
             self.lock_pause = True
-        self.player.set_pause()
+        self.player.pause()
 
     def run(self):
         '''主交互逻辑 (key event loop)'''
@@ -404,39 +419,37 @@ class Win(cli.Cli):
     def set_url(self):
         '''打开豆瓣网页'''
         import webbrowser
-        url = "http://music.douban.com" +\
-                self.playingsong['album'].replace('\/', '/')
+        url = "http://music.douban.com" + \
+            self.playingsong['album'].replace('\/', '/')
         webbrowser.open(url)
         self.display()
 
     def set_quit(self):
         '''退出播放'''
         self.q = True
-        logger.debug('finish 1')
         self.player.quit()
-        logger.debug('finish 2')
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
-        logger.debug('finish 3')
+        logger.debug('Terminal reset.')
         try:
-            logger.debug('finish 4')
             if self.cover_file is not None:
                 self.cover_file.close()
             os.rmdir(self._tempdir)
+            logger.debug('Temporary files removed.')
         except OSError:
             pass
         # store the history of playlist
-        logger.debug('finish 5')
         with open(self.PATH_HISTORY, 'w') as f:
             pickle.dump(self.history, f)
+        logger.debug('History saved.')
         # stroe the token and the default info
-        logger.debug('finish 6')
         with open(self.PATH_TOKEN, 'r') as f:
             data = pickle.load(f)
             data['volume'] = self._volume
             data['channel'] = self._channel
         with open(self.PATH_TOKEN, 'w') as f:
             pickle.dump(data, f)
-        os._exit(0)
+        logger.debug('Settings saved.')
+        sys.exit(0)
 
     @info('正在加载请稍后...')
     def set_play(self):
@@ -453,7 +466,7 @@ class Win(cli.Cli):
     @info('正在加载请稍后...')
     def set_next(self):
         '''开始下一曲'''
-        if self.player.is_alive():
+        if self.player.is_alive:
             self.lock_loop = False
             self.lock_start = True
             self.player.quit()
@@ -505,8 +518,8 @@ class Lrc(cli.Cli):
     def find_line(self):
         '''第一次载入时查找歌词'''
         for now_time in reversed(range(self.song_time)):
-            locate = [index for index, i in enumerate(self.sort_lrc_dict)\
-                    if i[0] == now_time]  # 查找歌词在self.sort_lrc_dict中的位置
+            locate = [index for index, i in enumerate(self.sort_lrc_dict)
+                      if i[0] == now_time]  # 查找歌词在self.sort_lrc_dict中的位置
             if locate:
                 return locate[0]
         return 0
@@ -543,8 +556,8 @@ class Lrc(cli.Cli):
                     linenum - self.screen_height/2 >= len(self.lines) - self.markline:
                 print '\r'
             else:
-                line = self.lines[self.markline -\
-                        (self.screen_height/2 - linenum)].strip()
+                line = self.lines[self.markline - (self.screen_height/2 - linenum)]
+                line = line.strip()
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
                 if linenum == self.screen_height/2:
@@ -556,10 +569,12 @@ class Lrc(cli.Cli):
 
         # 歌曲信息居中
         song = self.win.playingsong
-        tmp = (song['title'] +\
-               song['albumtitle'] +\
-               song['artist'] +\
-               song['public_time']).replace('\\', '').strip()
+        tmp = (
+            song['title'] +
+            song['albumtitle'] +
+            song['artist'] +
+            song['public_time']
+        ).replace('\\', '').strip()
         tmp = unicode(tmp, 'utf-8')
         l = self.center_num(tmp) + 7  # 7个固定字符
         if song['like']:
@@ -636,7 +651,7 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         # the playlist of the history
-        self.love = colored(' ♥', 'red')
+        self.love = colored(' ♥ ', 'red')
         self.screen_height, self.screen_width = self.linesnum()
 
         # 3个tab, playlist thistory rate
@@ -754,8 +769,9 @@ class History(cli.Cli):
         elif self.state == 1:
             # 如果在历史列表里播放,只在win.playlist里插入一首歌曲
             # 播放完毕继续
-            self.win.playlist.insert(0,\
-                    self.win.history[self.markline + self.topline - 1])
+            self.win.playlist.insert(
+                0, self.win.history[self.markline + self.topline - 1]
+            )
         elif self.state == 2:
             self.win.playlist = self.rate[self.displayline-1:]
         self.win.set_next()

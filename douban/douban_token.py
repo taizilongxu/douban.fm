@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 """
 豆瓣FM的网络连接部分
 主要完成登录部分
@@ -40,7 +40,7 @@ import logging
 import sys
 import os
 
-logger = logging.getLogger()
+logger = logging.getLogger('doubanfm.token')
 
 
 class Doubanfm(object):
@@ -125,6 +125,7 @@ class Doubanfm(object):
         path_token = os.path.expanduser('~/.douban_token.txt')
         if os.path.exists(path_token):
             # 已登陆
+            logger.info("Found existing Douban.fm token.")
             with open(path_token, 'r') as f:
                 self.login_data = pickle.load(f)
                 self.token = self.login_data['token']
@@ -142,7 +143,7 @@ class Doubanfm(object):
             print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' % self.user_name
         else:
             # 未登陆
-            logger.info('First time logging in Douban.fm')
+            logger.info('First time logging in Douban.fm.')
             while True:
                 self.email, self.password = self.win_login()
                 login_data = {
@@ -250,7 +251,11 @@ LRC = o
         for x in data:
             post_data[x] = data[x]
         url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data)
-        s = requests.get(url)
+        try:
+            s = requests.get(url)
+        except requests.exceptions.RequestException:
+            logger.error("Error communicating with Douban.fm API.")
+
         return s.text
 
     def set_channel(self, channel):
@@ -328,6 +333,8 @@ LRC = o
 
 
 def main():
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler())
     douban = Doubanfm()
     douban.init_login()  # 登录
     print douban.login_data
