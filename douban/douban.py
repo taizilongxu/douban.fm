@@ -296,7 +296,7 @@ class Win(cli.Cli):
             song['public_time']
         ).replace('\\', '')
 
-        logger.debug("Start playing %s - %s." % (song['artist'], song['title']))
+        logger.debug("Start playing %s - %s.", song['artist'], song['title'])
         self.player.start(song['url'].replace('\\', ''))
 
         self.lock_pause = False

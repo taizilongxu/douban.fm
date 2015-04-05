@@ -85,12 +85,12 @@ class Player(object):
             logger.debug("Player has already terminated.")
             self._exit_event.set()
             return
-        logger.debug("Watching %s[%d]" %
-                     (self._player_command, self.sub_proc.pid))
+        logger.debug("Watching %s[%d]",
+                     self._player_command, self.sub_proc.pid)
         returncode = self.sub_proc.wait()
         self._exit_event.set()
-        logger.debug("%s[%d] exit with code %d" %
-                     (self._player_command, self.sub_proc.pid, returncode))
+        logger.debug("%s[%d] exit with code %d",
+                     self._player_command, self.sub_proc.pid, returncode)
 
     @property
     def is_alive(self):
