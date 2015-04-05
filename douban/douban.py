@@ -295,7 +295,6 @@ class Win(cli.Cli):
             artist + ' ' +
             song['public_time']
         ).replace('\\', '')
-        volume = 0 if self.lock_muted else self._volume
 
         logger.debug("Start playing %s - %s." % (song['artist'], song['title']))
         self.player.start(song['url'].replace('\\', ''))

@@ -283,12 +283,12 @@ LRC = o
 
     def rate_music(self, playingsong):
         '''标记喜欢歌曲'''
-        s = self.requests_url('r', sid=playingsong['sid'])
+        self.requests_url('r', sid=playingsong['sid'])
         # self.playlist = eval(s)['song']
 
     def unrate_music(self, playingsong):
         '''取消标记喜欢歌曲'''
-        s = self.requests_url('u', sid=playingsong['sid'])
+        self.requests_url('u', sid=playingsong['sid'])
         # self.playlist = eval(s)['song']
 
     def submit_music(self, playingsong):

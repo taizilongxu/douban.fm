@@ -3,7 +3,6 @@
 import subprocess
 from threading import Thread, Event
 import time
-import select
 import logging
 import abc
 import fcntl
@@ -49,7 +48,7 @@ class Player(object):
         self._volume = default_volume
 
     def __repr__(self):
-        if self.is_alive():
+        if self.is_alive:
             status = 'PID {0}'.format(self.sub_proc.pid)
         else:
             status = 'not running'
@@ -176,7 +175,7 @@ class MPlayer(Player):
 
     def set_volume(self, volume):
         # volume <value> [abs] set if abs is not zero, otherwise just add delta
-        self._send_command('volume {0} 1'.format(num))
+        self._send_command("volume %d 1" % volume)
         super(MPlayer, self).set_volume(volume)
 
     # Special functions for mplayer
