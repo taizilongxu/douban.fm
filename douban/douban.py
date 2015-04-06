@@ -288,12 +288,13 @@ class Win(cli.Cli):
         title = colored(song['title'], 'green')
         albumtitle = colored(song['albumtitle'], 'yellow')
         artist = colored(song['artist'], 'white')
+        public_time = song['public_time'] or ''
         self.SUFFIX_SELECTED = (
             love +
             title + ' •' +
             albumtitle + ' •' +
             artist + ' ' +
-            song['public_time']
+            public_time
         ).replace('\\', '')
 
         logger.debug("Start playing %s - %s.", song['artist'], song['title'])
