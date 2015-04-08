@@ -19,7 +19,7 @@ import os
 import sys
 import tempfile
 import logging
-import cpickle as pickle
+import cPickle as pickle
 
 # root logger config
 logging.basicConfig(
