@@ -28,7 +28,7 @@ def init_config():
     '''
     if not os.path.exists(CONFIG_PATH):
         print '\033[31m♥\033[0m Get default config [\033[32m OK \033[0m]'
-        with open(path_config, 'w') as F:
+        with open(CONFIG_PATH, 'w') as F:
             F.write(CONFIG)
     else:
         print '\033[31m♥\033[0m Get local config [\033[32m OK \033[0m]'
