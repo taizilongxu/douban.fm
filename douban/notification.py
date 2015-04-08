@@ -56,8 +56,8 @@ def send_OS_X_notify(title, content, img_path):
             swizzled_bundleIdentifier)
     notification = NSUserNotification.alloc().init()
     notification.setInformativeText_('')
-    notification.setTitle_(title.decode('utf-8'))
-    notification.setSubtitle_(content.decode('utf-8'))
+    notification.setTitle_(title)
+    notification.setSubtitle_(content)
 
     notification.setInformativeText_('')
     notification.setUserInfo_({})

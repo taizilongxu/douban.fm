@@ -40,9 +40,35 @@ import logging
 import sys
 import os
 import config
+import json
 
 logger = logging.getLogger('doubanfm.token')
 
+def _decode_list(data):
+    rv = []
+    for item in data:
+        if isinstance(item, unicode):
+            item = item.encode('utf-8')
+        elif isinstance(item, list):
+            item = _decode_list(item)
+        elif isinstance(item, dict):
+            item = _decode_dict(item)
+        rv.append(item)
+    return rv
+
+def _decode_dict(data):
+    rv = {}
+    for key, value in data.iteritems():
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        elif isinstance(value, list):
+            value = _decode_list(value)
+        elif isinstance(value, dict):
+            value = _decode_dict(value)
+        rv[key] = value
+    return rv
 
 class Doubanfm(object):
     def __init__(self):
@@ -154,7 +180,7 @@ class Doubanfm(object):
                     'password': self.password
                 }
                 s = requests.post('http://www.douban.com/j/app/login', login_data)
-                dic = eval(s.text)
+                dic = json.loads(s.text, object_hook=_decode_dict)['song']
                 if dic['r'] == 1:
                     logger.debug(dic['err'])
                     continue
@@ -216,7 +242,7 @@ class Doubanfm(object):
             'channel_id': -3
         }]
         r = requests.get('http://www.douban.com/j/app/radio/channels')
-        channels += eval(r.text)['channels']
+        channels += json.loads(r.text)['channels']
         # 格式化频道列表，以便display
         lines = []
         for channel in channels:
@@ -248,17 +274,17 @@ class Doubanfm(object):
         if self.default_channel != channel:
             self.set_channel(channel)
         s = self.requests_url('n')
-        return eval(s)['song']
+        return json.loads(s, object_hook=_decode_dict)['song']
 
     def skip_song(self, playingsong):
         '''下一首,返回一个list'''
         s = self.requests_url('s', sid=playingsong['sid'])
-        return eval(s)['song']
+        return json.loads(s, object_hook=_decode_dict)['song']
 
     def bye(self, playingsong):
         '''不再播放,返回一个list'''
         s = self.requests_url('b', sid=playingsong['sid'])
-        return eval(s)['song']
+        return json.loads(s, object_hook=_decode_dict)['song']
 
     def rate_music(self, playingsong):
         '''标记喜欢歌曲'''
@@ -297,7 +323,7 @@ class Doubanfm(object):
             }
             s = requests.session()
             response = s.post(url, data=postdata)
-            lyric = eval(response.text)
+            lyric = json.loads(response.text, object_hook=_decode_dict)
             logger.debug(response.text)
             lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
             # 原歌词用的unicode,为了兼容
