@@ -10,9 +10,9 @@ import getch            # getchar
 import player           # player
 import notification     # desktop notification
 import config           # config
+from colors import *    # colors
 # system
 import subprocess
-from termcolor import colored
 import threading
 import time
 import os
@@ -57,7 +57,7 @@ class Win(cli.Cli):
         }
     FNULL = open(os.devnull, 'w')
     RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
-    PRO = colored(' PRO ', attrs=['reverse'])
+    PRO = on_light_red(' PRO ')
 
     def __init__(self, douban):
         # 线程锁
@@ -93,8 +93,8 @@ class Win(cli.Cli):
         config.get_config(self.KEYS)
 
         self.TITLE += \
-            colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
-            else colored(' Last.fm ', 'yellow')
+            yellow(' Douban Fm ') if not self.douban.lastfm\
+            else yellow(' Last.fm ')
 
         self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
 
@@ -170,8 +170,6 @@ class Win(cli.Cli):
         '''时间/音量显示线程'''
         length = len(self.TITLE)
         rest_time = 0
-        cyan = lambda x: colored(x, 'cyan')
-        red = lambda x: colored(x, 'red')
         while not self.q:
             if self.lock_pause:
                 continue
@@ -276,9 +274,9 @@ class Win(cli.Cli):
             love = self.love + ' '
         else:
             love = ''
-        title = colored(song['title'], 'green')
-        albumtitle = colored(song['albumtitle'], 'yellow')
-        artist = colored(song['artist'], 'white')
+        title = green(song['title'])
+        albumtitle = yellow(song['albumtitle'])
+        artist = white(song['artist'])
         public_time = song['public_time'] or ''
         self.SUFFIX_SELECTED = (
             love +
@@ -552,7 +550,7 @@ class Lrc(cli.Cli):
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
                 if linenum == self.screen_height/2:
-                    i = colored(line, 'blue')
+                    i = blue(line)
                     print ' ' * flag_num + i + '\r'
                 else:
                     print ' ' * flag_num + line + '\r'
@@ -595,20 +593,20 @@ class Help(cli.Cli):
         print
         print self.win.TITLE
         print
-        print ' '*5 + colored('移动', 'green') + ' '*17 + colored('音乐', 'green') + '\r'
+        print ' '*5 + green('移动') + ' '*17 + green('音乐') + '\r'
         print ' '*5 + '[%(DOWN)s] ---> 下          [space] ---> 播放' % keys + '\r'
         print ' '*5 + '[%(UP)s] ---> 上          [%(OPENURL)s] ---> 打开歌曲主页' % keys + '\r'
         print ' '*5 + '[%(TOP)s] ---> 移到最顶    [%(NEXT)s] ---> 下一首' % keys + '\r'
         print ' '*5 + '[%(BOTTOM)s] ---> 移到最底    [%(RATE)s] ---> 喜欢/取消喜欢' % keys + '\r'
         print ' '*26 + '[%(BYE)s] ---> 不再播放' % keys + '\r'
 
-        print ' '*5 + colored('音量', 'green') + ' '*17 + '[%(PAUSE)s] ---> 暂停' % keys + '\r'
+        print ' '*5 + green('音量') + ' '*17 + '[%(PAUSE)s] ---> 暂停' % keys + '\r'
         print ' '*5 + '[=] ---> 增          [%(QUIT)s] ---> 退出' % keys + '\r'
         print ' '*5 + '[-] ---> 减          [%(LOOP)s] ---> 单曲循环' % keys + '\r'
         print ' '*5 + '[%(MUTE)s] ---> 静音' % keys + '\r'
 
         print
-        print ' '*5 + colored('歌词', 'green') + '\r'
+        print ' '*5 + green('歌词') + '\r'
         print ' '*5 + '[%(LRC)s] ---> 歌词' % keys + '\r'
 
 
@@ -625,7 +623,7 @@ class Quit(Help):
         for i in range(self.screen_height):
             if i == self.screen_height / 2:
                 print ' ' * ((self.screen_width - 18)/2) \
-                    + colored('Are you sure? (Y/n)', 'red'),
+                    + red('Are you sure? (Y/n)'),
             else:
                 print
 
@@ -642,7 +640,7 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         # the playlist of the history
-        self.love = colored(' ♥ ', 'red')
+        self.love = red(' ♥ ')
         self.screen_height, self.screen_width = self.linesnum()
 
         # 3个tab, playlist thistory rate
@@ -650,9 +648,9 @@ class History(cli.Cli):
         self.state = 0
         self.play_tag = '♬♬♬♬♬♬'
         self.subtitle = [
-                colored('Playlist', 'white', 'on_cyan') + ' '*5 + 'History' + ' '*5 + 'Rate',
-                'Playlist' + ' '*5 + colored('History', 'white', 'on_cyan') + ' '*5 + 'Rate',
-                'Playlist' + ' '*5 + 'History' + ' '*5 + colored('Rate', 'white', 'on_cyan')
+                on_cyan('Playlist') + ' '*5 + 'History' + ' '*5 + 'Rate',
+                'Playlist' + ' '*5 + on_cyan('History') + ' '*5 + 'Rate',
+                'Playlist' + ' '*5 + 'History' + ' '*5 + on_cyan('Rate')
                 ]
         # hitory 使用win.history
         self.rate = []
@@ -674,7 +672,7 @@ class History(cli.Cli):
             # 播放列表
             for index, i in enumerate(self.win.playlist):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
-                line = colored(line, 'green')
+                line = green(line)
                 line = str(index) + ' ' + line
                 if i['like'] == 1:
                     line += self.love
@@ -685,7 +683,7 @@ class History(cli.Cli):
             # 历史列表
             for index, i in enumerate(self.win.history):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
-                line = colored(line, 'green')
+                line = green(line)
                 line = i['time'][5:] + ' ' + line
                 if i['like'] == 1:
                     line += self.love
@@ -704,7 +702,7 @@ class History(cli.Cli):
                         self.rate.insert(0, i)
             for index, i in enumerate(self.rate):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
-                line = colored(line, 'green')
+                line = green(line)
                 line = str(index) + ' ' + line + self.love
                 if i == self.win.playingsong:
                     line += self.play_tag

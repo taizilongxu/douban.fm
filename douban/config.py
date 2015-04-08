@@ -23,7 +23,9 @@ LRC = o
 '''
 
 def init_config():
-    # 配置文件
+    '''
+    检查配置文件
+    '''
     if not os.path.exists(CONFIG_PATH):
         print '\033[31m♥\033[0m Get default config [\033[32m OK \033[0m]'
         with open(path_config, 'w') as F:
@@ -32,7 +34,9 @@ def init_config():
         print '\033[31m♥\033[0m Get local config [\033[32m OK \033[0m]'
 
 def get_config(keys):
-    '''获取配置'''
+    '''
+    获取配置并检查是否更改
+    '''
     config = ConfigParser.ConfigParser()
     with open(CONFIG_PATH, 'r') as cfgfile:
         config.readfp(cfgfile)
