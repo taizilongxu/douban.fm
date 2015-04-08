@@ -39,6 +39,7 @@ import urllib
 import logging
 import sys
 import os
+import config
 
 logger = logging.getLogger('doubanfm.token')
 
@@ -203,30 +204,8 @@ class Doubanfm(object):
                     pickle.dump(data, f)
         except IndexError:
             pass
-
-        # 配置文件
-        path_config = os.path.expanduser('~/.doubanfm_config')
-        if not os.path.exists(path_config):
-            print '\033[31m♥\033[0m Get default config [\033[32m OK \033[0m]'
-            config = '''[key]
-UP = k
-DOWN = j
-TOP = g
-BOTTOM = G
-OPENURL = w
-RATE = r
-NEXT = n
-BYE = b
-QUIT = q
-PAUSE = p
-LOOP = l
-MUTE = m
-LRC = o
-'''  # 这个很丑,怎么办
-            with open(path_config, 'w') as F:
-                F.write(config)
-        else:
-            print '\033[31m♥\033[0m Get local config [\033[32m OK \033[0m]'
+        # set config
+        config.init_config()
 
     @property
     def channels(self):

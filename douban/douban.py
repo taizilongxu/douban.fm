@@ -1,14 +1,16 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-""" 豆瓣FM主程序
 """
-# Local
-import cli              # UI
+豆瓣fm主程序
+"""
+# local
+import cli              # ui
 import douban_token     # network
 import getch            # getchar
 import player           # player
 import notification     # desktop notification
-# System
+import config           # config
+# system
 import subprocess
 from termcolor import colored
 import threading
@@ -16,9 +18,8 @@ import time
 import os
 import sys
 import tempfile
-import ConfigParser
 import logging
-import cPickle as pickle
+import cpickle as pickle
 
 # root logger config
 logging.basicConfig(
@@ -89,7 +90,7 @@ class Win(cli.Cli):
         self.player = player.MPlayer(self._player_exit_event, self._volume)
 
         # 快捷键配置
-        self.get_config()
+        config.get_config(self.KEYS)
 
         self.TITLE += \
             colored(' Douban Fm ', 'yellow') if not self.douban.lastfm\
@@ -127,16 +128,6 @@ class Win(cli.Cli):
         '''启动新线程'''
         threading.Thread(target=target, args=args).start()
 
-    def get_config(self):
-        '''获取配置'''
-        config = ConfigParser.ConfigParser()
-        with open(os.path.expanduser('~/.doubanfm_config'), 'r') as cfgfile:
-            config.readfp(cfgfile)
-            options = config.options('key')
-            for option in options:
-                option = option.upper()
-                if option in self.KEYS:
-                    self.KEYS[option] = config.get('key', option)
 
     def init_notification(self):
         '''第一次桌面通知时加入图片'''
