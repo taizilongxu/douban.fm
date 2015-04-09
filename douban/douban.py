@@ -327,9 +327,9 @@ class Win(cli.Cli):
             self.display()
             k = getch.getch()
             if not self.state == 1:  # 歌词模式下除了方向键都可以用
-                if k == self.KEYS['UP']:
+                if k == self.KEYS['UP'] or k == 'A':
                     self.updown(-1)
-                elif k == self.KEYS['DOWN']:
+                elif k == self.KEYS['DOWN'] or k == 'B':
                     self.updown(1)
                 elif k == self.KEYS['TOP']:      # g键返回顶部
                     self.markline = 0
