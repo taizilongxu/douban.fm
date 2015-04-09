@@ -122,7 +122,7 @@ class Win(cli.Cli):
 
     def reload_theme(self):
         cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
-        cli.Cli.love = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
+        cli.Cli.LOVE = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
 
         self.TITLE =  cli.Cli.TITLE +\
             color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ') \
@@ -136,7 +136,7 @@ class Win(cli.Cli):
 
     def set_suffix_selected(self, song):
         if song['like'] == 1:
-            love = self.love
+            love = self.LOVE
         else:
             love = ''
         title = color_func(self.c['PLAYINGSONG']['title'])(song['title'])
@@ -399,13 +399,13 @@ class Win(cli.Cli):
         self.lock_rate = True
         if self.playingsong:
             if not self.playingsong['like']:
-                self.SUFFIX_SELECTED = self.love + self.SUFFIX_SELECTED
+                self.SUFFIX_SELECTED = self.LOVE + self.SUFFIX_SELECTED
                 self.display()
                 self.douban.rate_music(self.playingsong)
                 self.playingsong['like'] = 1
                 self.send_notify(content='标记红心')
             else:
-                self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.love):]
+                self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.LOVE):]
                 self.display()
                 self.douban.unrate_music(self.playingsong)
                 self.playingsong['like'] = 0
@@ -684,7 +684,7 @@ class History(cli.Cli):
                 line = color_func(self.c['PLAYINGSONG']['title'])(line)
                 line = str(index) + ' ' + line
                 if i['like'] == 1:
-                    line += self.love
+                    line += self.LOVE
                 if i == self.win.playingsong:
                     line += self.play_tag
                 self.lines.append(line)
@@ -695,7 +695,7 @@ class History(cli.Cli):
                 line = color_func(self.c['PLAYINGSONG']['title'])(line)
                 line = i['time'][5:] + ' ' + line
                 if i['like'] == 1:
-                    line += self.love
+                    line += self.LOVE
                 if i == self.win.playingsong:
                     line += self.play_tag
                 self.lines.append(line)
@@ -712,7 +712,7 @@ class History(cli.Cli):
             for index, i in enumerate(self.rate):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
                 line = color_func(self.c['PLAYINGSONG']['title'])(line)
-                line = str(index) + ' ' + line + self.love
+                line = str(index) + ' ' + line + self.LOVE
                 if i == self.win.playingsong:
                     line += self.play_tag
 

@@ -32,13 +32,13 @@ class Cli(object):
     THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
     c = config.get_default_theme(THEME[0])
     PREFIX_SELECTED = color_func(c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
+    LOVE = color_func(c['PLAYINGSONG']['like'])(' ❤ ', 'red')
     PREFIX_DESELECTED = '    '
     SUFFIX_SELECTED = ''  # 空格标记行后缀
     SUFFIX_DESELECTED = ''
     TITLE = PREFIX_DESELECTED  # 标题
 
     def __init__(self, lines):
-        self.love = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
         self.lines = lines
         self.markline = 0  # 箭头行 初始化设置默认频道
         self.topline = 0  # lines
