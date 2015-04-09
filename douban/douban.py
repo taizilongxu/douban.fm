@@ -734,9 +734,9 @@ class History(cli.Cli):
         while True:
             self.display()
             c = getch.getch()
-            if c == self.KEYS['UP'] and self.markline != 1:
+            if c == self.KEYS['UP'] or c == 'A' and self.markline != 1:
                 self.updown(-1)
-            elif c == self.KEYS['DOWN']:
+            elif c == self.KEYS['DOWN'] or c =='B':
                 self.updown(1)
             elif c == self.KEYS['QUIT']:
                 self.win.state = 0
@@ -752,10 +752,10 @@ class History(cli.Cli):
                 else:
                     self.markline = self.screen_height
                     self.topline = len(self.lines) - self.screen_height - 1
-            elif c == 'h':
+            elif c == 'h' or c == 'D':
                 self.state -= 1 if self.state != 0 else -2
                 self.get_lines()
-            elif c == 'l':
+            elif c == 'l' or c== 'C':
                 self.state += 1 if self.state != 2 else -2
                 self.get_lines()
 
