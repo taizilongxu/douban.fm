@@ -19,7 +19,6 @@ import os
 import sys
 import tempfile
 import logging
-import cPickle as pickle
 
 # root logger config
 logging.basicConfig(
@@ -37,7 +36,6 @@ logger.setLevel(logging.INFO)
 
 class Win(cli.Cli):
     '''窗体及播放控制'''
-    PATH_TOKEN = os.path.expanduser('~/.douban_token.txt')
     KEYS = {
         'UP': 'k',
         'DOWN': 'j',
@@ -553,7 +551,7 @@ class Lrc(cli.Cli):
             song['artist'] +
             song['public_time']
         ).replace('\\', '').strip()
-        l = self.center_num(tmp) + 7  # 7个固定字符
+        l = self.center_num(tmp)
         if song['like']:
             l += 2
         flag_num = (self.screen_width - l) / 2
