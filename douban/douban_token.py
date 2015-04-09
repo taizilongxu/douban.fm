@@ -242,7 +242,7 @@ class Doubanfm(object):
             'channel_id': -3
         }]
         r = requests.get('http://www.douban.com/j/app/radio/channels')
-        channels += json.loads(r.text)['channels']
+        channels += json.loads(r.text, object_hook=_decode_dict)['channels']
         # 格式化频道列表，以便display
         lines = []
         for channel in channels:
