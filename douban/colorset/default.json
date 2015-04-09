@@ -1,0 +1,31 @@
+{
+    "CYCLE_COLOR" :[198,57,166,50,179,74,112],
+    "TITLE" : {
+        "doubanfm" : 136,
+        "username" : 37,
+        "pro"      : 69,
+        "kbps"     : 239,
+        "time"     : 103,
+        "rate"     : 161,
+        "vol"      : 166,
+        "state"    : 125
+    },
+
+    "LINE":{
+        "arrow"   : 33,
+        "highlight"  : 33
+    },
+
+    "PLAYINGSONG" : {
+        "like"       : 161,
+        "title"      : 64,
+        "albumtitle" : 136,
+        "artist"     : 230,
+        "publictime" : 239
+    },
+
+    "LRC" : {
+        "line"    : 239,
+        "highlight"  : 33
+    }
+}

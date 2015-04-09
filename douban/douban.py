@@ -86,10 +86,13 @@ class Win(cli.Cli):
         config.get_config(self.KEYS)
 
         self.TITLE += \
-            yellow(' Douban Fm ') if not self.douban.lastfm\
-            else yellow(' Last.fm ')
+            color_func(c['TITLE']['doubanfm'])(' Douban Fm ') \
+            if not self.douban.lastfm\
+            else color_func(c['TITLE']['doubanfm'])(' Last.fm ')
 
-        self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
+        self.TITLE += '\ ' + \
+                color_func(c['TITLE']['username'])(self.douban.user_name) + \
+                ' >>\r'
 
         # 桌面通知
         self._tempdir = tempfile.mkdtemp()
@@ -178,17 +181,17 @@ class Win(cli.Cli):
 
                 title_pro = '' if self.playingsong['kbps'] == '64' else self.PRO
                 title_kbps = self.playingsong['kbps'] + 'kbps'
-                title_time = cyan(show_time)
-                title_rate = red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1])
-                title_vol = red('✖') if self.lock_muted else str(self._volume) + '%'
-                title_loop = red('↺') if self.lock_loop else red('→')
+                title_time = show_time
+                title_rate = self.RATE[int(round(self.playingsong['rating_avg'])) - 1]
+                title_vol = '✖' if self.lock_muted else str(self._volume) + '%'
+                title_loop = '↺' if self.lock_loop else '→'
                 title = [
-                    title_pro,
-                    title_kbps,
-                    title_time,
-                    title_rate,
-                    title_vol,
-                    title_loop
+                    color_func(c['TITLE']['pro'])(title_pro),
+                    color_func(c['TITLE']['kbps'])(title_kbps),
+                    color_func(c['TITLE']['time'])(title_time),
+                    color_func(c['TITLE']['rate'])(title_rate),
+                    color_func(c['TITLE']['vol'])(title_vol),
+                    color_func(c['TITLE']['state'])(title_loop)
                 ]
                 self.TITLE = \
                     self.TITLE[:length - 1] + ' ' + ' '.join(title) + '\r'
@@ -267,10 +270,10 @@ class Win(cli.Cli):
             love = self.love + ' '
         else:
             love = ''
-        title = green(song['title'])
-        albumtitle = yellow(song['albumtitle'])
-        artist = white(song['artist'])
-        public_time = song['public_time'] or ''
+        title = color_func(c['PLAYINGSONG']['title'])(song['title'])
+        albumtitle = color_func(c['PLAYINGSONG']['albumtitle'])(song['albumtitle'])
+        artist = color_func(c['PLAYINGSONG']['artist'])(song['artist'])
+        public_time = color_func(c['PLAYINGSONG']['publictime'])(song['public_time']) or ''
         self.SUFFIX_SELECTED = (
             love +
             title + ' •' +
@@ -537,9 +540,10 @@ class Lrc(cli.Cli):
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
                 if linenum == self.screen_height/2:
-                    i = blue(line)
+                    i = color_func(c['LRC']['highlight'])(line)
                     print ' ' * flag_num + i + '\r'
                 else:
+                    line = color_func(c['LRC']['line'])(line)
                     print ' ' * flag_num + line + '\r'
         print '\r'
 

@@ -26,17 +26,18 @@ TITLE:界面标题的设定
 import subprocess
 from termcolor import colored
 import getch
+from colors import *
 
 
 class Cli(object):
-    PREFIX_SELECTED = colored('  > ', 'blue')  # 箭头所指行前缀
+    PREFIX_SELECTED = color_func(c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
     PREFIX_DESELECTED = '    '
     SUFFIX_SELECTED = ''  # 空格标记行后缀
     SUFFIX_DESELECTED = ''
     TITLE = PREFIX_DESELECTED  # 标题
 
     def __init__(self, lines):
-        self.love = colored('♥', 'red')
+        self.love = color_func(c['PLAYINGSONG']['like'])('♥', 'red')
         self.lines = lines
         self.markline = 0  # 箭头行 初始化设置默认频道
         self.topline = 0  # lines
@@ -62,7 +63,7 @@ class Cli(object):
             # 箭头指向
             if index == self.markline:
                 prefix = self.PREFIX_SELECTED
-                i = colored(i, 'blue')
+                i = color_func(c['LINE']['highlight'])(i)
             else:
                 prefix = self.PREFIX_DESELECTED
             # 选择频道
