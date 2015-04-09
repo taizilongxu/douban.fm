@@ -24,7 +24,6 @@ TITLE:界面标题的设定
 #######################################################################
 
 import subprocess
-from termcolor import colored
 import getch
 from colors import *
 

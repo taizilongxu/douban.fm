@@ -83,10 +83,3 @@ on_light_cyan = basic_color('106')
 on_white = basic_color('107')
 
 c = config.get_default_theme()
-def color_func(func_name):
-    """
-    Call color function base on name
-    """
-    if str(func_name).isdigit():
-        return term_color(int(func_name))
-    return globals()[func_name]

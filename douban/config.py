@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import os
-import re
 import json
 import ConfigParser
 import cPickle as pickle
