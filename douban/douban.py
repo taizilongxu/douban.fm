@@ -122,7 +122,7 @@ class Win(cli.Cli):
 
     def reload_theme(self):
         cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
-        cli.Cli.love = color_func(self.c['PLAYINGSONG']['like'])('❤ ', 'red')
+        cli.Cli.love = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
 
         self.TITLE =  cli.Cli.TITLE +\
             color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ') \
@@ -136,7 +136,7 @@ class Win(cli.Cli):
 
     def set_suffix_selected(self, song):
         if song['like'] == 1:
-            love = self.love + ' '
+            love = self.love
         else:
             love = ''
         title = color_func(self.c['PLAYINGSONG']['title'])(song['title'])
@@ -650,7 +650,6 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         # the playlist of the history
-        self.love = red('❤ ')
         self.screen_height, self.screen_width = self.linesnum()
 
         # 3个tab, playlist history rate
