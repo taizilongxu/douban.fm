@@ -34,7 +34,6 @@ logger = logging.getLogger('doubanfm')
 logger.setLevel(logging.INFO)
 
 
-
 class Win(cli.Cli):
     '''窗体及播放控制'''
     KEYS = {
@@ -124,6 +123,7 @@ class Win(cli.Cli):
     def reload_theme(self):
         cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
         cli.Cli.love = color_func(self.c['PLAYINGSONG']['like'])('❤ ', 'red')
+
         self.TITLE =  cli.Cli.TITLE +\
             color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ') \
             if not self.douban.lastfm\
@@ -132,7 +132,9 @@ class Win(cli.Cli):
         self.TITLE += '\ ' + \
                 color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
                 ' >>'
-        song = self.playingsong
+        self.set_suffix_selected(self.playingsong)
+
+    def set_suffix_selected(self, song):
         if song['like'] == 1:
             love = self.love + ' '
         else:
@@ -148,8 +150,6 @@ class Win(cli.Cli):
             artist + ' ' +
             public_time
         ).replace('\\', '')
-        self.display()
-
 
     def thread(self, target, args=()):
         '''启动新线程'''
@@ -297,21 +297,7 @@ class Win(cli.Cli):
 
         self.thread(self.init_notification)  # 桌面通知
 
-        if song['like'] == 1:
-            love = self.love + ' '
-        else:
-            love = ''
-        title = color_func(self.c['PLAYINGSONG']['title'])(song['title'])
-        albumtitle = color_func(self.c['PLAYINGSONG']['albumtitle'])(song['albumtitle'])
-        artist = color_func(self.c['PLAYINGSONG']['artist'])(song['artist'])
-        public_time = color_func(self.c['PLAYINGSONG']['publictime'])(song['public_time']) or ''
-        self.SUFFIX_SELECTED = (
-            love +
-            title + ' •' +
-            albumtitle + ' •' +
-            artist + ' ' +
-            public_time
-        ).replace('\\', '')
+        self.set_suffix_selected(song)
 
         logger.debug("Start playing %s - %s.", song['artist'], song['title'])
         self.player.start(song['url'].replace('\\', ''))
@@ -389,19 +375,9 @@ class Win(cli.Cli):
                 self.change_volume(1)
             elif k == '-' or k == '_':       # 降低音量
                 self.change_volume(-1)
-            elif k == '1':
-                cli.Cli.c = config.get_default_theme(THEME[0])
+            elif k in ['1', '2', '3', '4']:
+                cli.Cli.c = config.get_default_theme(THEME[int(k) - 1])
                 self.reload_theme()
-            elif k == '2':
-                cli.Cli.c = config.get_default_theme(THEME[1])
-                self.reload_theme()
-            elif k == '3':
-                cli.Cli.c = config.get_default_theme(THEME[2])
-                self.reload_theme()
-            elif k == '4':
-                cli.Cli.c = config.get_default_theme(THEME[3])
-                self.reload_theme()
-
 
     def info(args):
         '''装饰器，用来改变SUFFIX_SELECTED并在界面输出'''
