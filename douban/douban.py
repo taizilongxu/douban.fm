@@ -37,7 +37,6 @@ logger.setLevel(logging.INFO)
 
 class Win(cli.Cli):
     '''窗体及播放控制'''
-    PATH_HISTORY = os.path.expanduser('~/.douban_history')
     PATH_TOKEN = os.path.expanduser('~/.douban_token.txt')
     KEYS = {
         'UP': 'k',
@@ -74,11 +73,7 @@ class Win(cli.Cli):
         #        main lrc help history quit
         self.state = 0
 
-        try:
-            with open(self.PATH_HISTORY, 'r') as f:
-                self.history = pickle.load(f)
-        except IOError:
-            self.history = []
+        self.history = config.get_history()
 
         self.douban = douban
 
@@ -427,16 +422,10 @@ class Win(cli.Cli):
         except OSError:
             pass
         # store the history of playlist
-        with open(self.PATH_HISTORY, 'w') as f:
-            pickle.dump(self.history, f)
+        config.set_history(self.history)
         logger.debug('History saved.')
         # stroe the token and the default info
-        with open(self.PATH_TOKEN, 'r') as f:
-            data = pickle.load(f)
-            data['volume'] = self._volume
-            data['channel'] = self._channel
-        with open(self.PATH_TOKEN, 'w') as f:
-            pickle.dump(data, f)
+        config.set_default(self._volume, self._channel)
         logger.debug('Settings saved.')
         sys.exit(0)
 
@@ -564,7 +553,6 @@ class Lrc(cli.Cli):
             song['artist'] +
             song['public_time']
         ).replace('\\', '').strip()
-        tmp = unicode(tmp, 'utf-8')
         l = self.center_num(tmp) + 7  # 7个固定字符
         if song['like']:
             l += 2
@@ -640,10 +628,11 @@ class History(cli.Cli):
         self.win = win
         self.KEYS = self.win.KEYS
         # the playlist of the history
-        self.love = red(' ♥ ')
+        # self.love = red(' ')
+        self.love = red('♥')
         self.screen_height, self.screen_width = self.linesnum()
 
-        # 3个tab, playlist thistory rate
+        # 3个tab, playlist history rate
         # 分别对应状态 0 1 2
         self.state = 0
         self.play_tag = '♬♬♬♬♬♬'
