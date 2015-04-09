@@ -80,14 +80,12 @@ def set_default(volume, channel):
     with open(PATH_TOKEN, 'w') as f:
         pickle.dump(data, f)
 
-def get_default_theme():
+def get_default_theme(theme):
     """
     Get default value of a config key
     """
-    path = os.path.dirname(__file__) + '/colorset/default.json'
+    path = os.path.dirname(__file__) + '/colorset/' + theme + '.json'
     # path = '/Users/limbo/Cloud/cli/douban/colorset/default.json'
     with open(path) as f:
         content = ''.join(f.readlines())
     return json.loads(content)
-
-c = get_default_theme()

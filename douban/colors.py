@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import config
+
 def basic_color(code):
     """
     16 colors supported
@@ -82,4 +83,6 @@ on_light_magenta = basic_color('105')
 on_light_cyan = basic_color('106')
 on_white = basic_color('107')
 
-c = config.get_default_theme()
+THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
+
+c = config.get_default_theme(THEME[0])
