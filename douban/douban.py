@@ -19,7 +19,6 @@ import os
 import sys
 import tempfile
 import logging
-import cPickle as pickle
 
 # root logger config
 logging.basicConfig(
@@ -37,8 +36,6 @@ logger.setLevel(logging.INFO)
 
 class Win(cli.Cli):
     '''窗体及播放控制'''
-    PATH_HISTORY = os.path.expanduser('~/.douban_history')
-    PATH_TOKEN = os.path.expanduser('~/.douban_token.txt')
     KEYS = {
         'UP': 'k',
         'DOWN': 'j',
@@ -74,11 +71,7 @@ class Win(cli.Cli):
         #        main lrc help history quit
         self.state = 0
 
-        try:
-            with open(self.PATH_HISTORY, 'r') as f:
-                self.history = pickle.load(f)
-        except IOError:
-            self.history = []
+        self.history = config.get_history()
 
         self.douban = douban
 
@@ -91,12 +84,6 @@ class Win(cli.Cli):
 
         # 快捷键配置
         config.get_config(self.KEYS)
-
-        self.TITLE += \
-            yellow(' Douban Fm ') if not self.douban.lastfm\
-            else yellow(' Last.fm ')
-
-        self.TITLE += '\ ' + self.douban.user_name + ' >>\r'
 
         # 桌面通知
         self._tempdir = tempfile.mkdtemp()
@@ -113,6 +100,15 @@ class Win(cli.Cli):
 
         super(Win, self).__init__(self._lines)
 
+        self.TITLE += \
+            color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ') \
+            if not self.douban.lastfm\
+            else color_func(self.c['TITLE']['doubanfm'])(' Last.fm ')
+
+        self.TITLE += '\ ' + \
+                color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
+                ' >>\r'
+
         # 启动自动播放
         self.markline = self.displayline = self._channel
         self.lock_start = True
@@ -123,6 +119,37 @@ class Win(cli.Cli):
         self.thread(self.watchdog)      # 播放器守护线程
         self.thread(self.display_time)  # 时间显示
         self.run()
+
+    def reload_theme(self):
+        cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
+        cli.Cli.love = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
+
+        self.TITLE =  cli.Cli.TITLE +\
+            color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ') \
+            if not self.douban.lastfm\
+            else color_func(self.c['TITLE']['doubanfm'])(' Last.fm ')
+
+        self.TITLE += '\ ' + \
+                color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
+                ' >>'
+        self.set_suffix_selected(self.playingsong)
+
+    def set_suffix_selected(self, song):
+        if song['like'] == 1:
+            love = self.love
+        else:
+            love = ''
+        title = color_func(self.c['PLAYINGSONG']['title'])(song['title'])
+        albumtitle = color_func(self.c['PLAYINGSONG']['albumtitle'])(song['albumtitle'])
+        artist = color_func(self.c['PLAYINGSONG']['artist'])(song['artist'])
+        public_time = color_func(self.c['PLAYINGSONG']['publictime'])(song['public_time']) or ''
+        self.SUFFIX_SELECTED = (
+            love +
+            title + ' •' +
+            albumtitle + ' •' +
+            artist + ' ' +
+            public_time
+        ).replace('\\', '')
 
     def thread(self, target, args=()):
         '''启动新线程'''
@@ -185,17 +212,17 @@ class Win(cli.Cli):
 
                 title_pro = '' if self.playingsong['kbps'] == '64' else self.PRO
                 title_kbps = self.playingsong['kbps'] + 'kbps'
-                title_time = cyan(show_time)
-                title_rate = red(self.RATE[int(round(self.playingsong['rating_avg'])) - 1])
-                title_vol = red('✖') if self.lock_muted else str(self._volume) + '%'
-                title_loop = red('↺') if self.lock_loop else red('→')
+                title_time = show_time
+                title_rate = self.RATE[int(round(self.playingsong['rating_avg'])) - 1]
+                title_vol = '✖' if self.lock_muted else str(self._volume) + '%'
+                title_loop = '↺' if self.lock_loop else '→'
                 title = [
-                    title_pro,
-                    title_kbps,
-                    title_time,
-                    title_rate,
-                    title_vol,
-                    title_loop
+                    color_func(self.c['TITLE']['pro'])(title_pro),
+                    color_func(self.c['TITLE']['kbps'])(title_kbps),
+                    color_func(self.c['TITLE']['time'])(title_time),
+                    color_func(self.c['TITLE']['rate'])(title_rate),
+                    color_func(self.c['TITLE']['vol'])(title_vol),
+                    color_func(self.c['TITLE']['state'])(title_loop)
                 ]
                 self.TITLE = \
                     self.TITLE[:length - 1] + ' ' + ' '.join(title) + '\r'
@@ -270,21 +297,7 @@ class Win(cli.Cli):
 
         self.thread(self.init_notification)  # 桌面通知
 
-        if song['like'] == 1:
-            love = self.love
-        else:
-            love = ''
-        title = green(song['title'])
-        albumtitle = yellow(song['albumtitle'])
-        artist = white(song['artist'])
-        public_time = song['public_time'] or ''
-        self.SUFFIX_SELECTED = (
-            love +
-            title + ' •' +
-            albumtitle + ' •' +
-            artist + ' ' +
-            public_time
-        ).replace('\\', '')
+        self.set_suffix_selected(song)
 
         logger.debug("Start playing %s - %s.", song['artist'], song['title'])
         self.player.start(song['url'].replace('\\', ''))
@@ -312,56 +325,59 @@ class Win(cli.Cli):
         '''主交互逻辑 (key event loop)'''
         while True:
             self.display()
-            c = getch.getch()
+            k = getch.getch()
             if not self.state == 1:  # 歌词模式下除了方向键都可以用
-                if c == self.KEYS['UP']:
+                if k == self.KEYS['UP']:
                     self.updown(-1)
-                elif c == self.KEYS['DOWN']:
+                elif k == self.KEYS['DOWN']:
                     self.updown(1)
-                elif c == self.KEYS['TOP']:      # g键返回顶部
+                elif k == self.KEYS['TOP']:      # g键返回顶部
                     self.markline = 0
                     self.topline = 0
-                elif c == self.KEYS['BOTTOM']:   # G键返回底部
+                elif k == self.KEYS['BOTTOM']:   # G键返回底部
                     self.markline = self.screen_height
                     self.topline = len(self._lines) - self.screen_height - 1
-            if c == self.KEYS['HELP']:     # help界面
+            if k == self.KEYS['HELP']:     # help界面
                 self.state = 2
                 Help(self)
-            elif c == self.KEYS['LRC']:      # o歌词
+            elif k == self.KEYS['LRC']:      # o歌词
                 self.set_lrc()
                 self.state = 1
                 self.thread(self.display_lrc)
-            elif c == 'e' and self.state == 0:
+            elif k == 'e' and self.state == 0:
                 self.state = 3
                 History(self)
-            elif c == self.KEYS['RATE']:     # r标记红心/取消标记
+            elif k == self.KEYS['RATE']:     # r标记红心/取消标记
                 self.thread(self.set_rate)
-            elif c == self.KEYS['NEXT']:     # n下一首
+            elif k == self.KEYS['NEXT']:     # n下一首
                 self.set_next()
-            elif c == ' ':                   # 空格选择频道,播放歌曲
+            elif k == ' ':                   # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     self.displaysong()
                     self.set_play()
-            elif c == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
+            elif k == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
                 self.set_url()
-            elif c == self.KEYS['BYE']:      # b不再播放
+            elif k == self.KEYS['BYE']:      # b不再播放
                 self.set_bye()
-            elif c == self.KEYS['PAUSE']:    # p暂停
+            elif k == self.KEYS['PAUSE']:    # p暂停
                 self.pause()
-            elif c == self.KEYS['MUTE']:     # m静音
+            elif k == self.KEYS['MUTE']:     # m静音
                 self.mute()
-            elif c == self.KEYS['LOOP']:     # l单曲循环
+            elif k == self.KEYS['LOOP']:     # l单曲循环
                 self.set_loop()
-            elif c == self.KEYS['QUIT']:     # q退出程序
+            elif k == self.KEYS['QUIT']:     # q退出程序
                 if self.state == 0:
                     self.state = 4
                     Quit(self)
                 else:
                     self.state = 0
-            elif c == '=' or c == '+':       # 提高音量
+            elif k == '=' or k == '+':       # 提高音量
                 self.change_volume(1)
-            elif c == '-' or c == '_':       # 降低音量
+            elif k == '-' or k == '_':       # 降低音量
                 self.change_volume(-1)
+            elif k in ['1', '2', '3', '4']:
+                cli.Cli.c = config.get_default_theme(THEME[int(k) - 1])
+                self.reload_theme()
 
     def info(args):
         '''装饰器，用来改变SUFFIX_SELECTED并在界面输出'''
@@ -427,16 +443,10 @@ class Win(cli.Cli):
         except OSError:
             pass
         # store the history of playlist
-        with open(self.PATH_HISTORY, 'w') as f:
-            pickle.dump(self.history, f)
+        config.set_history(self.history)
         logger.debug('History saved.')
         # stroe the token and the default info
-        with open(self.PATH_TOKEN, 'r') as f:
-            data = pickle.load(f)
-            data['volume'] = self._volume
-            data['channel'] = self._channel
-        with open(self.PATH_TOKEN, 'w') as f:
-            pickle.dump(data, f)
+        config.set_default(self._volume, self._channel)
         logger.debug('Settings saved.')
         sys.exit(0)
 
@@ -513,8 +523,8 @@ class Lrc(cli.Cli):
                 return locate[0]
         return 0
 
-    def __del__(self):
-        self.win.state = 0
+    # def __del__(self):
+    #     self.win.state = 0
 
     def display_line(self):
         '''显示歌词'''
@@ -550,9 +560,10 @@ class Lrc(cli.Cli):
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
                 if linenum == self.screen_height/2:
-                    i = blue(line)
+                    i = color_func(self.c['LRC']['highlight'])(line)
                     print ' ' * flag_num + i + '\r'
                 else:
+                    line = color_func(self.c['LRC']['line'])(line)
                     print ' ' * flag_num + line + '\r'
         print '\r'
 
@@ -564,8 +575,7 @@ class Lrc(cli.Cli):
             song['artist'] +
             song['public_time']
         ).replace('\\', '').strip()
-        tmp = unicode(tmp, 'utf-8')
-        l = self.center_num(tmp) + 7  # 7个固定字符
+        l = self.center_num(tmp)
         if song['like']:
             l += 2
         flag_num = (self.screen_width - l) / 2
@@ -642,7 +652,7 @@ class History(cli.Cli):
         # the playlist of the history
         self.screen_height, self.screen_width = self.linesnum()
 
-        # 3个tab, playlist thistory rate
+        # 3个tab, playlist history rate
         # 分别对应状态 0 1 2
         self.state = 0
         self.play_tag = '♬♬♬♬♬♬'
@@ -671,7 +681,7 @@ class History(cli.Cli):
             # 播放列表
             for index, i in enumerate(self.win.playlist):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
-                line = green(line)
+                line = color_func(self.c['PLAYINGSONG']['title'])(line)
                 line = str(index) + ' ' + line
                 if i['like'] == 1:
                     line += self.love
@@ -682,7 +692,7 @@ class History(cli.Cli):
             # 历史列表
             for index, i in enumerate(self.win.history):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
-                line = green(line)
+                line = color_func(self.c['PLAYINGSONG']['title'])(line)
                 line = i['time'][5:] + ' ' + line
                 if i['like'] == 1:
                     line += self.love
@@ -701,7 +711,7 @@ class History(cli.Cli):
                         self.rate.insert(0, i)
             for index, i in enumerate(self.rate):
                 line = i['title'] if len(i['title']) < width else i['title'][:width]
-                line = green(line)
+                line = color_func(self.c['PLAYINGSONG']['title'])(line)
                 line = str(index) + ' ' + line + self.love
                 if i == self.win.playingsong:
                     line += self.play_tag

@@ -24,19 +24,21 @@ TITLE:界面标题的设定
 #######################################################################
 
 import subprocess
-from termcolor import colored
 import getch
+from colors import *
 
 
 class Cli(object):
-    PREFIX_SELECTED = colored('  > ', 'blue')  # 箭头所指行前缀
+    THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
+    c = config.get_default_theme(THEME[0])
+    PREFIX_SELECTED = color_func(c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
     PREFIX_DESELECTED = '    '
     SUFFIX_SELECTED = ''  # 空格标记行后缀
     SUFFIX_DESELECTED = ''
     TITLE = PREFIX_DESELECTED  # 标题
 
     def __init__(self, lines):
-        self.love = colored(' ♥ ', 'red')
+        self.love = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
         self.lines = lines
         self.markline = 0  # 箭头行 初始化设置默认频道
         self.topline = 0  # lines
@@ -62,7 +64,7 @@ class Cli(object):
             # 箭头指向
             if index == self.markline:
                 prefix = self.PREFIX_SELECTED
-                i = colored(i, 'blue')
+                i = color_func(self.c['LINE']['highlight'])(i)
             else:
                 prefix = self.PREFIX_DESELECTED
             # 选择频道
@@ -71,6 +73,7 @@ class Cli(object):
             else:
                 suffix = self.SUFFIX_DESELECTED
             line = '%s %s %s' % (prefix, i, suffix)
+            line = color_func(self.c['LINE']['line'])(line)
             print line + '\r'  # 为什么加\r,我不知道,如果不加会出bug
 
     def displaysong(self):
@@ -121,5 +124,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-############################################################################

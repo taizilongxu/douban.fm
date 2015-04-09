@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
+import config
+
 def basic_color(code):
     """
     16 colors supported
@@ -32,6 +34,15 @@ def term_color(code):
         else:
             return "\033[38;5;%sm%s\033[0m" % (c, text)
     return inner
+
+def color_func(func_name):
+    """
+    Call color function base on name
+    """
+    if str(func_name).isdigit():
+        return term_color(int(func_name))
+    return globals()[func_name]
+
 """
 16 basic colors
 """
@@ -72,17 +83,6 @@ on_light_magenta = basic_color('105')
 on_light_cyan = basic_color('106')
 on_white = basic_color('107')
 
-molokai = [198,57,166,50,179,74]
-solarized = [124,32,64,66,130,23]
-tomorrow = [67,166,30,97,58,179]
-larapaste = [37,184,202,154,59,230]
+THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
 
-colorsheme = None
-
-if colorsheme:
-    red = term_color(colorsheme[0])
-    blue = term_color(colorsheme[1])
-    yellow = term_color(colorsheme[2])
-    green = term_color(colorsheme[3])
-    cyan = term_color(colorsheme[4])
-    magenta = term_color(colorsheme[5])
+c = config.get_default_theme(THEME[0])
