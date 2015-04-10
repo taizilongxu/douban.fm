@@ -17,7 +17,6 @@ import threading
 import time
 import os
 import sys
-import tempfile
 import logging
 
 # root logger config
@@ -86,9 +85,7 @@ class Win(cli.Cli):
         config.get_config(self.KEYS)
 
         # 桌面通知
-        self._tempdir = tempfile.mkdtemp()
-        self.cover_file = None
-        self.has_cover = False
+        self.noti = notification.Notify()
 
         # 存储歌曲信息
         self._lines = self.douban.channels
@@ -154,30 +151,6 @@ class Win(cli.Cli):
     def thread(self, target, args=()):
         '''启动新线程'''
         threading.Thread(target=target, args=args).start()
-
-
-    def init_notification(self):
-        '''第一次桌面通知时加入图片'''
-        old_title = self.playingsong['title']
-        self.cover_file = tempfile.NamedTemporaryFile(
-                suffix='.jpg', dir=self._tempdir)
-        if not self.douban.get_pic(self.playingsong, self.cover_file.name):
-            return
-        title = self.playingsong['title']
-        if old_title != title:
-            # 已切换至下一首歌
-            return
-        self.has_cover = True
-        content = self.playingsong['artist'] + ' - ' \
-            + self.playingsong['albumtitle']
-        notification.send_notification(title, content, self.cover_file.name)
-
-    def send_notify(self, content):
-        title = self.playingsong['title']
-        if self.has_cover:
-            notification.send_notification(title, content, self.cover_file.name)
-        else:
-            notification.send_notification(title, content)
 
     def display_lrc(self):
         '''歌词显示线程'''
@@ -295,7 +268,7 @@ class Win(cli.Cli):
             self.history.insert(0, self.playingsong)
         song = self.playingsong
 
-        self.thread(self.init_notification)  # 桌面通知
+        self.thread(self.noti.send_notify, args=(self.playingsong,))  # 桌面通知
 
         self.set_suffix_selected(song)
 
@@ -315,9 +288,9 @@ class Win(cli.Cli):
         '''暂停歌曲'''
         if self.lock_pause:
             self.lock_pause = False
-            self.send_notify(content='开始播放')
+            self.noti.send_notify(self.playingsong, '开始播放')
         else:
-            self.send_notify(content='暂停播放')
+            self.noti.send_notify(self.playingsong, '暂停播放')
             self.lock_pause = True
         self.player.pause()
 
@@ -403,22 +376,22 @@ class Win(cli.Cli):
                 self.display()
                 self.douban.rate_music(self.playingsong)
                 self.playingsong['like'] = 1
-                self.send_notify(content='标记红心')
+                self.noti.send_notify(self.playingsong, '标记红心')
             else:
                 self.SUFFIX_SELECTED = self.SUFFIX_SELECTED[len(self.LOVE):]
                 self.display()
                 self.douban.unrate_music(self.playingsong)
                 self.playingsong['like'] = 0
-                self.send_notify(content='取消标记红心')
+                self.noti.send_notify(self.playingsong, '取消标记红心')
         self.lock_rate = False
 
     def set_loop(self):
         '''设置单曲循环'''
         if self.lock_loop:
-            self.send_notify(content='停止单曲循环')
+            self.noti.send_notify(self.playingsong, '停止单曲循环')
             self.lock_loop = False
         else:
-            self.send_notify(content='单曲循环')
+            self.noti.send_notify(self.playingsong, '单曲循环')
             self.lock_loop = True
 
     def set_url(self):
@@ -435,19 +408,12 @@ class Win(cli.Cli):
         self.player.quit()
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
         logger.debug('Terminal reset.')
-        try:
-            if self.cover_file is not None:
-                self.cover_file.close()
-            os.rmdir(self._tempdir)
-            logger.debug('Temporary files removed.')
-        except OSError:
-            pass
         # store the history of playlist
         config.set_history(self.history)
-        logger.debug('History saved.')
+        logger.info('History saved.')
         # stroe the token and the default info
         config.set_default(self._volume, self._channel)
-        logger.debug('Settings saved.')
+        logger.info('Settings saved.')
         sys.exit(0)
 
     @info('正在加载请稍后...')
@@ -471,9 +437,6 @@ class Win(cli.Cli):
             self.player.quit()
             if self.state != 3:
                 self.playlist = self.douban.skip_song(self.playingsong)
-            if self.cover_file is not None:
-                self.cover_file.close()
-            self.has_cover = False
             self.play()
 
     @info('不再播放，切换下一首...')

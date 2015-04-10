@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 import platform
 import subprocess
+import tempfile
+import os
+import logging
+import urllib
+
+logger = logging.getLogger('doubanfm.notification')
 
 PLATFORM = platform.system()
 
@@ -71,6 +77,68 @@ def send_OS_X_notify(title, content, img_path):
     NSUserNotificationCenter.defaultUserNotificationCenter().\
         scheduleNotification_(notification)
 
+class Notify(object):
+
+    def __init__(self):
+        # 桌面通知
+        self._tempdir = tempfile.mkdtemp()
+        self.cover_file = None
+        self.has_cover = False
+        self.title = None
+
+    def get_pic(self, playingsong, tempfile_path):
+        '''获取专辑封面'''
+        url = playingsong['picture'].replace('\\', '')
+        for i in range(3):
+            try:
+                urllib.urlretrieve(url, tempfile_path)
+                logger.debug('Get cover art success!')
+                return True
+            except (IOError, urllib.ContentTooShortError):
+                pass
+        logger.error('Get cover art failed!')
+        return False
+
+    def init_notification(self, playingsong):
+        '''第一次桌面通知时加入图片'''
+
+        logger.debug('init_notification')
+
+        old_title = playingsong['title']
+        self.cover_file = tempfile.NamedTemporaryFile(
+                suffix='.jpg', dir=self._tempdir)
+        if not self.get_pic(playingsong, self.cover_file.name):
+            return
+        title = playingsong['title']
+        if old_title != title:
+            # 已切换至下一首歌
+            return
+        self.has_cover = True
+        content = playingsong['artist'] + ' - ' + playingsong['albumtitle']
+        send_notification(title.decode('utf-8'),\
+                content.decode('utf-8'), self.cover_file.name)
+
+    def send_notify(self, playingsong, content=''):
+        '''需要解码一下,通知需要unicode编码'''
+        title = playingsong['title'].decode('utf-8')
+        content = content.decode('utf-8')
+        if title == self.title:
+            if self.has_cover:
+                send_notification(self.title, content, self.cover_file.name)
+            else:
+                send_notification(self.title, content)
+        else:
+            self.init_notification(playingsong)
+            self.title = title
+
+    def __del__(self):
+        try:
+            if self.cover_file is not None:
+                self.cover_file.close()
+            os.rmdir(self._tempdir)
+            logger.info('Temporary files removed.')
+        except OSError:
+            pass
 
 def main():
     send_notification(title='Test title', content='test content')
