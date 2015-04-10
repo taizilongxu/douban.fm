@@ -305,18 +305,6 @@ class Doubanfm(object):
         '''歌曲结束标记'''
         self.requests_url('e', sid=playingsong['sid'])
 
-    def get_pic(self, playingsong, tempfile_path):
-        '''获取专辑封面'''
-        url = playingsong['picture'].replace('\\', '')
-        for i in range(3):
-            try:
-                urllib.urlretrieve(url, tempfile_path)
-                logger.debug('Get cover art success!')
-                return True
-            except (IOError, urllib.ContentTooShortError):
-                pass
-        logger.error('Get cover art failed!')
-        return False
 
     def get_lrc(self, playingsong):
         '''获取歌词'''

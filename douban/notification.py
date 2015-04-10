@@ -89,7 +89,7 @@ class Notify(object):
     def get_pic(self, playingsong, tempfile_path):
         '''获取专辑封面'''
         url = playingsong['picture'].replace('\\', '')
-        for i in range(3):
+        for _ in range(3):
             try:
                 urllib.urlretrieve(url, tempfile_path)
                 logger.debug('Get cover art success!')
