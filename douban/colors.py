@@ -1,6 +1,7 @@
-#!/usr/bin/env python
-# encoding: utf-8
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import config
+
 
 def basic_color(code):
     """
@@ -33,6 +34,7 @@ def term_color(code):
         else:
             return "\033[38;5;%sm%s\033[0m" % (c, text)
     return inner
+
 
 def color_func(func_name):
     """
