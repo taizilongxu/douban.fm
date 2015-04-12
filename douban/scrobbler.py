@@ -69,7 +69,7 @@ class Scrobbler(object):
         return False, err
 
     def now_playing(self, artist, title, album="", length="", tracknumber="", mb_trackid=""):
-        logger.debug("Last.fm playing %s - %s - %s" % (artist, title, album))
+        logger.debug("Last.fm playing %s - %s - %s", artist, title, album)
 
         payload = {
             "s": self.session_id,
@@ -97,7 +97,7 @@ class Scrobbler(object):
             return False
 
     def submit(self, artist, title, album="", length="", tracknumber="", mb_trackid=""):
-        logger.debug("Last.fm submitting %s - %s" % (artist, title))
+        logger.debug("Last.fm submitting %s - %s", artist, title)
 
         timestamp = int(time())
 

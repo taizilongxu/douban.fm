@@ -1,14 +1,14 @@
-#!/usr/bin/env python
-# encoding: utf-8
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import config
+
 
 def basic_color(code):
     """
     16 colors supported
     """
     def inner(text, rl=False):
-        """
-        Every raw_input with color sequences should be called with
+        """ Every raw_input with color sequences should be called with
         rl=True to avoid readline messed up the length calculation
         """
         c = code
@@ -35,6 +35,7 @@ def term_color(code):
             return "\033[38;5;%sm%s\033[0m" % (c, text)
     return inner
 
+
 def color_func(func_name):
     """
     Call color function base on name
@@ -43,9 +44,9 @@ def color_func(func_name):
         return term_color(int(func_name))
     return globals()[func_name]
 
-"""
-16 basic colors
-"""
+##############################
+# 16 basic colors
+
 default = basic_color('39')
 black = basic_color('30')
 red = basic_color('31')
@@ -63,9 +64,9 @@ light_magenta = basic_color('95')
 light_cyan = basic_color('96')
 white = basic_color('97')
 
-"""
-16 basic colors on background
-"""
+##############################
+# 16 basic colors on background
+
 on_default = basic_color('49')
 on_black = basic_color('40')
 on_red = basic_color('41')

@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# encoding: utf-8
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 import os
 import json
 import ConfigParser
@@ -9,8 +9,7 @@ import cPickle as pickle
 PATH_CONFIG = os.path.expanduser("~/.doubanfm_config")
 PATH_HISTORY = os.path.expanduser('~/.douban_history')
 PATH_TOKEN = os.path.expanduser('~/.douban_token.txt')
-CONFIG = \
-'''
+CONFIG = '''
 [key]
 UP = k
 DOWN = j
@@ -27,6 +26,7 @@ MUTE = m
 LRC = o
 '''
 
+
 def init_config():
     '''
     检查配置文件
@@ -37,6 +37,7 @@ def init_config():
             F.write(CONFIG)
     else:
         print '\033[31m♥\033[0m Get local config [\033[32m OK \033[0m]'
+
 
 def get_config(keys):
     '''
@@ -51,6 +52,7 @@ def get_config(keys):
             if option in keys:
                 keys[option] = config.get('key', option)
 
+
 def get_history():
     '''
     获取历史记录
@@ -62,12 +64,14 @@ def get_history():
         history = []
     return history
 
+
 def set_history(history):
     '''
     保存历史记录
     '''
     with open(PATH_HISTORY, 'w') as f:
         pickle.dump(history, f)
+
 
 def set_default(volume, channel):
     '''
@@ -79,6 +83,7 @@ def set_default(volume, channel):
         data['channel'] = channel
     with open(PATH_TOKEN, 'w') as f:
         pickle.dump(data, f)
+
 
 def get_default_theme(theme):
     """

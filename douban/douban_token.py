@@ -121,16 +121,19 @@ class Doubanfm(object):
         else:
             self.lastfm = False
 
-    def last_fm_account_required(fun):
+    def __last_fm_account_required(func):
         '''装饰器，用于需要登录Last.fm后才能使用的接口'''
-        @wraps(fun)
+        @wraps(func)
         def wrapper(self, *args, **kwds):
             if not self.lastfm:
                 return
-            return fun(self, *args, **kwds)
+            # Disable pylint callable check due to pylint's incompability
+            # with using a class method as decorator.
+            # Pylint will consider func as "self"
+            return func(self, *args, **kwds)    # pylint: disable=not-callable
         return wrapper
 
-    @last_fm_account_required
+    @__last_fm_account_required
     def submit_current_song(self):
         '''提交播放过的曲目'''
         # Submit the track if total playback time of the track > 30s
@@ -142,7 +145,7 @@ class Doubanfm(object):
                 self.playingsong['length']
             )
 
-    @last_fm_account_required
+    @__last_fm_account_required
     def scrobble_now_playing(self):
         '''提交当前正在播放曲目'''
         self.scrobbler.now_playing(
