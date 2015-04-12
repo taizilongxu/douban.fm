@@ -57,6 +57,7 @@ LOGO = '''
 
 logger = logging.getLogger('doubanfm.token')
 
+
 def _decode_list(data):
     rv = []
     for item in data:
@@ -64,24 +65,24 @@ def _decode_list(data):
             item = item.encode('utf-8')
         elif isinstance(item, list):
             item = _decode_list(item)
-        elif isinstance(item, dict):
-            item = _decode_dict(item)
         rv.append(item)
     return rv
+
 
 def _decode_dict(data):
     rv = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
             key = key.encode('utf-8')
+
         if isinstance(value, unicode):
             value = value.encode('utf-8')
         elif isinstance(value, list):
             value = _decode_list(value)
-        elif isinstance(value, dict):
-            value = _decode_dict(value)
+        # no need to recurse into dict, json library will do that
         rv[key] = value
     return rv
+
 
 class Doubanfm(object):
     def __init__(self):
@@ -102,8 +103,8 @@ class Doubanfm(object):
 
     def win_login(self):
         '''登陆界面'''
-        email = raw_input('Email:')
-        password = getpass.getpass('Password:')
+        email = raw_input('Email: ')
+        password = getpass.getpass('Password: ')
         return email, password
 
     def login_lastfm(self):
@@ -188,7 +189,7 @@ class Doubanfm(object):
                     'password': self.password
                 }
                 s = requests.post('http://www.douban.com/j/app/login', login_data)
-                dic = json.loads(s.text, object_hook=_decode_dict)['song']
+                dic = json.loads(s.text, object_hook=_decode_dict)
                 if dic['r'] == 1:
                     logger.debug(dic['err'])
                     continue
@@ -307,7 +308,6 @@ class Doubanfm(object):
     def submit_music(self, playingsong):
         '''歌曲结束标记'''
         self.requests_url('e', sid=playingsong['sid'])
-
 
     def get_lrc(self, playingsong):
         '''获取歌词'''

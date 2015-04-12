@@ -414,7 +414,7 @@ class Win(cli.Cli):
         # store the history of playlist
         config.set_history(self.history)
         logger.info('History saved.')
-        # stroe the token and the default info
+        # store the token and the default info
         config.set_default(self._volume, self._channel)
         logger.info('Settings saved.')
         sys.exit(0)
