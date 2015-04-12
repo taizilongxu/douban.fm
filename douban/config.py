@@ -7,8 +7,8 @@ import cPickle as pickle
 
 
 PATH_CONFIG = os.path.expanduser("~/.doubanfm_config")
-PATH_HISTORY = os.path.expanduser('~/.douban_history')
-PATH_TOKEN = os.path.expanduser('~/.douban_token.txt')
+PATH_HISTORY = os.path.expanduser('~/.doubanfm_history')
+PATH_TOKEN = os.path.expanduser('~/.doubanfm_token')
 CONFIG = '''
 [key]
 UP = k
