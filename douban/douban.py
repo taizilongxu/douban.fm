@@ -172,6 +172,7 @@ class Win(cli.Cli):
         rest_time = 0
         while not self.q:
             if self.lock_pause:
+                time.sleep(1)
                 continue
             if self.player.is_alive:
                 songtime = self.player.time_pos
