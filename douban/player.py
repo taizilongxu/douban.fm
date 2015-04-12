@@ -7,6 +7,7 @@ import logging
 import abc
 import fcntl
 import os
+import signal
 
 logger = logging.getLogger('doubanfm.player')
 
@@ -68,7 +69,8 @@ class Player(object):
             args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=self._null_file
+            stderr=self._null_file,
+            preexec_fn=os.setsid
         )
         # Set up NONBLOCKING flag for the pipe
         flags = fcntl.fcntl(self.sub_proc.stdout, fcntl.F_GETFL)
@@ -160,10 +162,12 @@ class MPlayer(Player):
         self._send_command('pause')
 
     def quit(self):
+        # Force quit the whole process group of mplayer.
+        # mplayer will not respond during network startup
+        # and has two processes in slave mode.
         if not self.is_alive:
             return
-        self._send_command('quit')
-        super(MPlayer, self).quit()
+        os.killpg(os.getpgid(self.sub_proc.pid), signal.SIGKILL)
 
     @property
     def time_pos(self):
