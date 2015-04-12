@@ -300,7 +300,9 @@ class Win(cli.Cli):
         while True:
             self.display()
             k = getch.getch()
-            if not self.state == 1:  # 歌词模式下除了方向键都可以用
+            if self.state != 1:  # 歌词模式下除了方向键都可以用
+                # getch will return multiple ASCII codes for arrow keys
+                # A, B, C, D are the first code of UP, DOWN, LEFT, RIGHT
                 if k == self.KEYS['UP'] or k == 'A':
                     self.updown(-1)
                 elif k == self.KEYS['DOWN'] or k == 'B':
