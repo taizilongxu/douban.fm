@@ -103,8 +103,8 @@ class Win(cli.Cli):
             else color_func(self.c['TITLE']['doubanfm'])(' Last.fm ')
 
         self.TITLE += '\ ' + \
-                color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
-                ' >>\r'
+            color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
+            ' >>\r'
 
         # 启动自动播放
         self.markline = self.displayline = self._channel
@@ -118,17 +118,18 @@ class Win(cli.Cli):
         self.run()
 
     def reload_theme(self):
-        cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
+        # 箭头所指行前缀
+        cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')
         cli.Cli.LOVE = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
 
-        self.TITLE =  cli.Cli.TITLE +\
+        self.TITLE = cli.Cli.TITLE +\
             color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ') \
             if not self.douban.lastfm\
             else color_func(self.c['TITLE']['doubanfm'])(' Last.fm ')
 
         self.TITLE += '\ ' + \
-                color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
-                ' >>'
+            color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
+            ' >>'
         self.set_suffix_selected(self.playingsong)
 
     def set_suffix_selected(self, song):
@@ -243,13 +244,15 @@ class Win(cli.Cli):
             self._player_exit_event.clear()     # Clear the event
             logger.debug('Noticed player exit.')
             # If self.q (about to quit), just quit
+            if self.q:
+                return
+            self.thread(self.douban.submit_music, args=(self.playingsong,))
             # If some thread has already called play(), just pass
-            if not self.q and not self.lock_start:
-                self.thread(self.douban.submit_music, args=(self.playingsong,))
+            if not self.lock_start:
                 self.play()
 
     def get_playlist(self):
-        self.playlist = self.douban.get_playlist(self._channel)
+        self.playlist = self.douban.get_playlist()
 
     def get_song(self):
         if not self.playlist:
@@ -330,7 +333,7 @@ class Win(cli.Cli):
             elif k == ' ':                   # 空格选择频道,播放歌曲
                 if self.markline + self.topline != self.displayline:
                     self.displaysong()
-                    self.set_play()
+                    self.set_channel()
             elif k == self.KEYS['OPENURL']:  # l打开当前播放歌曲豆瓣页
                 self.set_url()
             elif k == self.KEYS['BYE']:      # b不再播放
@@ -420,15 +423,15 @@ class Win(cli.Cli):
         sys.exit(0)
 
     @info('正在加载请稍后...')
-    def set_play(self):
+    def set_channel(self):
         '''开始播放'''
         logger.debug(str(self.displayline) + str(self._channel))
         self._channel = self.displayline
-        self.lock_start = True
-        # self.playingsong = {}
-        self.player.quit()
-        self._channel = self.displayline
+        self.douban.set_channel(self._channel)
         self.get_playlist()
+        self.lock_loop = False
+        self.lock_start = True
+        self.player.quit()
         self.play()
 
     @info('正在加载请稍后...')
