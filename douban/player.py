@@ -167,7 +167,11 @@ class MPlayer(Player):
         # and has two processes in slave mode.
         if not self.is_alive:
             return
-        os.killpg(os.getpgid(self.sub_proc.pid), signal.SIGKILL)
+        try:
+            os.killpg(os.getpgid(self.sub_proc.pid), signal.SIGKILL)
+        except OSError:
+            # The player might have exited itself.
+            pass
 
     @property
     def time_pos(self):
