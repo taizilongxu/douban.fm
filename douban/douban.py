@@ -349,6 +349,7 @@ class Win(cli.Cli):
                     Quit(self)
                 else:
                     self.state = 0
+                    self.display()
             elif k == '=' or k == '+':       # 提高音量
                 self.change_volume(1)
             elif k == '-' or k == '_':       # 降低音量
