@@ -581,7 +581,7 @@ class Help(cli.Cli):
         print ' '*5 + green('音量') + ' '*17 + '[%(PAUSE)s] ---> 暂停' % keys + '\r'
         print ' '*5 + '[=] ---> 增          [%(QUIT)s] ---> 退出' % keys + '\r'
         print ' '*5 + '[-] ---> 减          [%(LOOP)s] ---> 单曲循环' % keys + '\r'
-        print ' '*5 + '[%(MUTE)s] ---> 静音' % keys + '\r'
+        print ' '*5 + '[%(MUTE)s] ---> 静音        [e] ---> 播放列表' % keys + '\r'
 
         print
         print ' '*5 + green('歌词') + '\r'
