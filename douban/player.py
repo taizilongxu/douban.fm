@@ -142,20 +142,20 @@ class Player(object):
 
 class MPlayer(Player):
 
-    _player_command = "mplayer"
+    _player_command = "mpv"
     _default_args = [
-        '-slave',
-        '-nolirc',          # Get rid of a warning
-        '-quiet',           # Cannot use really-quiet because of get_* queries
-        '-softvol',         # Avoid using hardware (global) volume
-        '-cache', '5120',   # Use 5MiB cache
-        '-cache-min', '2'   # Start playing after 2% cache filled
+        '--slave-broken',                   # FIXME `--slave-broken is deprecated (see manpage).`
+        '--quiet',                          # Cannot use really-quiet because of get_* queries
+        '--softvol',                        # Avoid using hardware (global) volume
+#        '--cache', 'auto',                 # Use 5MiB cache
+        '--cache-seek-min', '2',            # Start playing after 2% cache filled
     ]
 
     def __init__(self, *args):
         super(MPlayer, self).__init__(*args)
 
     def start(self, url):
+        self._args += ['--cache-file', '{}/.cache/mpv/{}'.format(os.getenv('HOME'), url.split('/')[-1])]  # use file cache
         self._run_player(['-volume', str(self._volume), url])
 
     def pause(self):
