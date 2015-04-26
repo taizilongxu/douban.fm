@@ -179,8 +179,8 @@ class MPlayer(Player):
 
     @property
     def time_pos(self):
-#        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
         songtime = self._send_command('print_text ${=time-pos}', True)
+#        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
         if songtime:
             return int(round(float(songtime)))
         else:
