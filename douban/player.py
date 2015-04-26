@@ -160,7 +160,7 @@ class MPlayer(Player):
         super(MPlayer, self).__init__(*args)
 
     def start(self, url):
-        self._run_player(['-volume', str(self._volume), url])
+        self._run_player(['--volume', str(self._volume), url])
 
     def pause(self):
         self._send_command('pause')
@@ -179,7 +179,8 @@ class MPlayer(Player):
 
     @property
     def time_pos(self):
-        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
+#        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
+        songtime = self._send_command('print_text ${=time-pos}', 'ANS_TIME_POSITION')
         if songtime:
             return int(round(float(songtime)))
         else:
@@ -187,7 +188,7 @@ class MPlayer(Player):
 
     def set_volume(self, volume):
         # volume <value> [abs] set if abs is not zero, otherwise just add delta
-        self._send_command("volume %d 1" % volume)
+        self._send_command("volume {}".format(volume-self._volume))
         super(MPlayer, self).set_volume(volume)
 
     # Special functions for mplayer
