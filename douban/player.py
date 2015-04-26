@@ -63,7 +63,11 @@ class Player(object):
         # Force quit old process
         if self.is_alive:
             self.quit()
-        args = self._args + extra_cmd
+        # use file cache
+        args = self._args + ['{}/.cache/mpv/{}'.format(
+            os.getenv('HOME'),
+            extra_cmd[-1].split('/')[-1]
+        )] + extra_cmd
         logger.debug("Exec: " + ' '.join(args))
         self.sub_proc = subprocess.Popen(
             args,
@@ -144,18 +148,18 @@ class MPlayer(Player):
 
     _player_command = "mpv"
     _default_args = [
-        '--slave-broken',                   # FIXME `--slave-broken is deprecated (see manpage).`
-        '--quiet',                          # Cannot use really-quiet because of get_* queries
-        '--softvol',                        # Avoid using hardware (global) volume
-#        '--cache', 'auto',                 # Use 5MiB cache
-        '--cache-seek-min', '2',            # Start playing after 2% cache filled
+        '--slave-broken',           # FIXME `--slave-broken is deprecated (see manpage).`
+        '--quiet',                  # Cannot use really-quiet because of get_* queries
+        '--softvol',                # Avoid using hardware (global) volume
+#        '--cache', 'auto',         # Use 5MiB cache
+        '--cache-seek-min', '2',    # Start playing after 2% cache filled
+        '--cache-file'              # ready
     ]
 
     def __init__(self, *args):
         super(MPlayer, self).__init__(*args)
 
     def start(self, url):
-        self._args += ['--cache-file', '{}/.cache/mpv/{}'.format(os.getenv('HOME'), url.split('/')[-1])]  # use file cache
         self._run_player(['-volume', str(self._volume), url])
 
     def pause(self):
