@@ -180,7 +180,7 @@ class MPlayer(Player):
     @property
     def time_pos(self):
 #        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
-        songtime = self._send_command('print_text ${=time-pos}', 'ANS_TIME_POSITION')
+        songtime = self._send_command('print_text ${=time-pos}', True)
         if songtime:
             return int(round(float(songtime)))
         else:
@@ -227,6 +227,9 @@ class MPlayer(Player):
             if len(split_output) == 2 and split_output[0].strip() == expect:
                 # We found it
                 value = split_output[1]
+                return value.strip()
+            elif expect is True and len(split_output)==1 and output.split('.')[0].isdigit():
+                value = output.split('.')[0]
                 return value.strip()
 
 
