@@ -1,19 +1,16 @@
 ##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg?style=flat&text=version)](https://pypi.python.org/pypi/douban.fm) [![python](https://pypip.in/py_versions/douban.fm/badge.svg?style=flat)]()  [![Code Health](http://landscape.io/github/taizilongxu/douban.fm/master/landscape.png)](http://landscape.io/github/taizilongxu/douban.fm/master)
 
-终端上的豆瓣FM
+Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
-### Features
+### Screenshots
 
 V0.3.0
 
-
 ![](img/douban.png)
-
 
 ### Support
 
 Linux / OS X
-
 
 ### Installation
 
@@ -43,12 +40,6 @@ OS X:
 
 第一次登陆需要输入账号,密码,程序不会保留密码,而是保存返回的token存储在~/.douban_token.txt,下次登陆无需输入密码.
 
-### last.fm
-
-    $ douban.fm last.fm
-
-设置 last.fm 账号和密码,如果登陆成功左上角` Douban Fm ` 会变成` last.fm `
-
 ### Keys
 
 支持vim按键
@@ -72,6 +63,7 @@ OS X:
  [=]     --> 增
  [-]     --> 减
  [m]     --> 静音
+ [e]     --> 播放/历史/红心列表
 歌词(>=v0.2.9)
  [o]     --> 显示歌词
  [q]     --> 退出歌词
@@ -101,56 +93,21 @@ LRC = o      # 歌词
 HELP = h     # 查看帮助
 ```
 
-### Developer
-
-[Wiki](https://github.com/taizilongxu/douban.fm/wiki)
-
-### Done
-
-* 登陆token
-* 显示PRO
-* cli设计
-* 播放,下一首,红心,不再播放
-* 进度条(时间)
-* 终端高度的自动调整
-* pro用户歌曲kbps的选择(pro用户会自动选择192kbps)
-* 歌曲结束request(发送歌曲完成)
-* config设置
-* 调节音量(amixer) + 标题中显示音量
-* 歌词
-* Ubuntu桌面通知 by [Fansion](https://github.com/Fansion) | MAC OS 桌面通知 by [Cloverstd](https://github.com/cloverstd)
-* 支持MAC OS by [Cloverstd](https://github.com/cloverstd)
-* 歌曲暂停 by [Cloverstd](https://github.com/cloverstd)
-* 单曲播放 by [Cloverstd](https://github.com/cloverstd)
-* last.fm by [skyline75489](https://github.com/skyline75489)
-
 ### TODO
 
-* 默认频道
 * 播放歌曲数 红心数 不再播放数
-* 异常处理
 * 离线歌曲
-
-### BUG
-
-* 静音下自动切换歌曲 BUG
-* ~~播放歌曲中有时候会暂停~~
-* ~~退出后终端光标会隐藏~~
-* ~~.douban_token.txt路径问题~~
-* ~~登陆异常处理~~
-* ~~静音后播放下一首会取消静音~~
-* ~~歌词颜色显示与center方法的冲突致使歌词不能居中~~
-* ~~歌曲播放中歌词显示的定位~~
+* 兼容mvp播放器
 
 ### Authors
 
 * [Fansion](https://github.com/Fansion)
 * [Cloverstd](https://github.com/cloverstd)
 * [skyline75489](https://github.com/skyline75489)
+* [Hexcles](https://github.com/Hexcles)
 
 ### Reference
 
-* Node.js版本的[douban.fm](https://github.com/turingou/douban.fm)
 * [豆瓣FM命令行播放器(pyfm)](https://github.com/skyline75489/pyfm)
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
@@ -176,4 +133,4 @@ V0.2.8 增加config
 
 ### License (MIT)
 
-Copyright (c) 2014 hackerxu
+Copyright (c) 2014-2015 hackerxu
