@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 豆瓣FM的网络连接部分
-主要完成登录部分
+
 例如:
 douban = douban_token.Doubanfm()
-douban.init_login()  #登录
+douban.init_login()  # 登录
 
 playingsong =
 {
@@ -30,7 +30,6 @@ playingsong =
 
 """
 from functools import wraps
-from scrobbler import Scrobbler
 import requests
 import lrc2dic
 import getpass
@@ -55,10 +54,11 @@ LOGO = '''
 [38;5;51m⠁   ⠁         ⢻           ⠈       ⢸ ⠏         ⢹         ⠘⠇          ⠈⡇      ⠇ ⠸ (B[m
 '''
 
-logger = logging.getLogger('doubanfm.token')
+logger = logging.getLogger('doubanfm.token')  # get logger
 
 
 def _decode_list(data):
+    """解析json列表,转换成utf-8"""
     rv = []
     for item in data:
         if isinstance(item, unicode):
@@ -70,6 +70,7 @@ def _decode_list(data):
 
 
 def _decode_dict(data):
+    """解析json字典,转换成utf-8"""
     rv = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
@@ -87,98 +88,30 @@ def _decode_dict(data):
 class Doubanfm(object):
     def __init__(self):
         self.login_data = {}
-        self.lastfm = True  # lastfm 登陆
 
     def init_login(self):
+
         print LOGO
+
         self.douban_login()  # 登陆
-        self.lastfm_login()  # 登陆 last.fm
+
         print '\033[31m♥\033[0m Get channels ',
+
         self.get_channels()  # 获取频道列表
+
         print '[\033[32m OK \033[0m]'
+
         # 存储的default_channel是行数而不是真正发送数据的channel_id
         # 这里需要进行转化一下
         self.set_channel(self.default_channel)
-        print '\033[31m♥\033[0m Check PRO ',
-        # self.is_pro()
-        print '[\033[32m OK \033[0m]'
+
+        print '\033[31m♥\033[0m [\033[32m OK \033[0m]'
 
     def win_login(self):
         '''登陆界面'''
         email = raw_input('Email: ')
         password = getpass.getpass('Password: ')
         return email, password
-
-    def lastfm_login(self):
-        '''Last.fm登陆'''
-        # username & password
-        self.last_fm_username = \
-            self.login_data['last_fm_username'] if 'last_fm_username' in self.login_data\
-            else None
-        self.last_fm_password = \
-            self.login_data['last_fm_password'] if 'last_fm_password' in self.login_data\
-            else None
-        if len(sys.argv) > 1 and sys.argv[1] == 'last.fm':
-            from hashlib import md5
-            username = raw_input('Last.fm username: ') or None
-            password = getpass.getpass('Last.fm password :') or None
-            if username and password:
-                self.last_fm_username = username
-                self.last_fm_password = md5(password).hexdigest()
-            with open(config.PATH_TOKEN, 'r') as f:
-                data = pickle.load(f)
-            with open(config.PATH_TOKEN, 'w') as f:
-                data['last_fm_username'] = username
-                data['last_fm_password'] = self.last_fm_password
-                pickle.dump(data, f)
-
-        # login
-        if self.lastfm and self.last_fm_username and self.last_fm_password:
-            self.scrobbler = Scrobbler(
-                self.last_fm_username, self.last_fm_password)
-            r, err = self.scrobbler.handshake()
-            if r:
-                logger.info("Last.fm login succeeds!")
-                print '\033[31m♥\033[0m Last.fm logged in: %s' % self.last_fm_username
-            else:
-                logger.error("Last.fm login fails: " + err)
-                self.lastfm = False
-        else:
-            self.lastfm = False
-
-    def __last_fm_account_required(func):
-        '''装饰器，用于需要登录Last.fm后才能使用的接口'''
-        @wraps(func)
-        def wrapper(self, *args, **kwds):
-            if not self.lastfm:
-                return
-            # Disable pylint callable check due to pylint's incompability
-            # with using a class method as decorator.
-            # Pylint will consider func as "self"
-            return func(self, *args, **kwds)    # pylint: disable=not-callable
-        return wrapper
-
-    @__last_fm_account_required
-    def submit_current_song(self):
-        '''提交播放过的曲目'''
-        # Submit the track if total playback time of the track > 30s
-        if self.playingsong['length'] > 30:
-            self.scrobbler.submit(
-                self.playingsong['artist'],
-                self.playingsong['title'],
-                self.playingsong['albumtitle'],
-                self.playingsong['length']
-            )
-
-    @__last_fm_account_required
-    def scrobble_now_playing(self):
-        '''提交当前正在播放曲目'''
-        self.scrobbler.now_playing(
-            self.playingsong['artist'],
-            self.playingsong['title'],
-            self.playingsong['albumtitle'],
-            self.playingsong['length']
-        )
 
     def douban_login(self):
         '''登陆douban.fm获取token'''
