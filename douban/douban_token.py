@@ -90,21 +90,16 @@ class Doubanfm(object):
         self.login_data = {}
 
     def init_login(self):
-
         print LOGO
-
-        self.douban_login()  # 登陆
-
+        # 登录
+        self.douban_login()
         print '\033[31m♥\033[0m Get channels ',
-
-        self.get_channels()  # 获取频道列表
-
+        # 获取频道列表
+        self.get_channels()
         print '[\033[32m OK \033[0m]'
-
         # 存储的default_channel是行数而不是真正发送数据的channel_id
         # 这里需要进行转化一下
         self.set_channel(self.default_channel)
-
         print '\033[31m♥\033[0m [\033[32m OK \033[0m]'
 
     def win_login(self):
@@ -113,48 +108,52 @@ class Doubanfm(object):
         password = getpass.getpass('Password: ')
         return email, password
 
+    def request_token(self):
+        """通过帐号,密码请求token,返回一个dict"""
+        email, password = self.win_login()
+        post_data = {
+            'app_name': 'radio_desktop_win',
+            'version': '100',
+            'email': email,
+            'password': password
+        }
+        s = requests.post('http://www.douban.com/j/app/login', post_data)
+        logger.info(s.text)
+        return json.loads(s.text, object_hook=_decode_dict)
+
+    def process_login_data(self, login_data):
+        """通过login_data设定登录的默认值"""
+        self.token = login_data['token']
+        self.user_name = login_data['user_name']
+        self.user_id = login_data['user_id']
+        self.expire = login_data['expire']
+        self.default_volume = int(login_data['volume'])\
+            if 'volume' in login_data else 50
+        # Value stored in login_data in token file is line number
+        # instead of channel_id! Will do set_channel later.
+        self.default_channel = int(login_data['channel'])\
+            if 'channel' in login_data else 0
+
     def douban_login(self):
         '''登陆douban.fm获取token'''
         if os.path.exists(config.PATH_TOKEN):
-            # 已登陆
+            # 使用上次登录保存的token
             logger.info("Found existing Douban.fm token.")
             with open(config.PATH_TOKEN, 'r') as f:
                 self.login_data = pickle.load(f)
-                self.token = self.login_data['token']
-                self.user_name = self.login_data['user_name']
-                self.user_id = self.login_data['user_id']
-                self.expire = self.login_data['expire']
-                self.default_volume = int(self.login_data['volume'])\
-                    if 'volume' in self.login_data else 50
-                # Value stored in login_data in token file is lien number
-                # instead of channel_id! Will do set_channel later.
-                self.default_channel = int(self.login_data['channel'])\
-                    if 'channel' in self.login_data else 0
+                self.process_login_data(self.login_data)
             print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
                 self.user_name
         else:
             # 未登陆
             logger.info('First time logging in Douban.fm.')
             while True:
-                self.email, self.password = self.win_login()
-                login_data = {
-                    'app_name': 'radio_desktop_win',
-                    'version': '100',
-                    'email': self.email,
-                    'password': self.password
-                }
-                s = requests.post('http://www.douban.com/j/app/login', login_data)
-                dic = json.loads(s.text, object_hook=_decode_dict)
+                dic = self.request_token()
                 if dic['r'] == 1:
                     logger.debug(dic['err'])
                     continue
                 else:
-                    self.token = dic['token']
-                    self.user_name = dic['user_name']
-                    self.user_id = dic['user_id']
-                    self.expire = dic['expire']
-                    self.default_volume = 50
-                    self.default_channel = 1
+                    self.process_login_data(dic)
                     self.login_data = {
                         'app_name': 'radio_desktop_win',
                         'version': '100',
@@ -201,7 +200,6 @@ class Doubanfm(object):
             s = requests.get(url)
         except requests.exceptions.RequestException:
             logger.error("Error communicating with Douban.fm API.")
-
         return s.text
 
     def set_channel(self, line):
