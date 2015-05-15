@@ -389,12 +389,11 @@ class Win(cli.Cli):
         self.player.quit()
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
         logger.debug('Terminal reset.')
-        # store the history of playlist
-        config.set_history(self.history)
-        logger.info('History saved.')
         # store the token and the default info
-        config.set_default(self._volume, self._channel)
-        logger.info('Settings saved.')
+        self.douban.login_data.update({'volume': self._volume,
+                                       'channel': self._channel})
+        logger.info(self.douban.login_data)
+        config.save_config(self.history, self.douban.login_data)
         sys.exit(0)
 
     @info('正在加载请稍后...')

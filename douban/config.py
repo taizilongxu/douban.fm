@@ -49,7 +49,7 @@ class Config(object):
     def __init__(self):
         """TODO: to be defined. """
         self.history = self.get_history()
-        self.keys = self.get_config()
+        self.keys = self.get_keys()
         self.login_data = self.get_token()
 
     def get_token(self):
@@ -75,7 +75,7 @@ class Config(object):
                 break
         return login_data
 
-    def get_config(self):
+    def get_keys(self):
         '''
         获取配置并检查是否更改
         '''
@@ -106,27 +106,6 @@ class Config(object):
             history = []
         return history
 
-
-def set_history(history):
-    '''
-    保存历史记录
-    '''
-    with open(PATH_HISTORY, 'w') as f:
-        pickle.dump(history, f)
-
-
-def set_default(volume, channel):
-    '''
-    保存默认音量和频道
-    '''
-    with open(PATH_TOKEN, 'r') as f:
-        data = pickle.load(f)
-        data['volume'] = volume
-        data['channel'] = channel
-    with open(PATH_TOKEN, 'w') as f:
-        pickle.dump(data, f)
-
-
 def get_default_theme(theme):
     """
     Get default value of a config key
@@ -140,3 +119,11 @@ def get_default_theme(theme):
 def local_data():
     local_data = Config()
     return local_data.history, local_data.keys, local_data.login_data
+
+def save_config(history, login_data):
+    with open(PATH_TOKEN, 'w') as f:
+        pickle.dump(login_data, f)
+    with open(PATH_HISTORY, 'w') as f:
+        pickle.dump(history, f)
+
+
