@@ -35,27 +35,11 @@ logger.setLevel(logging.INFO)
 
 class Win(cli.Cli):
     '''窗体及播放控制'''
-    KEYS = {
-        'UP': 'k',
-        'DOWN': 'j',
-        'TOP': 'g',
-        'BOTTOM': 'G',
-        'OPENURL': 'w',
-        'RATE': 'r',
-        'NEXT': 'n',
-        'BYE': 'b',
-        'QUIT': 'q',
-        'PAUSE': 'p',
-        'LOOP': 'l',
-        'MUTE': 'm',
-        'LRC': 'o',
-        'HELP': 'h'
-        }
     FNULL = open(os.devnull, 'w')
     RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
     PRO = on_light_red(' PRO ')
 
-    def __init__(self, douban):
+    def __init__(self, douban, history, keys):
         # 线程锁
         self.lock_start = False  # 播放锁,play之前需要加
         self.lock_rate = False   # 加心锁
@@ -70,26 +54,26 @@ class Win(cli.Cli):
         #        main lrc help history quit
         self.state = 0
 
-        self.history = config.get_history()
+        self.history = history
 
         self.douban = douban
 
         # default volume
-        self._volume = douban.default_volume
+        self._volume = douban.login_data['volume']
 
         # player controler
         self._player_exit_event = threading.Event()
         self.player = player.MPlayer(self._player_exit_event, self._volume)
 
         # 快捷键配置
-        config.get_config(self.KEYS)
+        self.KEYS = keys
 
         # 桌面通知
         self.noti = notification.Notify()
 
         # 存储歌曲信息
         self.lines = self.douban.channels
-        self._channel = self.douban.default_channel
+        self._channel = self.douban.login_data['channel']
         self.playingsong = None
         self.playlist = None
         self.find_lrc = False
@@ -100,7 +84,7 @@ class Win(cli.Cli):
         self.TITLE += color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ')
 
         self.TITLE += '\ ' + \
-            color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
+            color_func(self.c['TITLE']['username'])(self.douban.login_data['user_name']) + \
             ' >>\r'
 
         # 启动自动播放
@@ -122,7 +106,7 @@ class Win(cli.Cli):
         self.TITLE = cli.Cli.TITLE + color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ')
 
         self.TITLE += '\ ' + \
-            color_func(self.c['TITLE']['username'])(self.douban.user_name) + \
+            color_func(self.c['TITLE']['username'])(self.douban.login_data['user_name']) + \
             ' >>'
         self.set_suffix_selected(self.playingsong)
 
@@ -737,9 +721,9 @@ class History(cli.Cli):
 
 
 def main():
-    douban = douban_token.Doubanfm()
-    douban.init_login()  # 登录
-    Win(douban)
+    history, keys, login_data = config.local_data()
+    douban = douban_token.Doubanfm(login_data)
+    Win(douban, history, keys)
 
 if __name__ == '__main__':
     main()

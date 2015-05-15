@@ -84,42 +84,44 @@ def _decode_dict(data):
         rv[key] = value
     return rv
 
+def win_login():
+    '''登陆界面'''
+    email = raw_input('Email: ')
+    password = getpass.getpass('Password: ')
+    return email, password
+
+def request_token():
+    """通过帐号,密码请求token,返回一个dict"""
+    email, password = win_login()
+    post_data = {
+        'app_name': 'radio_desktop_win',
+        'version': '100',
+        'email': email,
+        'password': password
+    }
+    s = requests.post('http://www.douban.com/j/app/login', post_data)
+    logger.info(s.text)
+    return json.loads(s.text, object_hook=_decode_dict)
+
 
 class Doubanfm(object):
-    def __init__(self):
-        self.login_data = {}
-
-    def init_login(self):
-        print LOGO
-        # 登录
-        self.douban_login()
-        print '\033[31m♥\033[0m Get channels ',
-        # 获取频道列表
+    def __init__(self, login_data):
+        self.login_data = login_data
         self.get_channels()
-        print '[\033[32m OK \033[0m]'
-        # 存储的default_channel是行数而不是真正发送数据的channel_id
-        # 这里需要进行转化一下
-        self.set_channel(self.default_channel)
-        print '\033[31m♥\033[0m [\033[32m OK \033[0m]'
 
-    def win_login(self):
-        '''登陆界面'''
-        email = raw_input('Email: ')
-        password = getpass.getpass('Password: ')
-        return email, password
+    # def init_login(self):
+    #     print LOGO
+    #     # 登录
+    #     self.douban_login()
+    #     print '\033[31m♥\033[0m Get channels ',
+    #     # 获取频道列表
+    #     self.get_channels()
+    #     print '[\033[32m OK \033[0m]'
+    #     # 存储的default_channel是行数而不是真正发送数据的channel_id
+    #     # 这里需要进行转化一下
+    #     self.set_channel(self.default_channel)
+    #     print '\033[31m♥\033[0m [\033[32m OK \033[0m]'
 
-    def request_token(self):
-        """通过帐号,密码请求token,返回一个dict"""
-        email, password = self.win_login()
-        post_data = {
-            'app_name': 'radio_desktop_win',
-            'version': '100',
-            'email': email,
-            'password': password
-        }
-        s = requests.post('http://www.douban.com/j/app/login', post_data)
-        logger.info(s.text)
-        return json.loads(s.text, object_hook=_decode_dict)
 
     def process_login_data(self, login_data):
         """通过login_data设定登录的默认值"""
@@ -134,43 +136,6 @@ class Doubanfm(object):
         self.default_channel = int(login_data['channel'])\
             if 'channel' in login_data else 0
 
-    def douban_login(self):
-        '''登陆douban.fm获取token'''
-        if os.path.exists(config.PATH_TOKEN):
-            # 使用上次登录保存的token
-            logger.info("Found existing Douban.fm token.")
-            with open(config.PATH_TOKEN, 'r') as f:
-                self.login_data = pickle.load(f)
-                self.process_login_data(self.login_data)
-            print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
-                self.user_name
-        else:
-            # 未登陆
-            logger.info('First time logging in Douban.fm.')
-            while True:
-                dic = self.request_token()
-                if dic['r'] == 1:
-                    logger.debug(dic['err'])
-                    continue
-                else:
-                    self.process_login_data(dic)
-                    self.login_data = {
-                        'app_name': 'radio_desktop_win',
-                        'version': '100',
-                        'user_id': self.user_id,
-                        'expire': self.expire,
-                        'token': self.token,
-                        'user_name': self.user_name,
-                        'volume': '50',
-                        'channel': '0'
-                    }
-                    logger.info('Logged in username: ' + self.user_name)
-                    with open(config.PATH_TOKEN, 'w') as f:
-                        pickle.dump(self.login_data, f)
-                        logger.debug('Write data to ' + config.PATH_TOKEN)
-                    break
-        # set config
-        config.init_config()
 
     def get_channels(self):
         '''获取channel列表，将channel name/id存入self._channel_list'''
