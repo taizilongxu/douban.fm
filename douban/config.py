@@ -63,7 +63,7 @@ class Config(object):
                 login_data['user_name']
         else:
             # 未登陆
-            logger.info('First time logging in Douban.fm.')
+            # logger.info('First time logging in Douban.fm.')
             while True:
                 login_data = request_token()
                 if login_data['r'] == 1:

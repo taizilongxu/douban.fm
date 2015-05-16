@@ -100,7 +100,6 @@ def request_token():
         'password': password
     }
     s = requests.post('http://www.douban.com/j/app/login', post_data)
-    logger.info(s.text)
     return json.loads(s.text, object_hook=_decode_dict)
 
 
@@ -108,34 +107,19 @@ class Doubanfm(object):
     def __init__(self, login_data):
         self.login_data = login_data
         self.get_channels()
+        self.post_data = self.process_login_data()
 
-    # def init_login(self):
-    #     print LOGO
-    #     # 登录
-    #     self.douban_login()
-    #     print '\033[31m♥\033[0m Get channels ',
-    #     # 获取频道列表
-    #     self.get_channels()
-    #     print '[\033[32m OK \033[0m]'
-    #     # 存储的default_channel是行数而不是真正发送数据的channel_id
-    #     # 这里需要进行转化一下
-    #     self.set_channel(self.default_channel)
-    #     print '\033[31m♥\033[0m [\033[32m OK \033[0m]'
-
-
-    def process_login_data(self, login_data):
-        """通过login_data设定登录的默认值"""
-        self.token = login_data['token']
-        self.user_name = login_data['user_name']
-        self.user_id = login_data['user_id']
-        self.expire = login_data['expire']
-        self.default_volume = int(login_data['volume'])\
-            if 'volume' in login_data else 50
-        # Value stored in login_data in token file is line number
-        # instead of channel_id! Will do set_channel later.
-        self.default_channel = int(login_data['channel'])\
-            if 'channel' in login_data else 0
-
+    def process_login_data(self):
+        """
+        """
+        channel_id = self.get_channel_id(self.login_data['channel'])
+        post_data = {'app_name': 'radio_desktop_win',  # 固定
+                     'version': 100,  # 固定
+                     'user_id': self.login_data['user_id'],  # 登录必填
+                     'expire': self.login_data['expire'],  # 登录必填
+                     'token': self.login_data['token'],  # 登录必填
+                     'channel': channel_id}  # 可选项
+        return post_data
 
     def get_channels(self):
         '''获取channel列表，将channel name/id存入self._channel_list'''
@@ -147,6 +131,13 @@ class Doubanfm(object):
         r = requests.get('http://www.douban.com/j/app/radio/channels')
         self._channel_list += json.loads(r.text, object_hook=_decode_dict)['channels']
 
+    def get_channel_id(self, line):
+        '''把行数转化成channel_id'''
+        return self._channel_list[line]['channel_id']
+
+    def set_channel(self, line):
+        self.post_data['channel'] = self._channel_list[line]['channel_id']
+
     @property
     def channels(self):
         '''返回channel名称列表（一个list，不包括id）'''
@@ -156,7 +147,7 @@ class Doubanfm(object):
 
     def requests_url(self, ptype, **data):
         '''这里包装了一个函数,发送post_data'''
-        post_data = self.login_data.copy()
+        post_data = self.post_data.copy()
         post_data['type'] = ptype
         for x in data:
             post_data[x] = data[x]
@@ -166,11 +157,6 @@ class Doubanfm(object):
         except requests.exceptions.RequestException:
             logger.error("Error communicating with Douban.fm API.")
         return s.text
-
-    def set_channel(self, line):
-        '''把行数转化成channel_id'''
-        self.default_channel = line
-        self.login_data['channel'] = self._channel_list[line]['channel_id']
 
     def get_playlist(self):
         '''获取播放列表,返回一个list'''
