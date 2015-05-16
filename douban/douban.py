@@ -186,7 +186,7 @@ class Win(cli.Cli):
 
     def display(self):
         '''显示主控制界面'''
-        if self.state == 0:
+        if self.state == 0 and not self.lock_start:
             cli.Cli.display(self)
 
     def change_volume(self, increment):
@@ -195,7 +195,7 @@ class Win(cli.Cli):
             self._volume += 5
         else:
             self._volume -= 5
-        self._volume = max(min(self._volume, 100), 0)
+        self._volume = max(min(self._volume, 100), 0)  # 限制在0-100之间
         self.lock_muted = False if self._volume else True
         self.player.set_volume(self._volume)
 
@@ -402,7 +402,7 @@ class Win(cli.Cli):
         if self._channel == self.displayline:
             return
         self._channel = self.displayline
-        self.douban.set_channel(self._channel)
+        self.douban.set_channel(self._channel)  # 对douban的post_data修改频道
         self.get_playlist()
         self.lock_loop = False
         self.lock_start = True

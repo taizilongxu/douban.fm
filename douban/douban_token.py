@@ -2,33 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 豆瓣FM的网络连接部分
-
-例如:
-douban = douban_token.Doubanfm()
-douban.init_login()  # 登录
-
-playingsong =
-{
-    "album": "/subject/5952615/",
-    "picture": "http://img3.douban.com/mpic/s4616653.jpg",
-    "ssid": "e1b2",
-    "artist": "Bruno Mars / B.o.B",
-    "url": "http://mr3.douban.com/201308250247/4a3de2e8016b5d659821ec76e6a2f35d/view/song/small/p1562725.mp3",
-    "company": "EMI",
-    "title": "Nothin' On You",
-    "rating_avg": 4.04017,
-    "length": 267,
-    "subtype": "",
-    "public_time": "2011",
-    "sid": "1562725",
-    "aid": "5952615",
-    "sha256": "2422b6fa22611a7858060fd9c238e679626b3173bb0d161258b4175d69f17473",
-    "kbps": "64",
-    "albumtitle": "2011 Grammy Nominees",
-    "like": 1
-}
-
 """
+
 from functools import wraps
 import requests
 import lrc2dic
@@ -84,11 +59,13 @@ def _decode_dict(data):
         rv[key] = value
     return rv
 
+
 def win_login():
-    '''登陆界面'''
+    """登陆界面"""
     email = raw_input('Email: ')
     password = getpass.getpass('Password: ')
     return email, password
+
 
 def request_token():
     """通过帐号,密码请求token,返回一个dict"""
@@ -104,14 +81,20 @@ def request_token():
 
 
 class Doubanfm(object):
+
     def __init__(self, login_data):
+        """初始化获取频道列表
+        :param login_data:{'user_id': user_id,
+                           'expire': exprie,
+                            'token': token,
+                            'channel': channel}
+        """
         self.login_data = login_data
         self.get_channels()
         self.post_data = self.process_login_data()
 
     def process_login_data(self):
-        """
-        """
+        """post_data"""
         channel_id = self.get_channel_id(self.login_data['channel'])
         post_data = {'app_name': 'radio_desktop_win',  # 固定
                      'version': 100,  # 固定
@@ -122,7 +105,7 @@ class Doubanfm(object):
         return post_data
 
     def get_channels(self):
-        '''获取channel列表，将channel name/id存入self._channel_list'''
+        """获取channel列表，将channel name/id存入self._channel_list"""
         # 红心兆赫需要手动添加
         self._channel_list = [{
             'name': '红心兆赫',
@@ -132,7 +115,7 @@ class Doubanfm(object):
         self._channel_list += json.loads(r.text, object_hook=_decode_dict)['channels']
 
     def get_channel_id(self, line):
-        '''把行数转化成channel_id'''
+        """把行数转化成channel_id"""
         return self._channel_list[line]['channel_id']
 
     def set_channel(self, line):
@@ -140,13 +123,20 @@ class Doubanfm(object):
 
     @property
     def channels(self):
-        '''返回channel名称列表（一个list，不包括id）'''
+        """返回channel名称列表（一个list，不包括id）"""
         # 格式化频道列表，以便display
         lines = [ch['name'] for ch in self._channel_list]
         return lines
 
     def requests_url(self, ptype, **data):
-        '''这里包装了一个函数,发送post_data'''
+        """这里包装了一个函数,发送post_data
+        :param ptype: n 列表无歌曲,返回新列表
+                      e 发送歌曲完毕
+                      b 不再播放,返回新列表
+                      s 下一首,返回新的列表
+                      r 标记喜欢
+                      u 取消标记喜欢
+        """
         post_data = self.post_data.copy()
         post_data['type'] = ptype
         for x in data:
@@ -159,34 +149,54 @@ class Doubanfm(object):
         return s.text
 
     def get_playlist(self):
-        '''获取播放列表,返回一个list'''
+        """获取播放列表,返回一个list"""
         s = self.requests_url('n')
         return json.loads(s, object_hook=_decode_dict)['song']
 
     def skip_song(self, playingsong):
-        '''下一首,返回一个list'''
+        """下一首,返回一个list
+        :param playingsong: {
+                "album": "/subject/5952615/",
+                "picture": "http://img3.douban.com/mpic/s4616653.jpg",
+                "ssid": "e1b2",
+                "artist": "Bruno Mars / B.o.B",
+                "url": "http://mr3.douban.com/201308250247/4a3de2e8016b5d659821ec76e6a2f35d/view/song/small/p1562725.mp3",
+                "company": "EMI",
+                "title": "Nothin' On You",
+                "rating_avg": 4.04017,
+                "length": 267,
+                "subtype": "",
+                "public_time": "2011",
+                "sid": "1562725",
+                "aid": "5952615",
+                "sha256": "2422b6fa22611a7858060fd9c238e679626b3173bb0d161258b4175d69f17473",
+                "kbps": "64",
+                "albumtitle": "2011 Grammy Nominees",
+                "like": 1
+            }
+        """
         s = self.requests_url('s', sid=playingsong['sid'])
         return json.loads(s, object_hook=_decode_dict)['song']
 
     def bye(self, playingsong):
-        '''不再播放,返回一个list'''
+        """不再播放,返回一个list"""
         s = self.requests_url('b', sid=playingsong['sid'])
         return json.loads(s, object_hook=_decode_dict)['song']
 
     def rate_music(self, playingsong):
-        '''标记喜欢歌曲'''
+        """标记喜欢歌曲"""
         self.requests_url('r', sid=playingsong['sid'])
 
     def unrate_music(self, playingsong):
-        '''取消标记喜欢歌曲'''
+        """取消标记喜欢歌曲"""
         self.requests_url('u', sid=playingsong['sid'])
 
     def submit_music(self, playingsong):
-        '''歌曲结束标记'''
+        """歌曲结束标记"""
         self.requests_url('e', sid=playingsong['sid'])
 
     def get_lrc(self, playingsong):
-        '''获取歌词'''
+        """获取歌词"""
         try:
             url = "http://api.douban.com/v2/fm/lyric"
             postdata = {
