@@ -63,7 +63,11 @@ class Player(object):
         # Force quit old process
         if self.is_alive:
             self.quit()
-        args = self._args + extra_cmd
+        # use file cache
+        args = self._args + ['{}/.cache/mpv/{}'.format(
+            os.getenv('HOME'),
+            extra_cmd[-1].split('/')[-1]
+        )] + extra_cmd
         logger.debug("Exec: " + ' '.join(args))
         self.sub_proc = subprocess.Popen(
             args,
@@ -142,21 +146,21 @@ class Player(object):
 
 class MPlayer(Player):
 
-    _player_command = "mplayer"
+    _player_command = "mpv"
     _default_args = [
-        '-slave',
-        '-nolirc',          # Get rid of a warning
-        '-quiet',           # Cannot use really-quiet because of get_* queries
-        '-softvol',         # Avoid using hardware (global) volume
-        '-cache', '5120',   # Use 5MiB cache
-        '-cache-min', '2'   # Start playing after 2% cache filled
+        '--slave-broken',           # FIXME `--slave-broken is deprecated (see manpage).`
+        '--quiet',                  # Cannot use really-quiet because of get_* queries
+        '--softvol',                # Avoid using hardware (global) volume
+#        '--cache', 'auto',         # Use 5MiB cache
+        '--cache-seek-min', '2',    # Start playing after 2% cache filled
+        '--cache-file'              # ready
     ]
 
     def __init__(self, *args):
         super(MPlayer, self).__init__(*args)
 
     def start(self, url):
-        self._run_player(['-volume', str(self._volume), url])
+        self._run_player(['--volume', str(self._volume), url])
 
     def pause(self):
         self._send_command('pause')
@@ -175,7 +179,8 @@ class MPlayer(Player):
 
     @property
     def time_pos(self):
-        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
+        songtime = self._send_command('print_text ${=time-pos}', True)
+#        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
         if songtime:
             return int(round(float(songtime)))
         else:
@@ -183,7 +188,7 @@ class MPlayer(Player):
 
     def set_volume(self, volume):
         # volume <value> [abs] set if abs is not zero, otherwise just add delta
-        self._send_command("volume %d 1" % volume)
+        self._send_command("volume {}".format(volume-self._volume))
         super(MPlayer, self).set_volume(volume)
 
     # Special functions for mplayer
@@ -222,6 +227,9 @@ class MPlayer(Player):
             if len(split_output) == 2 and split_output[0].strip() == expect:
                 # We found it
                 value = split_output[1]
+                return value.strip()
+            elif expect is True and len(split_output)==1 and output.split('.')[0].isdigit():
+                value = output.split('.')[0]
                 return value.strip()
 
 
