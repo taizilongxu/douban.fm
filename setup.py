@@ -5,7 +5,7 @@ import sys, os
 打包的用的setup必须引入，
 """
 
-VERSION = '0.3.0'
+VERSION = '0.3.1'
 
 setup(name='douban.fm',
       version=VERSION,
@@ -17,7 +17,7 @@ setup(name='douban.fm',
       author_email='468137306@qq.com',
       url='https://github.com/taizilongxu/douban.fm',
       license='MIT',
-      packages=['douban'],
+      packages=['douban', 'douban/colorset'],
       include_package_data=True,
       zip_safe=True,
       install_requires=[

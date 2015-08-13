@@ -1,10 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import os
-import json
 import ConfigParser
 import cPickle as pickle
 from douban_token import request_token
+from colorset import theme
 
 
 PATH_CONFIG = os.path.expanduser("~/.doubanfm_config")
@@ -106,15 +106,11 @@ class Config(object):
             history = []
         return history
 
-def get_default_theme(theme):
+def get_default_theme(theme_name):
     """
     Get default value of a config key
     """
-    path = os.path.dirname(__file__) + '/colorset/' + theme + '.json'
-    # path = '/Users/limbo/Cloud/cli/douban/colorset/default.json'
-    with open(path) as f:
-        content = ''.join(f.readlines())
-    return json.loads(content)
+    return getattr(theme, theme_name)
 
 def local_data():
     local_data = Config()
