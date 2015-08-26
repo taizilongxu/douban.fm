@@ -4,10 +4,9 @@ import os
 import ConfigParser
 import cPickle as pickle
 import logging
-from douban_token import request_token
 from colorset import theme
 
-logger = logging.getLogger(__name__)  # get logger
+logger = logging.getLogger('doubanfm')  # get logger
 
 THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
 PATH_CONFIG = os.path.expanduser("~/.doubanfm_config")
@@ -46,17 +45,24 @@ KEYS = {
     'HELP': 'h'
     }
 
+def request_token():
+    """通过帐号,密码请求token,返回一个dict"""
+    email, password = win_login()
+    post_data = {
+        'app_name': 'radio_desktop_win',
+        'version': '100',
+        'email': email,
+        'password': password
+    }
+    s = requests.post('http://www.douban.com/j/app/login', post_data)
+    return json.loads(s.text, object_hook=_decode_dict)
+
+
 class Config(object):
     """Docstring for Congif. """
 
     def __init__(self):
         self.__theme = 'tomorrow'
-    #     # 获取播放历史
-    #     self.history = self.get_history()
-    #     # 获取按键映射
-    #     self.keys = self.get_keys()
-    #     # 获取登陆信息
-    #     self.login_data = self.get_token()
 
     @property
     def login_data(self):
@@ -104,9 +110,6 @@ class Config(object):
 
     @property
     def history(self):
-        '''
-        获取历史记录
-        '''
         try:
             with open(PATH_HISTORY, 'r') as f:
                 history = pickle.load(f)
@@ -127,18 +130,14 @@ class Config(object):
         """
         :param value: 0, 1, 2, 3
         """
-        logger.info(value)
         self.__theme = THEME[value]
 
+    @staticmethod
+    def save_config(history, login_data):
+        with open(PATH_TOKEN, 'w') as f:
+            pickle.dump(login_data, f)
+        with open(PATH_HISTORY, 'w') as f:
+            pickle.dump(history, f)
 
-def local_data():
-    local_data = Config()
-    return local_data.history, local_data.keys, local_data.login_data
-
-def save_config(history, login_data):
-    with open(PATH_TOKEN, 'w') as f:
-        pickle.dump(login_data, f)
-    with open(PATH_HISTORY, 'w') as f:
-        pickle.dump(history, f)
 
 db_config = Config()

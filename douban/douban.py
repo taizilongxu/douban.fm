@@ -4,13 +4,13 @@
 豆瓣fm主程序
 """
 # local
-import cli              # ui
-import douban_token     # network
-import getch            # getchar
-import player           # player
-import notification     # desktop notification
-import config           # config
-from colors import *    # colors
+import cli                      # ui
+import douban_token             # network
+import getch                    # getchar
+import player                   # player
+import notification             # desktop notification
+from config import db_config    # config
+from colors import *            # colors
 # system
 import subprocess
 import threading
@@ -39,7 +39,7 @@ class Win(cli.Cli):
     RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
     PRO = on_light_red(' PRO ')
 
-    def __init__(self, douban, history, keys):
+    def __init__(self, douban):
         # 线程锁
         self.lock_start = False  # 播放锁,play之前需要加
         self.lock_rate = False   # 加心锁
@@ -54,7 +54,7 @@ class Win(cli.Cli):
         #        main lrc help history quit
         self.state = 0
 
-        self.history = history
+        self.history = db_config.history
 
         self.douban = douban
 
@@ -66,7 +66,7 @@ class Win(cli.Cli):
         self.player = player.MPlayer(self._player_exit_event, self._volume)
 
         # 快捷键配置
-        self.KEYS = keys
+        self.KEYS = db_config.keys
 
         # 桌面通知
         self.noti = notification.Notify()
@@ -100,7 +100,7 @@ class Win(cli.Cli):
 
     def reload_theme(self):
         # 箭头所指行前缀
-        cli.Cli.c = config.db_config.theme
+        cli.Cli.c = db_config.theme
         cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')
         cli.Cli.LOVE = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
 
@@ -332,7 +332,7 @@ class Win(cli.Cli):
             elif k == '-' or k == '_':       # 降低音量
                 self.change_volume(-1)
             elif k in ['1', '2', '3', '4']:
-                config.db_config.theme = int(k) - 1
+                db_config.theme = int(k) - 1
                 self.reload_theme()
 
     def info(args):
@@ -394,7 +394,7 @@ class Win(cli.Cli):
         self.douban.login_data.update({'volume': self._volume,
                                        'channel': self._channel})
         logger.info(self.douban.login_data)
-        config.save_config(self.history, self.douban.login_data)
+        db_config.save_config(self.history, self.douban.login_data)
         sys.exit(0)
 
     @info('正在加载请稍后...')
@@ -721,9 +721,8 @@ class History(cli.Cli):
 
 
 def main():
-    history, keys, login_data = config.local_data()
-    douban = douban_token.Doubanfm(login_data)
-    Win(douban, history, keys)
+    douban = douban_token.Doubanfm()
+    Win(douban)
 
 if __name__ == '__main__':
     main()

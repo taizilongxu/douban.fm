@@ -10,6 +10,7 @@ import getpass
 import urllib
 import logging
 import json
+from config import db_config
 
 LOGO = '''
 [38;5;202m⡇       ⡆  ⡀    ⣄       ⣆       ⡄⢀      ⢀⡄          ⡄              ⢠⡇           (B[m
@@ -62,29 +63,17 @@ def win_login():
     return email, password
 
 
-def request_token():
-    """通过帐号,密码请求token,返回一个dict"""
-    email, password = win_login()
-    post_data = {
-        'app_name': 'radio_desktop_win',
-        'version': '100',
-        'email': email,
-        'password': password
-    }
-    s = requests.post('http://www.douban.com/j/app/login', post_data)
-    return json.loads(s.text, object_hook=_decode_dict)
-
 
 class Doubanfm(object):
 
-    def __init__(self, login_data):
+    def __init__(self):
         """初始化获取频道列表
         :param login_data:{'user_id': user_id,
                            'expire': exprie,
                            'token': token,
                            'channel': channel}
         """
-        self.login_data = login_data
+        self.login_data = db_config.login_data
         self.get_channels()
         self.post_data = self.process_login_data()
 
