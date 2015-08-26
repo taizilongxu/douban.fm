@@ -100,6 +100,7 @@ class Win(cli.Cli):
 
     def reload_theme(self):
         # 箭头所指行前缀
+        cli.Cli.c = config.db_config.theme
         cli.Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')
         cli.Cli.LOVE = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
 
@@ -331,7 +332,7 @@ class Win(cli.Cli):
             elif k == '-' or k == '_':       # 降低音量
                 self.change_volume(-1)
             elif k in ['1', '2', '3', '4']:
-                cli.Cli.c = config.get_default_theme(THEME[int(k) - 1])
+                config.db_config.theme = int(k) - 1
                 self.reload_theme()
 
     def info(args):

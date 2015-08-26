@@ -1,19 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-豆瓣FM的网络连接部分
+豆瓣FM API
 """
 
-from functools import wraps
 import requests
 import lrc2dic
 import getpass
-import pickle
 import urllib
 import logging
-import sys
-import os
-import config
 import json
 
 LOGO = '''
@@ -29,7 +24,7 @@ LOGO = '''
 [38;5;51m⠁   ⠁         ⢻           ⠈       ⢸ ⠏         ⢹         ⠘⠇          ⠈⡇      ⠇ ⠸ (B[m
 '''
 
-logger = logging.getLogger('doubanfm.token')  # get logger
+logger = logging.getLogger(__name__)  # get logger
 
 
 def _decode_list(data):
@@ -86,8 +81,8 @@ class Doubanfm(object):
         """初始化获取频道列表
         :param login_data:{'user_id': user_id,
                            'expire': exprie,
-                            'token': token,
-                            'channel': channel}
+                           'token': token,
+                           'channel': channel}
         """
         self.login_data = login_data
         self.get_channels()

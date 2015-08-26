@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import config
+from config import db_config
 
 
 def basic_color(code):
@@ -84,6 +84,5 @@ on_light_magenta = basic_color('105')
 on_light_cyan = basic_color('106')
 on_white = basic_color('107')
 
-THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
 
-c = config.get_default_theme(THEME[0])
+c = db_config.theme

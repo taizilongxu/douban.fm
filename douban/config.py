@@ -3,10 +3,13 @@
 import os
 import ConfigParser
 import cPickle as pickle
+import logging
 from douban_token import request_token
 from colorset import theme
 
+logger = logging.getLogger(__name__)  # get logger
 
+THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
 PATH_CONFIG = os.path.expanduser("~/.doubanfm_config")
 PATH_HISTORY = os.path.expanduser('~/.doubanfm_history')
 PATH_TOKEN = os.path.expanduser('~/.doubanfm_token')
@@ -47,13 +50,16 @@ class Config(object):
     """Docstring for Congif. """
 
     def __init__(self):
-        """TODO: to be defined. """
-        self.history = self.get_history()
-        self.keys = self.get_keys()
-        self.login_data = self.get_token()
+        self.__theme = 'tomorrow'
+    #     # 获取播放历史
+    #     self.history = self.get_history()
+    #     # 获取按键映射
+    #     self.keys = self.get_keys()
+    #     # 获取登陆信息
+    #     self.login_data = self.get_token()
 
-    def get_token(self):
-        '''登陆douban.fm获取token'''
+    @property
+    def login_data(self):
         if os.path.exists(PATH_TOKEN):
             # 使用上次登录保存的token
             # logger.info("Found existing Douban.fm token.")
@@ -75,7 +81,8 @@ class Config(object):
                 break
         return login_data
 
-    def get_keys(self):
+    @property
+    def keys(self):
         '''
         获取配置并检查是否更改
         '''
@@ -95,7 +102,8 @@ class Config(object):
                         KEYS[option] = config.get('key', option)
         return KEYS
 
-    def get_history(self):
+    @property
+    def history(self):
         '''
         获取历史记录
         '''
@@ -106,11 +114,22 @@ class Config(object):
             history = []
         return history
 
-def get_default_theme(theme_name):
-    """
-    Get default value of a config key
-    """
-    return getattr(theme, theme_name)
+    @property
+    def theme(self):
+        """
+        THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
+        """
+        # Todo
+        return getattr(theme, self.__theme)
+
+    @theme.setter
+    def theme(self, value):
+        """
+        :param value: 0, 1, 2, 3
+        """
+        logger.info(value)
+        self.__theme = THEME[value]
+
 
 def local_data():
     local_data = Config()
@@ -122,4 +141,4 @@ def save_config(history, login_data):
     with open(PATH_HISTORY, 'w') as f:
         pickle.dump(history, f)
 
-
+db_config = Config()

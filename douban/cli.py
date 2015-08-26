@@ -25,13 +25,12 @@ TITLE:界面标题的设定
 
 import subprocess
 import getch
-import config
+from config import db_config
 from colors import color_func
 
 
 class Cli(object):
-    THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
-    c = config.get_default_theme(THEME[0])
+    c = db_config.theme
     PREFIX_SELECTED = color_func(c['LINE']['arrow'])('  > ')  # 箭头所指行前缀
     LOVE = color_func(c['PLAYINGSONG']['like'])(' ❤ ', 'red')
     PREFIX_DESELECTED = '    '
