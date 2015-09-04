@@ -10,7 +10,7 @@ import getch                    # getchar
 import player                   # player
 import notification             # desktop notification
 from config import db_config    # config
-from colors import *            # colors
+from colors import red, green, on_cyan, on_light_red, color_func  # colors
 # system
 import subprocess
 import threading
@@ -602,10 +602,10 @@ class History(cli.Cli):
         self.state = 0
         self.play_tag = '♬♬♬♬♬♬'
         self.subtitle = [
-                on_cyan('Playlist') + ' '*5 + 'History' + ' '*5 + 'Rate',
-                'Playlist' + ' '*5 + on_cyan('History') + ' '*5 + 'Rate',
-                'Playlist' + ' '*5 + 'History' + ' '*5 + on_cyan('Rate')
-                ]
+            on_cyan('Playlist') + ' '*5 + 'History' + ' '*5 + 'Rate',
+            'Playlist' + ' '*5 + on_cyan('History') + ' '*5 + 'Rate',
+            'Playlist' + ' '*5 + 'History' + ' '*5 + on_cyan('Rate')
+        ]
         # hitory 使用win.history
         self.rate = []
         self.playlist = []
@@ -681,7 +681,7 @@ class History(cli.Cli):
             c = getch.getch()
             if c == self.KEYS['UP'] or c == 'A' and self.markline != 1:
                 self.updown(-1)
-            elif c == self.KEYS['DOWN'] or c =='B':
+            elif c == self.KEYS['DOWN'] or c == 'B':
                 self.updown(1)
             elif c == self.KEYS['QUIT']:
                 self.win.state = 0
@@ -700,7 +700,7 @@ class History(cli.Cli):
             elif c == 'h' or c == 'D':
                 self.state -= 1 if self.state != 0 else -2
                 self.get_lines()
-            elif c == 'l' or c== 'C':
+            elif c == 'l' or c == 'C':
                 self.state += 1 if self.state != 2 else -2
                 self.get_lines()
 

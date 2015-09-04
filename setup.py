@@ -23,7 +23,7 @@ setup(name='douban.fm',
       install_requires=[
         'termcolor',
         'requests',
-      ],
+      ] + (['pyobjc-core', 'pyobjc'] if 'darwin' in sys.platform else []),
       entry_points={
         'console_scripts':[
             'douban.fm = douban.douban:main'

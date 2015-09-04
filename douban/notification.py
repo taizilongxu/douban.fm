@@ -11,14 +11,6 @@ logger = logging.getLogger('doubanfm.notification')
 
 PLATFORM = platform.system()
 
-if PLATFORM == 'Darwin':
-    try:
-        from Foundation import NSDate, NSUserNotification, NSUserNotificationCenter
-        from AppKit import NSImage
-        import objc
-    except ImportError:
-        pass
-
 
 def send_notification(title="Douban.fm", content="", cover_file=None):
     '''发送桌面通知'''
@@ -44,27 +36,37 @@ def send_Linux_notify(title, content, img_path):
 
 def send_OS_X_notify(title, content, img_path):
     '''发送Mac桌面通知'''
+    try:
+        from Foundation import (
+            NSDate, NSUserNotification, NSUserNotificationCenter)
+        from AppKit import NSImage
+        import objc
+    except ImportError:
+        return
+
     def swizzle(cls, SEL, func):
-        old_IMP = cls.instanceMethodForSelector_(SEL)
+        old_IMP = getattr(cls, SEL, None)
+
+        if old_IMP is None:
+            old_IMP = cls.instanceMethodForSelector_(SEL)
 
         def wrapper(self, *args, **kwargs):
             return func(self, old_IMP, *args, **kwargs)
         new_IMP = objc.selector(wrapper, selector=old_IMP.selector,
                                 signature=old_IMP.signature)
-        objc.classAddMethod(cls, SEL, new_IMP)
+        objc.classAddMethod(cls, SEL.encode(), new_IMP)
 
     def swizzled_bundleIdentifier(self, original):
         # Use iTunes icon for notification
         return 'com.apple.itunes'
 
     swizzle(objc.lookUpClass('NSBundle'),
-            b'bundleIdentifier',
+            'bundleIdentifier',
             swizzled_bundleIdentifier)
     notification = NSUserNotification.alloc().init()
-    notification.setInformativeText_('')
+
     notification.setTitle_(title)
     notification.setSubtitle_(content)
-
     notification.setInformativeText_('')
     notification.setUserInfo_({})
     if img_path is not None:
@@ -72,10 +74,11 @@ def send_OS_X_notify(title, content, img_path):
         # notification.setContentImage_(image)
         notification.set_identityImage_(image)
     notification.setDeliveryDate_(
-            NSDate.dateWithTimeInterval_sinceDate_(0, NSDate.date())
+        NSDate.dateWithTimeInterval_sinceDate_(0, NSDate.date())
     )
     NSUserNotificationCenter.defaultUserNotificationCenter().\
         scheduleNotification_(notification)
+
 
 class Notify(object):
 
@@ -106,7 +109,7 @@ class Notify(object):
 
         old_title = playingsong['title']
         self.cover_file = tempfile.NamedTemporaryFile(
-                suffix='.jpg', dir=self._tempdir)
+            suffix='.jpg', dir=self._tempdir)
         if not self.get_pic(playingsong, self.cover_file.name):
             return
         title = playingsong['title']
@@ -115,8 +118,9 @@ class Notify(object):
             return
         self.has_cover = True
         content = playingsong['artist'] + ' - ' + playingsong['albumtitle']
-        send_notification(title.decode('utf-8'),\
-                content.decode('utf-8'), self.cover_file.name)
+        send_notification(title.decode('utf-8'),
+                          content.decode('utf-8'),
+                          self.cover_file.name)
 
     def send_notify(self, playingsong, content=''):
         '''需要解码一下,通知需要unicode编码'''
@@ -139,6 +143,7 @@ class Notify(object):
             logger.info('Temporary files removed.')
         except OSError:
             pass
+
 
 def main():
     send_notification(title='Test title', content='test content')
