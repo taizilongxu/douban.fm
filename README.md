@@ -1,4 +1,4 @@
-##douban.fm [![version](https://pypip.in/version/douban.fm/badge.svg?style=flat&text=version)](https://pypi.python.org/pypi/douban.fm) [![python](https://pypip.in/py_versions/douban.fm/badge.svg?style=flat)]()  [![Code Health](http://landscape.io/github/taizilongxu/douban.fm/master/landscape.png)](http://landscape.io/github/taizilongxu/douban.fm/master)
+##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615)
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
@@ -52,7 +52,7 @@ OS X:
  [G]     --> 移到最底
 音乐
  [space] --> 播放
- [w]     --> 打开歌曲主页
+ [w]     --> 打开歌曲专辑豆瓣主页
  [n]     --> 下一首
  [r]     --> 喜欢/取消喜欢
  [b]     --> 不再播放
