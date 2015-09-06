@@ -5,11 +5,11 @@
 """
 # local
 import cli                      # ui
-import douban_token             # network
 import getch                    # getchar
 import player                   # player
 import notification             # desktop notification
 from config import db_config    # config
+from API import api             # network
 from colors import red, green, on_cyan, on_light_red, color_func  # colors
 # system
 import subprocess
@@ -234,6 +234,7 @@ class Win(cli.Cli):
         self.playlist = self.douban.get_playlist()
 
     def get_song(self):
+        # Todo playlist为空bug
         if not self.playlist:
             self.get_playlist()
         return self.playlist.pop(0)
@@ -721,7 +722,7 @@ class History(cli.Cli):
 
 
 def main():
-    douban = douban_token.Doubanfm()
+    douban = api.Doubanfm()
     Win(douban)
 
 if __name__ == '__main__':

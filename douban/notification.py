@@ -42,6 +42,7 @@ def send_OS_X_notify(title, content, img_path):
         from AppKit import NSImage
         import objc
     except ImportError:
+        logger.info('failed to init OSX notify!')
         return
 
     def swizzle(cls, SEL, func):
@@ -78,6 +79,7 @@ def send_OS_X_notify(title, content, img_path):
     )
     NSUserNotificationCenter.defaultUserNotificationCenter().\
         scheduleNotification_(notification)
+    logger.info('send notify success!')
 
 
 class Notify(object):
