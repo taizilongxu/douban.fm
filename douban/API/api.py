@@ -4,12 +4,12 @@
 豆瓣FM API
 """
 import requests
-import douban.lrc2dic
 import getpass
 import urllib
 import logging
 import json
 from douban.config import db_config
+from douban.lrc2dic import lrc2dict
 
 LOGO = '''
 [38;5;202m⡇       ⡆  ⡀    ⣄       ⣆       ⡄⢀      ⢀⡄          ⡄              ⢠⡇           (B[m
@@ -190,7 +190,7 @@ class Doubanfm(object):
             response = s.post(url, data=postdata)
             lyric = json.loads(response.text, object_hook=_decode_dict)
             logger.debug(response.text)
-            lrc_dic = lrc2dic.lrc2dict(lyric['lyric'])
+            lrc_dic = lrc2dict(lyric['lyric'])
             # 原歌词用的unicode,为了兼容
             for key, value in lrc_dic.iteritems():
                 lrc_dic[key] = value.decode('utf-8')

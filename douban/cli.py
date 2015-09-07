@@ -26,7 +26,7 @@ TITLE:界面标题的设定
 import subprocess
 import getch
 from config import db_config
-from colors import color_func
+from colorset.colors import color_func
 
 
 class Cli(object):

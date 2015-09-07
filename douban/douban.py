@@ -10,7 +10,8 @@ import player                   # player
 import notification             # desktop notification
 from config import db_config    # config
 from API import api             # network
-from colors import red, green, on_cyan, on_light_red, color_func  # colors
+from colorset.colors \
+    import red, green, on_cyan, on_light_red, color_func  # colors
 # system
 import subprocess
 import threading
