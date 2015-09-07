@@ -4,13 +4,8 @@ import os
 import ConfigParser
 import cPickle as pickle
 import logging
-import requests
 from colorset import theme
-
-try:
-    import simplejson as json
-except ImportError:
-    import json
+from API.login import request_token
 
 logger = logging.getLogger('doubanfm')  # get logger
 
@@ -50,20 +45,6 @@ KEYS = {
     'LRC': 'o',
     'HELP': 'h'
     }
-
-
-def request_token():
-    """通过帐号,密码请求token,返回一个dict"""
-    from API import win_login, _decode_dict
-    email, password = win_login()
-    post_data = {
-        'app_name': 'radio_desktop_win',
-        'version': '100',
-        'email': email,
-        'password': password
-    }
-    s = requests.post('http://www.douban.com/j/app/login', post_data)
-    return json.loads(s.text, object_hook=_decode_dict)
 
 
 class Config(object):

@@ -4,12 +4,12 @@
 豆瓣FM API
 """
 import requests
-import getpass
 import urllib
 import logging
 import json
 from douban.config import db_config
 from douban.lrc2dic import lrc2dict
+from json_utils import decode_dict
 
 LOGO = '''
 [38;5;202m⡇       ⡆  ⡀    ⣄       ⣆       ⡄⢀      ⢀⡄          ⡄              ⢠⡇           (B[m
@@ -26,59 +26,29 @@ LOGO = '''
 
 logger = logging.getLogger(__name__)  # get logger
 
-
-def _decode_list(data):
-    """解析json列表,转换成utf-8"""
-    rv = []
-    for item in data:
-        if isinstance(item, unicode):
-            item = item.encode('utf-8')
-        elif isinstance(item, list):
-            item = _decode_list(item)
-        rv.append(item)
-    return rv
-
-
-def _decode_dict(data):
-    """解析json字典,转换成utf-8"""
-    rv = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
-            key = key.encode('utf-8')
-
-        if isinstance(value, unicode):
-            value = value.encode('utf-8')
-        elif isinstance(value, list):
-            value = _decode_list(value)
-        # no need to recurse into dict, json library will do that
-        rv[key] = value
-    return rv
-
-
-def win_login():
-    """登陆界面"""
-    email = raw_input('Email: ')
-    password = getpass.getpass('Password: ')
-    return email, password
-
-
-
 class Doubanfm(object):
 
     def __init__(self):
-        """初始化获取频道列表
+        """
+        初始化:
+            1. 获取本地data
+            2. 获取频道列表
+            3. 处理本地data, 装入post_data
+
         :param login_data:{'user_id': user_id,
                            'expire': exprie,
                            'token': token,
                            'channel': channel}
         """
         self.login_data = db_config.login_data
-        self.get_channels()
-        self.post_data = self.process_login_data()
+        self._get_channels()
+        self.post_data = self._process_login_data()
 
-    def process_login_data(self):
-        """post_data"""
-        channel_id = self.get_channel_id(self.login_data['channel'])
+    def _process_login_data(self):
+        """
+        return post_data
+        """
+        channel_id = self._get_channel_id(self.login_data['channel'])
         post_data = {'app_name': 'radio_desktop_win',  # 固定
                      'version': 100,  # 固定
                      'user_id': self.login_data['user_id'],  # 登录必填
@@ -87,18 +57,22 @@ class Doubanfm(object):
                      'channel': channel_id}  # 可选项
         return post_data
 
-    def get_channels(self):
-        """获取channel列表，将channel name/id存入self._channel_list"""
+    def _get_channels(self):
+        """
+        获取channel列表，将channel name/id存入self._channel_list
+        """
         # 红心兆赫需要手动添加
         self._channel_list = [{
             'name': '红心兆赫',
             'channel_id': -3
         }]
         r = requests.get('http://www.douban.com/j/app/radio/channels')
-        self._channel_list += json.loads(r.text, object_hook=_decode_dict)['channels']
+        self._channel_list += json.loads(r.text, object_hook=decode_dict)['channels']
 
-    def get_channel_id(self, line):
-        """把行数转化成channel_id"""
+    def _get_channel_id(self, line):
+        """
+        把行数转化成channel_id
+        """
         return self._channel_list[line]['channel_id']
 
     def set_channel(self, line):
@@ -106,13 +80,17 @@ class Doubanfm(object):
 
     @property
     def channels(self):
-        """返回channel名称列表（一个list，不包括id）"""
-        # 格式化频道列表，以便display
+        """
+        格式化频道列表，以便display
+
+        :params lines: list
+        """
         lines = [ch['name'] for ch in self._channel_list]
         return lines
 
     def requests_url(self, ptype, **data):
-        """这里包装了一个函数,发送post_data
+        """
+        这里包装了一个函数,发送post_data
         :param ptype: n 列表无歌曲,返回新列表
                       e 发送歌曲完毕
                       b 不再播放,返回新列表
@@ -132,9 +110,13 @@ class Doubanfm(object):
         return s.text
 
     def get_playlist(self):
-        """获取播放列表,返回一个list"""
+        """
+        获取播放列表
+
+        :params return: list
+        """
         s = self.requests_url('n')
-        return json.loads(s, object_hook=_decode_dict)['song']
+        return json.loads(s, object_hook=decode_dict)['song']
 
     def skip_song(self, playingsong):
         """下一首,返回一个list
@@ -159,27 +141,39 @@ class Doubanfm(object):
             }
         """
         s = self.requests_url('s', sid=playingsong['sid'])
-        return json.loads(s, object_hook=_decode_dict)['song']
+        return json.loads(s, object_hook=decode_dict)['song']
 
     def bye(self, playingsong):
-        """不再播放,返回一个list"""
+        """
+        不再播放
+
+        :params return: list
+        """
         s = self.requests_url('b', sid=playingsong['sid'])
-        return json.loads(s, object_hook=_decode_dict)['song']
+        return json.loads(s, object_hook=decode_dict)['song']
 
     def rate_music(self, playingsong):
-        """标记喜欢歌曲"""
+        """
+        标记喜欢歌曲
+        """
         self.requests_url('r', sid=playingsong['sid'])
 
     def unrate_music(self, playingsong):
-        """取消标记喜欢歌曲"""
+        """
+        取消标记喜欢歌曲
+        """
         self.requests_url('u', sid=playingsong['sid'])
 
     def submit_music(self, playingsong):
-        """歌曲结束标记"""
+        """
+        歌曲结束标记
+        """
         self.requests_url('e', sid=playingsong['sid'])
 
     def get_lrc(self, playingsong):
-        """获取歌词"""
+        """
+        获取歌词
+        """
         try:
             url = "http://api.douban.com/v2/fm/lyric"
             postdata = {
@@ -188,9 +182,12 @@ class Doubanfm(object):
             }
             s = requests.session()
             response = s.post(url, data=postdata)
-            lyric = json.loads(response.text, object_hook=_decode_dict)
+
+            # 把歌词解析成字典
+            lyric = json.loads(response.text, object_hook=decode_dict)
             logger.debug(response.text)
             lrc_dic = lrc2dict(lyric['lyric'])
+
             # 原歌词用的unicode,为了兼容
             for key, value in lrc_dic.iteritems():
                 lrc_dic[key] = value.decode('utf-8')
@@ -200,16 +197,3 @@ class Doubanfm(object):
         except requests.exceptions.RequestException:
             logger.error('Get lyric failed!')
             return {}
-
-
-def main():
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
-    douban = Doubanfm()
-    douban.init_login()  # 登录
-    print douban.login_data
-    print douban.channels
-    print douban.get_playlist()
-
-if __name__ == '__main__':
-    main()
