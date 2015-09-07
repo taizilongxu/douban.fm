@@ -1,5 +1,20 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+"""
+对mplayer及其他播放器(TODO)的控制
+
+    e = Event()
+    player = MPlayer(e)
+
+主要方法:
+
+    player.start(url)
+    player.pause()
+    player.quit()
+    player.set_volume(50)
+    player.time_pos
+    player.is_alive
+"""
 import subprocess
 from threading import Thread, Event
 import time

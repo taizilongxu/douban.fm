@@ -119,7 +119,9 @@ class Doubanfm(object):
         return json.loads(s, object_hook=decode_dict)['song']
 
     def skip_song(self, playingsong):
-        """下一首,返回一个list
+        """
+        跳过歌曲
+
         :param playingsong: {
                 "album": "/subject/5952615/",
                 "picture": "http://img3.douban.com/mpic/s4616653.jpg",
@@ -139,6 +141,7 @@ class Doubanfm(object):
                 "albumtitle": "2011 Grammy Nominees",
                 "like": 1
             }
+        return: list
         """
         s = self.requests_url('s', sid=playingsong['sid'])
         return json.loads(s, object_hook=decode_dict)['song']
@@ -147,7 +150,7 @@ class Doubanfm(object):
         """
         不再播放
 
-        :params return: list
+        return: list
         """
         s = self.requests_url('b', sid=playingsong['sid'])
         return json.loads(s, object_hook=decode_dict)['song']

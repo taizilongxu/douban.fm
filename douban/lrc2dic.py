@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-# reference: (http://reverland.org/python/2014/10/09/lrc/)
-import re
+"""
+歌词解析, 把歌词解析成字典形式
+reference: (http://reverland.org/python/2014/10/09/lrc/)
+"""
 
+import re
 
 def lrc2dict(lrc):
     def remove(x):
@@ -40,5 +43,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-############################################################################

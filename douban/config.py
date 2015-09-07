@@ -48,23 +48,22 @@ KEYS = {
 
 
 class Config(object):
-    """Docstring for Congif. """
+    """Docstring for Config. """
 
     def __init__(self):
+        # TODO 加入config里
         self.__theme = 'tomorrow'
 
     @property
     def login_data(self):
         if os.path.exists(PATH_TOKEN):
             # 使用上次登录保存的token
-            # logger.info("Found existing Douban.fm token.")
             with open(PATH_TOKEN, 'r') as f:
                 login_data = pickle.load(f)
             print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
                 login_data['user_name']
         else:
             # 未登陆
-            # logger.info('First time logging in Douban.fm.')
             while True:
                 login_data = request_token()
                 if login_data['r'] == 1:
@@ -123,8 +122,12 @@ class Config(object):
 
     @staticmethod
     def save_config(history, login_data):
+        """
+        存储历史记录和登陆信息
+        """
         with open(PATH_TOKEN, 'w') as f:
             pickle.dump(login_data, f)
+
         with open(PATH_HISTORY, 'w') as f:
             pickle.dump(history, f)
 

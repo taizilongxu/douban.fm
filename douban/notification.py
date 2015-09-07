@@ -1,5 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+"""
+linux和OSX下的系统通知
+"""
+
 import platform
 import subprocess
 import tempfile
