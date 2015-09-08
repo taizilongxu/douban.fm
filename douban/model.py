@@ -63,8 +63,10 @@ class Playlist(object):
             self._playlist.get()
 
 
-
 class History(object):
 
     def __init__(self):
         pass
+
+
+playlist = Playlist()
