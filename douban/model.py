@@ -38,6 +38,7 @@ class Playlist(object):
         """
         if channel:
             douban.set_channel(channel)
+            self.empty()
 
         for i in douban.get_playlist():
             self._playlist.put(i)
