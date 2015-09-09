@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-from douban.config import db_config
+from config import db_config
 
 
 def basic_color(code):

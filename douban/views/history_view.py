@@ -1,4 +1,6 @@
 
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 class History(cli.Cli):
     '''历史记录'''
     def __init__(self, win):

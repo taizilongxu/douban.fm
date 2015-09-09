@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 
 class Help(cli.Cli):
     '''帮助界面，查看快捷键'''

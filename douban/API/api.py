@@ -7,8 +7,8 @@ import requests
 import urllib
 import logging
 import json
-from douban.config import db_config
-from douban.lrc2dic import lrc2dict
+from config import db_config
+from lrc2dic import lrc2dict
 from json_utils import decode_dict
 
 LOGO = '''

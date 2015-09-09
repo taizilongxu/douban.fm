@@ -6,14 +6,16 @@
     e = Event()
     player = MPlayer(e)
 
-主要方法:
-
+方法:
     player.start(url)
     player.pause()
     player.quit()
     player.set_volume(50)
     player.time_pos
     player.is_alive
+
+    queue自定义get_song方法, 从中取出url, 进行播放
+    player.start_queue(queue)
 """
 import subprocess
 from threading import Thread, Event
@@ -169,6 +171,23 @@ class MPlayer(Player):
 
     def __init__(self, *args):
         super(MPlayer, self).__init__(*args)
+        self._exit_queue_event = False
+
+    def _watchdog_queue(self):
+        self._exit_queue_event = True
+
+        while self._exit_queue_event:
+            self.queue.get_song()
+            self.start(self.queue.get_playingsong()['url'])
+            self.sub_proc.wait()  # Wait for event
+
+    def start_queue(self, queue):
+        self.queue = queue
+
+        if not self._exit_queue_event:
+            Thread(target=self._watchdog_queue).start()
+        else:
+            self._exit_event.clear()
 
     def start(self, url):
         self._run_player(['-volume', str(self._volume), url])
@@ -180,6 +199,7 @@ class MPlayer(Player):
         # Force quit the whole process group of mplayer.
         # mplayer will not respond during network startup
         # and has two processes in slave mode.
+        self._exit_queue_event = False  # 标记_watchdog_queue结束
         if not self.is_alive:
             return
         try:
@@ -231,7 +251,7 @@ class MPlayer(Player):
                 output = self.sub_proc.stdout.readline().rstrip()
             except IOError:
                 return None
-            #print output
+            # print output
             split_output = output.split('=')
             # print(split_output)
             if len(split_output) == 2 and split_output[0].strip() == expect:
