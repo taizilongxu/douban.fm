@@ -47,8 +47,13 @@ print playlist.get_song()
 
 # data_main_view = MainDal(mutex_playingsong, mutex_play_state, config)
 
-e = threading.Event
-player = MPlayer(e)
+player = MPlayer()
+player.start_queue(playlist)
+import time
+time.sleep(20)
+for i in range(20):
+    print i
+    time.sleep(1)
 player.start_queue(playlist)
 
 # def watchdog(self):

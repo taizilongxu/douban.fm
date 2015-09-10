@@ -3,8 +3,7 @@
 """
 对mplayer及其他播放器(TODO)的控制
 
-    e = Event()
-    player = MPlayer(e)
+    player = MPlayer()
 
 方法:
     player.start(url)
@@ -14,7 +13,10 @@
     player.time_pos
     player.is_alive
 
-    queue自定义get_song方法, 从中取出url, 进行播放
+queue为自定义get_song方法, 从中取出url, 进行播放
+    player.start_queue(queue)
+
+如果需要重新,更换播放列表直接重复即可
     player.start_queue(queue)
 """
 import subprocess
@@ -53,7 +55,7 @@ class Player(object):
     _null_file = open(os.devnull, "w")
 
     @abc.abstractmethod
-    def __init__(self, event, default_volume=100):
+    def __init__(self, default_volume=100):
         """初始化
 
         子类需要先判断该播放器是否可用（不可用则抛出异常），再调用该方法
@@ -62,7 +64,7 @@ class Player(object):
         """
         self.sub_proc = None            # subprocess instance
         self._args = [self._player_command] + self._default_args
-        self._exit_event = event
+        self._exit_event = Event()
         self._volume = default_volume
 
     def __repr__(self):
@@ -177,6 +179,7 @@ class MPlayer(Player):
         self._exit_queue_event = True
 
         while self._exit_queue_event:
+            print 'loop watchdog queue'
             self.queue.get_song()
             self.start(self.queue.get_playingsong()['url'])
             self.sub_proc.wait()  # Wait for event
@@ -187,7 +190,7 @@ class MPlayer(Player):
         if not self._exit_queue_event:
             Thread(target=self._watchdog_queue).start()
         else:
-            self._exit_event.clear()
+            self.sub_proc.terminate()
 
     def start(self, url):
         self._run_player(['-volume', str(self._volume), url])

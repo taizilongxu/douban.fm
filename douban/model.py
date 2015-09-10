@@ -6,6 +6,8 @@
 from API.api import Doubanfm
 import Queue
 from threading import RLock
+import functools
+import time
 
 douban = Doubanfm()
 
@@ -22,12 +24,17 @@ class Playlist(object):
         """
         互斥锁, 类中各个方法互斥
         """
+        @functools.wraps(func)
         def _func(self):
+            start = time.clock()
             mutex.acquire()
             try:
                 return func(self)
             finally:
                 mutex.release()
+                elapsed = (time.clock() - start)
+                print func.__name__
+                print("Time used:", elapsed)
         return _func
 
     @lock
