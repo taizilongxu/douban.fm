@@ -4,13 +4,13 @@
 豆瓣fm主程序
 """
 # local
-import getch                    # getchar
 from player import MPlayer       # player
 # import notification             # desktop notification
 # from config import db_config    # config
 # from colorset.colors import on_light_red, color_func  # colors
 from dal.dal_main import MainDal
 from model import Playlist
+from views import main_view
 # system
 # import subprocess
 import threading
@@ -42,19 +42,41 @@ mutex_play_state = {
 }
 mutex_time = 0
 # mutex_playingsong = playlist.get_playingsong()
-print 'ttest'
-print playlist.get_song()
-
-# data_main_view = MainDal(mutex_playingsong, mutex_play_state, config)
-
 player = MPlayer()
 player.start_queue(playlist)
+
+main_view.Win()
+
 import time
-time.sleep(20)
-for i in range(20):
-    print i
-    time.sleep(1)
-player.start_queue(playlist)
+time.sleep(10)
+
+data_main_view = MainDal(playlist.get_playingsong(), mutex_play_state, config)
+
+print data_main_view.title
+print data_main_view.suffix_selected
+
+
+class Data(object):
+
+    def __init__(self):
+        self.observers = []
+        self.playlist = Playlist()
+
+    def register(self, observer):
+        if observer not in self.observers:
+            self.observers.append(observer)
+
+    def deregister(self, observer):
+        if observer in self.observers:
+            self.observers.remove(observer)
+
+    def notify_observers(self):
+        for o in self.observers:
+            o.update(self.temperature, self.humidity, self.pressure)
+
+    def data_changed(self):
+        self.notify_observers()
+
 
 # def watchdog(self):
 #     '''守护线程，检查歌曲是否播放完毕'''

@@ -13,10 +13,10 @@
     player.time_pos
     player.is_alive
 
-queue为自定义get_song方法, 从中取出url, 进行播放
+queue自定义get_song方法, 从中取出url, 进行播放(暂时, 以后可以抽象)
     player.start_queue(queue)
 
-如果需要重新,更换播放列表直接重复即可
+如果需要更新,更换播放列表直接重复即可
     player.start_queue(queue)
 """
 import subprocess
@@ -80,6 +80,7 @@ class Player(object):
         extra_cmd: 额外的参数 (list)
         """
         # Force quit old process
+        print 'start run_player'
         if self.is_alive:
             self.quit()
         args = self._args + extra_cmd
@@ -97,6 +98,7 @@ class Player(object):
         fcntl.fcntl(self.sub_proc.stdout, fcntl.F_SETFL, flags)
         # Start watchdog
         Thread(target=self._watchdog).start()
+        print 'end run_player'
 
     def _watchdog(self):
         """监控正在运行的播放器（独立线程）

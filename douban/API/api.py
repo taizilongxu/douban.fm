@@ -26,6 +26,7 @@ LOGO = '''
 
 logger = logging.getLogger(__name__)  # get logger
 
+
 class Doubanfm(object):
 
     def __init__(self):

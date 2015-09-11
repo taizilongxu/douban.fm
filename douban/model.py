@@ -15,6 +15,18 @@ mutex = RLock()
 
 
 class Playlist(object):
+    """
+    播放列表, 各个方法互斥
+
+    使用方法:
+
+        playlist = Playlist()
+
+        playingsong = playlist.get_song()
+
+        获取当前播放歌曲
+        playingsong = playlist.get_playingsong()
+    """
 
     def __init__(self):
         self._playlist = Queue.Queue(0)
@@ -22,7 +34,7 @@ class Playlist(object):
 
     def lock(func):
         """
-        互斥锁, 类中各个方法互斥
+        互斥锁
         """
         @functools.wraps(func)
         def _func(self):
@@ -59,15 +71,14 @@ class Playlist(object):
         if self._playlist.empty():
             self._get_list()
 
-        song = self._playlist.get(1)  # 阻塞模式
+        song = self._playlist.get(False)  # 阻塞模式
 
         self._playingsong = song
 
         return song
 
+    @lock
     def get_playingsong(self):
-        # if not self._playingsong:
-        #     return self.get_song()
         return self._playingsong
 
     @lock
