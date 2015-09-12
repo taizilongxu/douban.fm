@@ -35,12 +35,14 @@ class Win(Cli):
     def make_display_lines(self):
         """
         生成输出行
+
+        注意: 多线程终端同时输出会有bug, 导致起始位置偏移
         """
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
         subprocess.call('clear', shell=True)  # 清屏
 
         display_lines = ['\n\r']
-        display_lines.append(self._title)
+        display_lines.append(self._title + '\r')
 
         top = self.topline
         bottom = self.topline + self.screen_height + 1

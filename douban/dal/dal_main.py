@@ -21,7 +21,7 @@ RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
 PRO = on_light_red(' PRO ')
 LOVE = ' ❤ '
 PREFIX_SELECTED = '  > '
-PREFIX_DESELECTED = ''
+PREFIX_DESELECTED = '    '
 SUFFIX_SELECTED = ''
 SUFFXI_DESELECTED = ''
 

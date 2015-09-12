@@ -80,7 +80,6 @@ class Player(object):
         extra_cmd: 额外的参数 (list)
         """
         # Force quit old process
-        print 'start run_player'
         if self.is_alive:
             self.quit()
         args = self._args + extra_cmd
@@ -98,7 +97,6 @@ class Player(object):
         fcntl.fcntl(self.sub_proc.stdout, fcntl.F_SETFL, flags)
         # Start watchdog
         Thread(target=self._watchdog).start()
-        print 'end run_player'
 
     def _watchdog(self):
         """监控正在运行的播放器（独立线程）
@@ -169,7 +167,7 @@ class MPlayer(Player):
         '-nolirc',          # Get rid of a warning
         '-quiet',           # Cannot use really-quiet because of get_* queries
         '-softvol',         # Avoid using hardware (global) volume
-        '-cache', '5120',   # Use 5MiB cache
+        # '-cache', '120',   # Use 5MiB cache
         '-cache-min', '2'   # Start playing after 2% cache filled
     ]
 
