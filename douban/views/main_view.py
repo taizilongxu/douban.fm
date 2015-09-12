@@ -3,22 +3,34 @@
 from base_view import Cli
 import subprocess
 from colorset.colors import color_func  # colors
-import getch
-import Queue
-from threading import Condition, Thread
+from dal.dal_main import MainDal
 
 
 class Win(Cli):
     '''窗体及播放控制'''
 
-    def __init__(self):
-        self.display_lines = ''
-        self.queue = Queue.Queue(0)
-        self.condition = Condition()
-        self.quit = False
+    def __init__(self, data):
+        super(Win, self).__init__()
+        self.data = data
 
-        Thread(target=self._controller).start()
-        Thread(target=self._watchdog_queue).start()
+        self.display_lines = ''  # 展示所有的行
+
+    def set_dal(self):
+        dal = MainDal(self.data)
+        self.c = dal.c  # 主题
+        self.set_title(dal.title)
+        self.set_love(dal.love)
+        self.set_prefix_selected(dal.prefix_selected)
+        self.set_prefix_deselected(dal.prefix_deselected)
+        self.set_suffix_selected(dal.suffix_selected)
+        self.set_suffix_deselected(dal.suffix_deselected)
+        self.set_lines(dal.lines)
+
+    def display(self):
+        self.set_dal()
+        self.make_display_lines()
+        for i in self.display_lines:
+            print i
 
     def make_display_lines(self):
         """
@@ -27,24 +39,24 @@ class Win(Cli):
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
         subprocess.call('clear', shell=True)  # 清屏
 
-        display_lines = ['\n']
-        display_lines.append(self.TITLE)
+        display_lines = ['\n\r']
+        display_lines.append(self._title)
 
         top = self.topline
         bottom = self.topline + self.screen_height + 1
 
-        for index, i in enumerate(self.__lines[top:bottom]):
+        for index, i in enumerate(self._lines[top:bottom]):
             # 箭头指向
             if index == self.markline:
-                prefix = self.__cli_prefix_selected
+                prefix = self._prefix_selected
                 i = color_func(self.c['LINE']['highlight'])(i)
             else:
-                prefix = self.__cli_prefix_deselected
+                prefix = self._prefix_deselected
             # 选择频道
             if index + self.topline == self.displayline:
-                suffix = self.__cli_suffix_selected
+                suffix = self._suffix_selected
             else:
-                suffix = self.__cli_suffix_deselected
+                suffix = self._suffix_deselected
             line = '%s %s %s' % (prefix, i, suffix)
             line = color_func(self.c['LINE']['line'])(line)
 
@@ -54,29 +66,3 @@ class Win(Cli):
     def diplay(self):
         for i in self.display_lines:
             print i
-
-    def _watchdog_queue(self):
-        while not self.quit:
-            print 'watchdog_queue'
-            self.condition.acquire()
-            if self.queue.empty():
-                self.condition.wait()
-
-            k = self.queue.get()
-            print k
-            if k == 'q':
-                self.quit = True
-
-            self.condition.release()
-
-    def _controller(self):
-        while not self.quit:
-            print 'controller'
-            k = getch.getch()
-
-            self.condition.acquire()
-
-            self.queue.put(k)
-
-            self.condition.notify()
-            self.condition.release()

@@ -182,8 +182,7 @@ class MPlayer(Player):
 
         while self._exit_queue_event:
             print 'loop watchdog queue'
-            self.queue.get_song()
-            self.start(self.queue.get_playingsong()['url'])
+            self.start(self.queue.get_song()['url'])
             self.sub_proc.wait()  # Wait for event
 
     def start_queue(self, queue):
@@ -193,6 +192,9 @@ class MPlayer(Player):
             Thread(target=self._watchdog_queue).start()
         else:
             self.sub_proc.terminate()
+
+    def next(self):
+        self.start_queue(self.queue)
 
     def start(self, url):
         self._run_player(['-volume', str(self._volume), url])

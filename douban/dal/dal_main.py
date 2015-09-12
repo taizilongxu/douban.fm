@@ -28,37 +28,23 @@ SUFFXI_DESELECTED = ''
 
 class MainDal(object):
 
-    def __init__(self, playingsong, play_state, config):
+    def __init__(self, data):
         self.c = db_config.theme
-        self.time = 0  # default time
+        self.lines = data.lines
 
-        self.set_playingsong(playingsong)
-        self.set_play_state(play_state)
-        self.set_config(config)
-
-    def set_playingsong(self, playingsong):
-        """
-        歌曲信息
-        """
+        playingsong = data.playlist.get_playingsong()
         self.song_total_time = playingsong['length']
         self.song_kbps = playingsong['kbps'] + 'kbps'
         self.song_rate = RATE[int(round(playingsong['rating_avg'])) - 1]
         self.song_pro = '' if playingsong['kbps'] == '64' else PRO
-
         self.song_title = playingsong['title']
         self.song_albumtitle = playingsong['albumtitle']
         self.song_artist = playingsong['artist']
         self.song_public_time = playingsong['public_time']
 
-    def set_play_state(self, play_state):
-        """
-        播放状态
-        """
-        self.vol = play_state['vol']
-        self.loop = play_state['loop']
-
-    def set_config(self, config):
-        pass
+        self.vol = data.vol
+        self.loop = data.loop
+        self.time = data.time
 
     def set_time(self, time):
         """
@@ -119,7 +105,3 @@ class MainDal(object):
     @property
     def suffix_deselected(self):
         return SUFFXI_DESELECTED
-
-    @property
-    def lines():
-        pass

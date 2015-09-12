@@ -3,11 +3,11 @@
 '''
 用print设计的滚动终端界面
 
-__cli_prefix_selected:可以指定当前指向行的前缀
-__cli_prefix_deselected:暂时没有用,如果想保持选项行一致需要填写和PREFIX_SELECTED一样大小的空格
-__cli_suffix_selected:对选中行进行标记
-__cli_suffix_deselected:暂时无用
-__cli_title:界面标题的设定
+_prefix_selected:可以指定当前指向行的前缀
+_prefix_deselected:暂时没有用,如果想保持选项行一致需要填写和PREFIX_SELECTED一样大小的空格
+_suffix_selected:对选中行进行标记
+_suffix_deselected:暂时无用
+_title:界面标题的设定
 '''
 #######################################################################
 # topline: 屏幕显示最顶
@@ -34,47 +34,43 @@ from config import db_config
 
 class Cli(object):
 
-    def __init__(self, lines):
-        self.__lines = lines  # 展示的频道信息
+    def __init__(self):
         self.markline = 0  # 箭头行 初始化设置默认频道
         self.topline = 0  # lines
         self.displayline = 0  # 初始化歌曲信息显示行
 
         self.display_lines = []  # 需要输出的信息
-        self.__cli_title = ''
-        self.__cli_love = ''
-        self.__cli_prefix_selected = ''
-        self.__cli_prefix_deselected = ''
-        self.__cli_suffix_selected = ''
-        self.__cli_suffix_deselected = ''
+        self._title = ''
+        self._love = ''
+        self._prefix_selected = ''
+        self._prefix_deselected = ''
+        self._suffix_selected = ''
+        self._suffix_deselected = ''
 
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
         subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
 
     def set_title(self, string):
-        self.__cli_title = string
+        self._title = string
 
     def set_love(self, string):
-        self.__cli_love = string
+        self._love = string
 
     def set_prefix_selected(self, string):
-        self.__cli_prefix_selected = string
+        self._prefix_selected = string
 
     def set_prefix_deselected(self, string):
-        self.__cli_prefix_deselected = string
+        self._prefix_deselected = string
 
     def set_suffix_selected(self, string):
-        self.__cli_suffix_selected = string
+        self._suffix_selected = string
 
     def set_suffix_deselected(self, string):
-        self.__cli_suffix_deselected = string
+        self._suffix_deselected = string
 
-    def set_config(self, config):
-        """
-        设置默认参数
-        """
-        pass
+    def set_lines(self, string):
+        self._lines = string
 
     def set_displayline(self):
         """
@@ -90,7 +86,7 @@ class Cli(object):
                 屏幕宽度 int
         """
         num = subprocess.check_output('stty size', shell=True).split(' ')
-        height = int(num[0] - 4)  # -4 上下空余
+        height = int(num[0]) - 4  # -4 上下空余
         width = int(num[1])
         return height, width
 
@@ -161,3 +157,6 @@ class Cli(object):
         for i in tmp:
             l += 2 if self.is_cn_char(i) else 1
         return l
+
+    def __del__(self):
+        subprocess.call('echo -e "\033[?25h";clear', shell=True)

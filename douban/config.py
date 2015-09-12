@@ -46,22 +46,54 @@ KEYS = {
     'HELP': 'h'
     }
 
+LOGO = '''
+[38;5;202m⡇       ⡆  ⡀    ⣄       ⣆       ⡄⢀      ⢀⡄          ⡄              ⢠⡇           (B[m
+[38;5;214m⡇      ⢰⡇  ⣿    ⡗⢤      ⡏⡆    ⢸⣼⠘⢾      ⢸⡇ ⡄       ⢰⡇ ⣴   ⣰     ⡀  ⡇⡇       ⢀⢧  (B[m
+[38;5;226m⡇      ⢸⢇  ⣿   ⢀⠇⠘⡄     ⡇⡇    ⡇⠁ ⠘⡄  ⢸⡀ ⡎⡇⢰⢹       ⡜⡇⢰⠁⢇ ⢠⢿  ⢸⢆ ⣇  ⡇⡇  ⣄    ⢸⢸  (B[m
+[38;5;190m⡇     ⢀⠇⢸  ⡏⡆  ⢸  ⡇⣷   ⢸ ⡇    ⡇   ⡇  ⢸⡇ ⡇⢱⡎⢸    ⡆  ⡇⢸⢸ ⢸ ⢸⠘⡄ ⢸⢸⢀⢿  ⡇⢱⢀ ⣿ ⢸⡀ ⢸⠈⡆ (B[m
+[38;5;154m⡇     ⢸ ⢸⢰ ⡇⡇  ⢸  ⣇⠟⡄  ⢸ ⢣   ⣠⠃   ⡇  ⡸⡇⢰⠁⢸⠇⢸ ⡀ ⢰⢹  ⡇⢸⢸ ⠸⡀⢸ ⡇ ⡸⢸⢸⠸⡀⢠⠃⢸⢸⡄⡿⡀⡇⡇ ⢸ ⡇ (B[m
+[38;5;82m⡇  ⣦  ⡇ ⢸⢸⣿ ⢱  ⢸  ⢸ ⢣  ⢸ ⢸  ⡜⠈    ⡇⣄ ⡇⢱⢸ ⠘ ⠸⣸⢣ ⢸⠘⢤⢀⠇⢸⡇  ⡇⡸ ⡇ ⡇ ⣿ ⡇⢸ ⢸⢸⣿ ⠗⠁⢱ ⢸ ⡇ (B[m
+[38;5;46m⡇  ⣿  ⡇ ⢸⡇⣿ ⢸  ⡸    ⠘⢄ ⢸ ⢸ ⢠⠃     ⡇⣿ ⡇⠘⡼    ⡿⠸⡀⡇  ⣿ ⢸⡅  ⡇⡇ ⢣ ⡇ ⣿ ⢣⢸ ⢸⡜⠸   ⠸⡀⢸ ⡇ (B[m
+[38;5;48m⣧⠒⣴⢹ ⣀⠇ ⠸⡇⢻  ⠱⡀⡅      ⡇⢸  ⡇⢸      ⡇⣿ ⡇ ⠁    ⠇ ⡇⡇  ⢿ ⢸⡇  ⢸⡇ ⠘⡄⡇ ⡟ ⢸⠎ ⢸⡇     ⡇⡇ ⡇⡇(B[m
+[38;5;50m⡟ ⠻ ⡿⠹   ⠁⠘   ⣇⠇      ⠈⠇  ⢇⠇      ⢳⠉⣦⠃        ⣷⠁  ⠈  ⠇  ⢸⡇  ⠉⠃      ⢸⡇     ⢸⡇ ⢱⠇(B[m
+[38;5;51m⠁   ⠁         ⢻           ⠈       ⢸ ⠏         ⢹         ⠘⠇          ⠈⡇      ⠇ ⠸ (B[m
+'''
+
 
 class Config(object):
-    """Docstring for Config. """
+    """
+    提供默认值
+    """
 
     def __init__(self):
         # TODO 加入config里
         self.__theme = 'tomorrow'
+        self.volume = 50
+        self.channel = 0
+        self.theme_id = 0
+
+    @property
+    def line(self):
+        return 
 
     @property
     def login_data(self):
+        """
+        提供登陆的认证
+
+        这里顺带增加了 volume, channel, theme_id 的默认值
+        """
         if os.path.exists(PATH_TOKEN):
             # 使用上次登录保存的token
             with open(PATH_TOKEN, 'r') as f:
                 login_data = pickle.load(f)
             print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
                 login_data['user_name']
+
+            self.volume = login_data.get('volume', 50)
+            self.channel = login_data.get('channel', 0)
+            self.theme_id = login_data.get('theme_id', 0)
+
         else:
             # 未登陆
             while True:
@@ -111,14 +143,15 @@ class Config(object):
         THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
         """
         # Todo
-        return getattr(theme, self.__theme)
+        THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
+        return getattr(theme, THEME[self.theme_id])
 
     @theme.setter
     def theme(self, value):
         """
         :param value: 0, 1, 2, 3
         """
-        self.__theme = THEME[value]
+        self.theme_id = value
 
     @staticmethod
     def save_config(history, login_data):

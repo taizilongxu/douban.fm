@@ -6,6 +6,7 @@
 from API.api import Doubanfm
 import Queue
 from threading import RLock
+from config import db_config
 import functools
 import time
 
@@ -97,4 +98,10 @@ class Playlist(object):
 class History(object):
 
     def __init__(self):
-        pass
+        db_config.history
+
+
+class Channel(object):
+
+    def __init__(self):
+        self.lines = douban.channels

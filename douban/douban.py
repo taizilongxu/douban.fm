@@ -8,9 +8,13 @@ from player import MPlayer       # player
 # import notification             # desktop notification
 # from config import db_config    # config
 # from colorset.colors import on_light_red, color_func  # colors
+import getch
+import Queue
+from threading import Condition, Thread
 from dal.dal_main import MainDal
-from model import Playlist
+from model import Playlist, History, Channel
 from views import main_view
+import functools
 # system
 # import subprocess
 import threading
@@ -18,6 +22,7 @@ import threading
 # import os
 # import sys
 # import logging
+from config import db_config
 
 # # root logger config
 # logging.basicConfig(
@@ -33,49 +38,133 @@ import threading
 # logger.setLevel(logging.INFO)
 
 
-playlist = Playlist()
-config = None
-
-mutex_play_state = {
-    'vol': 100,
-    'loop': 0
-}
-mutex_time = 0
-# mutex_playingsong = playlist.get_playingsong()
-player = MPlayer()
-player.start_queue(playlist)
-
-main_view.Win()
-
-import time
-time.sleep(10)
-
-data_main_view = MainDal(playlist.get_playingsong(), mutex_play_state, config)
-
-print data_main_view.title
-print data_main_view.suffix_selected
 
 
 class Data(object):
+    """
+    所有需要的数据统一在一起
+    """
 
     def __init__(self):
-        self.observers = []
         self.playlist = Playlist()
+        self.lines = Channel().lines
+        # self.hitory = History()
+        self.key = db_config.keys
+        self.vol = db_config.volume
+        self.theme = db_config.theme
+        self.channel = db_config.channel
+        self.loop = False
+        self.pro = False
+        self.time = 0
 
-    def register(self, observer):
-        if observer not in self.observers:
-            self.observers.append(observer)
+        # 注册的视图
+        self.view = None
 
-    def deregister(self, observer):
-        if observer in self.observers:
-            self.observers.remove(observer)
 
-    def notify_observers(self):
-        for o in self.observers:
-            o.update(self.temperature, self.humidity, self.pressure)
+    def register(self, view):
+        """
+        注册视图: 一次只能绑定一个视图
+        """
+        self.view = view
 
-    def data_changed(self):
-        self.notify_observers()
+    def deregister(self):
+        """
+        注销视图
+        """
+        self.view = None
+
+    def display(func):
+        @functools.wraps(func)
+        def _func(self):
+            tmp = func(self)
+            if self.view:
+                self.view.display()
+            return tmp
+        return _func
+
+    @display
+    def get_song(self):
+        return self.playlist.get_song()
+
+    # @display
+    # def get_playingsong(self):
+    #     return self.playlist.get_playingsong()
+
+
+class Controller(object):
+    """
+    按键控制
+    """
+
+    def __init__(self, player, data):
+        # 接受player和data
+        self.player = player
+        self.data = data
+
+        # 注册视图
+        data.register(main_view.Win(data))
+
+        player.start_queue(data)
+
+        self.queue = Queue.Queue(0)
+        self.condition = Condition()
+        self.quit = False
+        Thread(target=self._controller).start()
+        Thread(target=self._watchdog_queue).start()
+
+    def _watchdog_queue(self):
+        """
+        从queue里取出字符执行命令
+        """
+        while not self.quit:
+            self.condition.acquire()
+            if self.queue.empty():
+                self.condition.wait()
+
+            k = self.queue.get()
+            print k
+            if k == 'q':  # 退出
+                self.player.quit()
+                self.quit = True
+            elif k == 't':  # 暂停
+                self.player.pause()
+            elif k == 'n':  # 下一首
+                self.player.next()
+            elif k == '-':  # 增大音量
+                self.player.set_volume(50)
+            elif k == '+':  # 减小音量
+                self.player.set_volume(100)
+
+            self.condition.release()
+
+    def _controller(self):
+        """
+        接受按键, 存入queue
+        """
+        while not self.quit:
+            k = getch.getch()
+
+            self.condition.acquire()
+
+            self.queue.put(k)
+
+            self.condition.notify()
+            self.condition.release()
+
+player = MPlayer()
+data = Data()
+Controller(player, data)
+
+
+
+# import time
+# time.sleep(10)
+
+# data_main_view = MainDal(playlist.get_playingsong(), mutex_play_state, config)
+
+# print data_main_view.title
+# print data_main_view.suffix_selected
+
 
 
 # def watchdog(self):
