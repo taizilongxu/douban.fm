@@ -36,29 +36,30 @@ class Lrc(Win):
                 return locate[0]
         return 0
 
-    def display_line(self):
-        """显示歌词当前播放对应行"""
-        locate = \
-            [index for index, i in enumerate(self.sort_lrc_dict)
-                if i[0] == self.song_time]
-        if locate:
-            self.markline = locate[0]
+    # def display_line(self):
+    #     """显示歌词当前播放对应行"""
+    #     locate = \
+    #         [index for index, i in enumerate(self.sort_lrc_dict)
+    #             if i[0] == self.song_time]
+    #     if locate:
+    #         self.markline = locate[0]
 
     def make_display_lines(self):
         """通过歌词生成屏幕需要显示的内容"""
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
-        subprocess.call('clear')
-        display_lines = ['\n\r']
+        subprocess.call('clear', shell=True)
+
+        display_lines = ['\n']
         display_lines.append(self._title + '\r')
-        display_lines.append('\n\r')
+        display_lines.append('\n')
 
         for linenum in range(self.screen_height - 2):
             if self.screen_height/2 - linenum > self.markline - self.topline or \
                     linenum - self.screen_height/2 >= len(self._lines) - self.markline:
-                display_lines.append('\n\r')
+                display_lines.append('\r')
             else:
                 line = self._lines[self.markline - (self.screen_height/2 - linenum)]
-                line = line.strip()
+                line = line.strip('\n')
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
                 if linenum == self.screen_height/2:
