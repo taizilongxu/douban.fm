@@ -39,14 +39,20 @@ class Playlist(object):
         """
         @functools.wraps(func)
         def _func(self):
-            start = time.clock()
             mutex.acquire()
             try:
                 return func(self)
             finally:
                 mutex.release()
-                elapsed = (time.clock() - start)
         return _func
+
+    def get_lrc(self):
+        """
+        返回当前播放歌曲歌词
+        """
+        if self._playingsong:
+            return douban.get_lrc(self._playingsong)
+        return {}
 
     def set_channel(self, channel_num):
         """

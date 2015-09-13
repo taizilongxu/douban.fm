@@ -28,8 +28,6 @@ _title:界面标题的设定
 #######################################################################
 
 import subprocess
-import getch
-from config import db_config
 
 
 class Cli(object):
@@ -71,6 +69,9 @@ class Cli(object):
 
     def set_lines(self, string):
         self._lines = string
+
+    def set_sort_lrc_dict(self, string):
+        self._sort_lrc_dict = string
 
     def set_displayline(self):
         """

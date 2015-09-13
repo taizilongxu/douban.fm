@@ -30,7 +30,7 @@ class MainDal(object):
 
     def __init__(self, data):
         self.c = db_config.theme
-        self.lines = data.lines
+        self.data = data
 
         playingsong = data.playlist.get_playingsong()
         self.song_total_time = playingsong['length']
@@ -113,3 +113,7 @@ class MainDal(object):
     @property
     def suffix_deselected(self):
         return SUFFXI_DESELECTED
+
+    @property
+    def lines(self):
+        return self.data.lines
