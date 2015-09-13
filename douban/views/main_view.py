@@ -7,13 +7,14 @@ from dal.dal_main import MainDal
 
 
 class Win(Cli):
-    '''窗体及播放控制'''
+    """窗体"""
 
     def __init__(self, data):
         super(Win, self).__init__()
         self.data = data
 
         self.display_lines = ''  # 展示所有的行
+        self.disable = False  # 设置显示失效
 
     def set_dal(self):
         dal = MainDal(self.data)
@@ -26,11 +27,15 @@ class Win(Cli):
         self.set_suffix_deselected(dal.suffix_deselected)
         self.set_lines(dal.lines)
 
+    def set_disable(self):
+        self.disable = True
+
     def display(self):
-        self.set_dal()
-        self.make_display_lines()
-        for i in self.display_lines:
-            print i
+        if not self.disable:
+            self.set_dal()
+            self.make_display_lines()
+            for i in self.display_lines:
+                print i
 
     def make_display_lines(self):
         """
@@ -64,7 +69,3 @@ class Win(Cli):
 
             display_lines.append(line + '\r')  # 为什么加\r,我不知道,如果不加会出bug
         self.display_lines = display_lines
-
-    def diplay(self):
-        for i in self.display_lines:
-            print i

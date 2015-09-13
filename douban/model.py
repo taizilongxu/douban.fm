@@ -46,9 +46,15 @@ class Playlist(object):
             finally:
                 mutex.release()
                 elapsed = (time.clock() - start)
-                print func.__name__
-                print("Time used:", elapsed)
         return _func
+
+    def set_channel(self, channel_num):
+        """
+        设置api发送的FM频道
+
+        :params channel_num: channel_list的索引值 int
+        """
+        douban.set_channel(channel_num)
 
     @lock
     def _get_list(self, channel=None):
@@ -72,7 +78,7 @@ class Playlist(object):
         if self._playlist.empty():
             self._get_list()
 
-        song = self._playlist.get(False)  # 阻塞模式
+        song = self._playlist.get(True)
 
         self._playingsong = song
 

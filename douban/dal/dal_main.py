@@ -19,7 +19,7 @@ from colorset.colors import on_light_red, color_func  # colors
 
 RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
 PRO = on_light_red(' PRO ')
-LOVE = ' ❤ '
+LOVE = ' ❤  '
 PREFIX_SELECTED = '  > '
 PREFIX_DESELECTED = '    '
 SUFFIX_SELECTED = ''
@@ -36,15 +36,17 @@ class MainDal(object):
         self.song_total_time = playingsong['length']
         self.song_kbps = playingsong['kbps'] + 'kbps'
         self.song_rate = RATE[int(round(playingsong['rating_avg'])) - 1]
-        self.song_pro = '' if playingsong['kbps'] == '64' else PRO
+        self.song_pro = '' if playingsong['kbps'] == '128' else PRO
         self.song_title = playingsong['title']
         self.song_albumtitle = playingsong['albumtitle']
         self.song_artist = playingsong['artist']
         self.song_public_time = playingsong['public_time']
+        self.song_like = playingsong['like']
 
         self.vol = data.vol
         self.loop = data.loop
         self.time = data.time
+        self.user_name = data.user_name
 
     def set_time(self, time):
         """
@@ -62,6 +64,9 @@ class MainDal(object):
         time = self.set_time(self.time)
 
         title = [
+            PREFIX_DESELECTED,
+            color_func(self.c['TITLE']['doubanfm'])('DoubanFM'),
+            color_func(self.c['TITLE']['username'])(self.user_name),
             color_func(self.c['TITLE']['pro'])(self.song_pro),
             color_func(self.c['TITLE']['kbps'])(self.song_kbps),
             color_func(self.c['TITLE']['time'])(time),
@@ -73,7 +78,10 @@ class MainDal(object):
 
     @property
     def love(self):
-        return color_func(self.c['PLAYINGSONG']['like'])(LOVE)
+        if self.song_like == 1:
+            return color_func(self.c['PLAYINGSONG']['like'])(LOVE)
+        else:
+            return ''
 
     @property
     def prefix_selected(self):

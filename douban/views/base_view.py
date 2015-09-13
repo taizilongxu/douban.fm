@@ -78,6 +78,10 @@ class Cli(object):
         """
         self.displayline = self.markline + self.topline
 
+    def set_channel(self):
+        self.set_displayline()
+        return self.displayline
+
     def linesnum(self):
         """
         测试屏幕显示行数, 每行字符数
@@ -90,13 +94,6 @@ class Cli(object):
         width = int(num[1])
         return height, width
 
-    def render(self):
-        """
-        输出到屏幕
-        """
-        for line in self.display_lines:
-            print line
-
     def make_display_lines(self):
         """
         生成输出信息
@@ -105,23 +102,9 @@ class Cli(object):
 
     def display(self):
         """
-        显示信息
+        显示输出信息
         """
         pass
-
-    def run(self):
-        """
-        监听按键
-        """
-        while True:
-            self.display()
-            c = getch.getch()
-            if c == 'k':
-                self.updown(-1)
-            if c == 'j':
-                self.updown(1)
-            if c == 'q':
-                break
 
     def updown(self, increment):
         """
@@ -133,13 +116,27 @@ class Cli(object):
         # paging
         if increment == -1 and self.markline == 0 and self.topline != 0:
             self.topline -= 1
-        elif increment == 1 and self.markline + self.topline != len(self.__lines) - 1 and self.markline == self.screen_height:
+        elif increment == 1 and self.markline + self.topline != len(self._lines) - 1 and self.markline == self.screen_height:
             self.topline += 1
         # scroll
         if increment == -1 and self.markline != 0:
             self.markline -= 1
-        elif increment == 1 and self.markline != self.screen_height and self.markline < len(self.__lines) - 1:
+        elif increment == 1 and self.markline != self.screen_height and self.markline < len(self._lines) - 1:
             self.markline += 1
+
+    def up(self):
+        self.updown(-1)
+
+    def down(self):
+        self.updown(1)
+
+    def go_bottom(self):
+        self.markline = self.screen_height
+        self.topline = len(self._lines) - self.screen_height - 1
+
+    def go_top(self):
+        self.markline = 0
+        self.topline = 0
 
     def is_cn_char(self, i):
         """

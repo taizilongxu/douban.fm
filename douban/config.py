@@ -71,10 +71,7 @@ class Config(object):
         self.volume = 50
         self.channel = 0
         self.theme_id = 0
-
-    @property
-    def line(self):
-        return 
+        self.user_name = ''
 
     @property
     def login_data(self):
@@ -93,6 +90,7 @@ class Config(object):
             self.volume = login_data.get('volume', 50)
             self.channel = login_data.get('channel', 0)
             self.theme_id = login_data.get('theme_id', 0)
+            self.user_name = login_data.get('user name', '')
 
         else:
             # 未登陆

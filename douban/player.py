@@ -16,7 +16,7 @@
 queue自定义get_song方法, 从中取出url, 进行播放(暂时, 以后可以抽象)
     player.start_queue(queue)
 
-如果需要更新,更换播放列表直接重复即可
+如果需要更新,更换播放列表直接重复上面命令即可
     player.start_queue(queue)
 """
 import subprocess
@@ -167,7 +167,7 @@ class MPlayer(Player):
         '-nolirc',          # Get rid of a warning
         '-quiet',           # Cannot use really-quiet because of get_* queries
         '-softvol',         # Avoid using hardware (global) volume
-        # '-cache', '120',   # Use 5MiB cache
+        '-cache', '5120',   # Use 5MiB cache
         '-cache-min', '2'   # Start playing after 2% cache filled
     ]
 
@@ -179,7 +179,6 @@ class MPlayer(Player):
         self._exit_queue_event = True
 
         while self._exit_queue_event:
-            print 'loop watchdog queue'
             self.start(self.queue.get_song()['url'])
             self.sub_proc.wait()  # Wait for event
 
@@ -215,11 +214,16 @@ class MPlayer(Player):
 
     @property
     def time_pos(self):
-        songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
-        if songtime:
-            return int(round(float(songtime)))
-        else:
-            return None
+
+        try:
+            songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
+            if songtime:
+                return int(round(float(songtime)))
+            else:
+                return 0
+        except NotPlayingError:
+            return 0
+
 
     def set_volume(self, volume):
         # volume <value> [abs] set if abs is not zero, otherwise just add delta

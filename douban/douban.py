@@ -11,13 +11,11 @@ from player import MPlayer       # player
 import getch
 import Queue
 from threading import Condition, Thread
-from dal.dal_main import MainDal
 from model import Playlist, History, Channel
 from views import main_view
 import functools
 # system
 # import subprocess
-import threading
 # import time
 # import os
 # import sys
@@ -38,8 +36,6 @@ from config import db_config
 # logger.setLevel(logging.INFO)
 
 
-
-
 class Data(object):
     """
     所有需要的数据统一在一起
@@ -53,25 +49,53 @@ class Data(object):
         self.vol = db_config.volume
         self.theme = db_config.theme
         self.channel = db_config.channel
+        self.user_name = db_config.user_name
         self.loop = False
         self.pro = False
         self.time = 0
 
-        # 注册的视图
-        self.view = None
+
+class Router(object):
+    """
+    集中管理view之间的切换
+    """
+
+    def __init__(self):
+        self.player = MPlayer()
+        self.data = Data()
+
+        self.view_control_map = {
+            'main': MainController(self.player, self.data),
+            'lrc': LrcController(),
+            'quit': QuitController()
+        }
+
+        # init
+        self.view_control_map['main'].run()
 
 
-    def register(self, view):
-        """
-        注册视图: 一次只能绑定一个视图
-        """
-        self.view = view
+class MainController(object):
+    """
+    按键控制
+    """
 
-    def deregister(self):
+    def __init__(self, player, data):
+        # 接受player, data, view
+        self.player = player
+        self.data = data
+        self.view = main_view.Win(self.data)
+
+    def run(self):
         """
-        注销视图
+        每个controller需要提供run方法, 来提供启动
         """
-        self.view = None
+        self.player.start_queue(self)
+
+        self.queue = Queue.Queue(0)
+        self.quit = False
+        Thread(target=self._controller).start()
+        Thread(target=self._watchdog_queue).start()
+        Thread(target=self._watchdog_time).start()
 
     def display(func):
         @functools.wraps(func)
@@ -84,49 +108,65 @@ class Data(object):
 
     @display
     def get_song(self):
-        return self.playlist.get_song()
+        """
+        切换歌曲时刷新
+        """
+        return self.data.playlist.get_song()
 
-    # @display
-    # def get_playingsong(self):
-    #     return self.playlist.get_playingsong()
+    @display
+    def up(self):
+        self.view.up()
 
+    @display
+    def down(self):
+        self.view.down()
 
-class Controller(object):
-    """
-    按键控制
-    """
+    @display
+    def go_bottom(self):
+        self.view.go_bottom()
 
-    def __init__(self, player, data):
-        # 接受player和data
-        self.player = player
-        self.data = data
+    @display
+    def go_top(self):
+        self.view.go_top()
 
-        # 注册视图
-        data.register(main_view.Win(data))
+    @display
+    def set_channel(self):
+        self.data.channel = self.view.set_channel()  # 获取view里的channel索引
+        self.data.playlist.set_channel(self.data.channel)  # 设置API里的channel
 
-        player.start_queue(data)
-
-        self.queue = Queue.Queue(0)
-        self.condition = Condition()
-        self.quit = False
-        Thread(target=self._controller).start()
-        Thread(target=self._watchdog_queue).start()
+    def _watchdog_time(self):
+        """
+        标题时间显示
+        """
+        while not self.quit:
+            import time
+            self.data.time = self.player.time_pos
+            self.view.display()
+            time.sleep(1)
 
     def _watchdog_queue(self):
         """
         从queue里取出字符执行命令
         """
         while not self.quit:
-            self.condition.acquire()
-            if self.queue.empty():
-                self.condition.wait()
-
             k = self.queue.get()
-            print k
             if k == 'q':  # 退出
                 self.player.quit()
                 self.quit = True
-            elif k == 't':  # 暂停
+            elif k == ' ':
+                self.set_channel()
+                self.player.start_queue(self)
+
+            elif k == 'k':  # 向下
+                self.up()
+            elif k == 'j':  # 向上
+                self.down()
+            elif k == 'G':
+                self.go_bottom()
+            elif k == 'g':
+                self.go_top()
+
+            elif k == 'p':  # 暂停
                 self.player.pause()
             elif k == 'n':  # 下一首
                 self.player.next()
@@ -135,26 +175,28 @@ class Controller(object):
             elif k == '+':  # 减小音量
                 self.player.set_volume(100)
 
-            self.condition.release()
-
     def _controller(self):
         """
         接受按键, 存入queue
         """
         while not self.quit:
             k = getch.getch()
-
-            self.condition.acquire()
-
             self.queue.put(k)
 
-            self.condition.notify()
-            self.condition.release()
 
-player = MPlayer()
-data = Data()
-Controller(player, data)
+class LrcController(object):
 
+    def __init__(self):
+        pass
+
+
+class QuitController(object):
+
+    def __init__(self):
+        pass
+
+
+Router()
 
 
 # import time
