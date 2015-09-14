@@ -58,6 +58,7 @@ class Data(object):
     def playingsong(self):
         return self.playlist.get_playingsong()
 
+
 class Router(object):
     """
     集中管理view之间的切换
@@ -75,13 +76,13 @@ class Router(object):
             'quit': False
         }
 
-        # init
-        self.view_control_map['main'].run(self.switch_queue)
-
         # 切换线程
         Thread(target=self._watchdog_switch).start()
 
     def _watchdog_switch(self):
+        # init
+        self.view_control_map['main'].run(self.switch_queue)
+
         while not self.view_control_map['quit']:
             key = self.switch_queue.get()
             if key == 'quit':

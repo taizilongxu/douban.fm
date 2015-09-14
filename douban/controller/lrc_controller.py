@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import getch
-import functools
 import Queue
+import time
 import logging
 from threading import Thread
 from views import lrc_view
@@ -21,33 +21,23 @@ class LrcController(object):
         self.data = data
         self.view = lrc_view.Lrc(self.data)
         self.queue = Queue.Queue(0)
-        self.quit = False
 
     def run(self, switch_queue):
         """
         每个controller需要提供run方法, 来提供启动
         """
         self.switch_queue = switch_queue
+        self.quit = False
 
-        Thread(target=self._controller).start()
         Thread(target=self._watchdog_queue).start()
+        Thread(target=self._controller).start()
         Thread(target=self._watchdog_time).start()
-
-    def display(func):
-        @functools.wraps(func)
-        def _func(self):
-            tmp = func(self)
-            if self.view:
-                self.view.display()
-            return tmp
-        return _func
 
     def _watchdog_time(self):
         """
         标题时间显示
         """
         while not self.quit:
-            import time
             self.data.time = self.player.time_pos
             self.view.display()
             time.sleep(1)
@@ -68,7 +58,7 @@ class LrcController(object):
         """
         while not self.quit:
             k = getch.getch()
-            self.queue.put(k)
             logger.info(k)
+            self.queue.put(k)
             if k == 'q':
                 break

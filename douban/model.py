@@ -33,6 +33,10 @@ class Playlist(object):
         self._playlist = Queue.Queue(0)
         self._playingsong = None
 
+        # 根据歌曲来改变歌词
+        self._lrc = {}
+        self._pre_playingsong = None
+
     def lock(func):
         """
         互斥锁
@@ -50,9 +54,10 @@ class Playlist(object):
         """
         返回当前播放歌曲歌词
         """
-        if self._playingsong:
-            return douban.get_lrc(self._playingsong)
-        return {}
+        if self._playingsong != self._pre_playingsong:
+            self._lrc = douban.get_lrc(self._playingsong)
+            self._pre_playingsong = self._playingsong
+        return self._lrc
 
     def set_channel(self, channel_num):
         """

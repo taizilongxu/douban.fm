@@ -30,7 +30,7 @@ class MainController(object):
 
         Thread(target=self._controller).start()
         Thread(target=self._watchdog_queue).start()
-        # Thread(target=self._watchdog_time).start()
+        Thread(target=self._watchdog_time).start()
 
     def display(func):
         @functools.wraps(func)
@@ -122,5 +122,5 @@ class MainController(object):
         while not self.quit:
             k = getch.getch()
             self.queue.put(k)
-            if k == 'q':
+            if k == 'o' or k == 'q':
                 break
