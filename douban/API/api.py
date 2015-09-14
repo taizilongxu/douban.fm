@@ -69,7 +69,6 @@ class Doubanfm(object):
             print '403 Forbidden'
             sys.exit()
 
-
     def _get_channel_id(self, line):
         """
         把行数转化成channel_id

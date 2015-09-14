@@ -73,6 +73,18 @@ class Config(object):
         self.theme_id = 0
         self.user_name = ''
 
+    def output(args):
+        '''装饰器，用来改变SUFFIX_SELECTED并在界面输出'''
+        def _deco(func):
+            def _func(self):
+                print '\033[31m♥\033[0m ',
+                print args,
+                tmp = func(self)
+                print ' [\033[32m OK \033[0m]'
+                return tmp
+            return _func
+        return _deco
+
     @property
     def login_data(self):
         """
@@ -84,8 +96,6 @@ class Config(object):
             # 使用上次登录保存的token
             with open(PATH_TOKEN, 'r') as f:
                 login_data = pickle.load(f)
-            print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
-                login_data['user_name']
 
             self.volume = login_data.get('volume', 50)
             self.channel = login_data.get('channel', 0)
@@ -103,15 +113,17 @@ class Config(object):
                                    'channel': 0,
                                    'theme_id': 0})
                 break
+        print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
+            login_data['user_name']
         return login_data
 
     @property
+    @output('Get keys')
     def keys(self):
         '''
         获取配置并检查是否更改
         '''
         if not os.path.exists(PATH_CONFIG):
-            print '\033[31m♥\033[0m Get default config [\033[32m OK \033[0m]'
             with open(PATH_CONFIG, 'w') as F:
                 F.write(CONFIG)
         else:
@@ -127,6 +139,7 @@ class Config(object):
         return KEYS
 
     @property
+    @output('Get hitory')
     def history(self):
         try:
             with open(PATH_HISTORY, 'r') as f:
@@ -136,12 +149,14 @@ class Config(object):
         return history
 
     @property
+    @output('Get theme')
     def theme(self):
         """
         THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
         """
         # Todo
         THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
+        print '\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]'
         return getattr(theme, THEME[self.theme_id])
 
     @theme.setter
