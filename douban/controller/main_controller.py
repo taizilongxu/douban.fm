@@ -93,7 +93,7 @@ class MainController(object):
                 self.set_channel()
                 self.player.start_queue(self)
 
-            elif k == 'o':
+            elif k == 'o':  # 歌词
                 self.quit = True
                 self.switch_queue.put('lrc')
 

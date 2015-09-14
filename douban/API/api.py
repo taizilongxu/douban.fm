@@ -7,6 +7,7 @@ import requests
 import urllib
 import logging
 import json
+import sys
 from config import db_config
 from lrc2dic import lrc2dict
 from json_utils import decode_dict
@@ -57,12 +58,15 @@ class Doubanfm(object):
             'name': '红心兆赫',
             'channel_id': -3
         }]
-        r = requests.get('http://www.douban.com/j/app/radio/channels')
+        try:
+            r = requests.get('http://www.douban.com/j/app/radio/channels')
+        except requests.exceptions.ConnectionError:
+            print 'ConnectionError'
+            sys.exit()
         try:
             self._channel_list += json.loads(r.text, object_hook=decode_dict)['channels']
         except ValueError:
             print '403 Forbidden'
-            import sys
             sys.exit()
 
 
