@@ -9,6 +9,8 @@ from player import MPlayer       # player
 # from config import db_config    # config
 # from colorset.colors import on_light_red, color_func  # colors
 import Queue
+import logging
+import os
 from threading import Thread
 from model import Playlist, Channel
 from config import db_config
@@ -16,18 +18,18 @@ from config import db_config
 from controller.main_controller import MainController
 from controller.lrc_controller import LrcController
 
-# # root logger config
-# logging.basicConfig(
-#     format="%(asctime)s - \
-# [%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s",
-#     datefmt='%Y-%m-%d %H:%I:%S',
-#     filename=os.path.expanduser('~/.doubanfm.log'),
-#     level=logging.WARNING
-# )
+# root logger config
+logging.basicConfig(
+    format="%(asctime)s - \
+[%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s",
+    datefmt='%Y-%m-%d %H:%I:%S',
+    filename=os.path.expanduser('~/.doubanfm.log'),
+    level=logging.INFO
+)
 
-# # Set up our own logger
-# logger = logging.getLogger('doubanfm')
-# logger.setLevel(logging.INFO)
+# Set up our own logger
+logger = logging.getLogger('doubanfm')
+logger.setLevel(logging.INFO)
 
 
 class Data(object):

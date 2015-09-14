@@ -18,15 +18,16 @@ class MainController(object):
         self.data = data
         self.view = main_view.Win(self.data)
 
+        self.player.start_queue(self)
+        self.queue = Queue.Queue(0)
+
     def run(self, switch_queue):
         """
         每个controller需要提供run方法, 来提供启动
         """
-        self.player.start_queue(self)
-
-        self.queue = Queue.Queue(0)
         self.switch_queue = switch_queue
         self.quit = False
+
         Thread(target=self._controller).start()
         Thread(target=self._watchdog_queue).start()
         # Thread(target=self._watchdog_time).start()
@@ -121,3 +122,5 @@ class MainController(object):
         while not self.quit:
             k = getch.getch()
             self.queue.put(k)
+            if k == 'q':
+                break

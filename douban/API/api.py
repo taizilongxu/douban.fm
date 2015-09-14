@@ -12,7 +12,7 @@ from lrc2dic import lrc2dict
 from json_utils import decode_dict
 
 
-logger = logging.getLogger(__name__)  # get logger
+logger = logging.getLogger('doubanfm')  # get logger
 
 
 class Doubanfm(object):
@@ -58,7 +58,13 @@ class Doubanfm(object):
             'channel_id': -3
         }]
         r = requests.get('http://www.douban.com/j/app/radio/channels')
-        self._channel_list += json.loads(r.text, object_hook=decode_dict)['channels']
+        try:
+            self._channel_list += json.loads(r.text, object_hook=decode_dict)['channels']
+        except ValueError:
+            print '403 Forbidden'
+            import sys
+            sys.exit()
+
 
     def _get_channel_id(self, line):
         """
@@ -167,6 +173,12 @@ class Doubanfm(object):
     def get_lrc(self, playingsong):
         """
         获取歌词
+
+        如果测试频繁会发如下信息:
+        {'msg': 'You API access rate limit has been exceeded.
+                 Contact api-master@douban.com if you want higher limit. ',
+         'code': 1998,
+         'request': 'POST /v2/fm/lyric'}
         """
         try:
             url = "http://api.douban.com/v2/fm/lyric"
@@ -179,7 +191,9 @@ class Doubanfm(object):
 
             # 把歌词解析成字典
             lyric = json.loads(response.text, object_hook=decode_dict)
-            logger.debug(response.text)
+            if lyric['code'] == 1998:
+                logger.info('lrc API access rate limit has been exceeded')
+                return {}
             lrc_dic = lrc2dict(lyric['lyric'])
 
             # 原歌词用的unicode,为了兼容

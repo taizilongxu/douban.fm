@@ -3,8 +3,11 @@
 import getch
 import functools
 import Queue
+import logging
 from threading import Thread
 from views import lrc_view
+
+logger = logging.getLogger('doubanfm')  # get logger
 
 
 class LrcController(object):
@@ -17,15 +20,15 @@ class LrcController(object):
         self.player = player
         self.data = data
         self.view = lrc_view.Lrc(self.data)
+        self.queue = Queue.Queue(0)
+        self.quit = False
 
     def run(self, switch_queue):
         """
         每个controller需要提供run方法, 来提供启动
         """
-
-        self.queue = Queue.Queue(0)
         self.switch_queue = switch_queue
-        self.quit = False
+
         Thread(target=self._controller).start()
         Thread(target=self._watchdog_queue).start()
         Thread(target=self._watchdog_time).start()
@@ -66,3 +69,6 @@ class LrcController(object):
         while not self.quit:
             k = getch.getch()
             self.queue.put(k)
+            logger.info(k)
+            if k == 'q':
+                break
