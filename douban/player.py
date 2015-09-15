@@ -9,6 +9,7 @@
     player.start(url)
     player.pause()
     player.quit()
+    player.loop()
     player.set_volume(50)
     player.time_pos
     player.is_alive
@@ -174,12 +175,16 @@ class MPlayer(Player):
     def __init__(self, *args):
         super(MPlayer, self).__init__(*args)
         self._exit_queue_event = False
+        self._loop = False
 
     def _watchdog_queue(self):
         self._exit_queue_event = True
 
         while self._exit_queue_event:
-            self.start(self.queue.get_song()['url'])
+            if self._loop:
+                self.start(self.queue.playingsong['url'])
+            else:
+                self.start(self.queue.get_song()['url'])
             self.sub_proc.wait()  # Wait for event
 
     def start_queue(self, queue, volume=None):
@@ -190,6 +195,9 @@ class MPlayer(Player):
             Thread(target=self._watchdog_queue).start()
         else:
             self.sub_proc.terminate()
+
+    def loop(self):
+        self._loop = False if self._loop else True
 
     def next(self):
         self.start_queue(self.queue, self._volume)
@@ -224,7 +232,6 @@ class MPlayer(Player):
                 return 0
         except NotPlayingError:
             return 0
-
 
     def set_volume(self, volume):
         # volume <value> [abs] set if abs is not zero, otherwise just add delta

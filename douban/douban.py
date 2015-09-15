@@ -48,6 +48,7 @@ class Data(object):
         self.user_name = db_config.user_name
         self.loop = False
         self.pro = False
+        self.mute = False
         self.time = 0
 
     @property
@@ -367,20 +368,6 @@ Router()
 #             time.sleep(1)
 
 
-#     def thread(self, target, args=()):
-#         '''启动新线程'''
-#         threading.Thread(target=target, args=args).start()
-
-#     def display_lrc(self):
-#         '''歌词显示线程'''
-#         # TODO
-#         if not self.find_lrc:
-#             self.find_lrc = True
-#             self.lrc_dict = self.douban.get_lrc(self.playingsong)
-#         if self.lrc_dict:
-#             Lrc(self.lrc_dict, self)
-#         else:
-#             self.state = 0
 
 
 

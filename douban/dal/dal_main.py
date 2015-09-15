@@ -65,6 +65,9 @@ class MainDal(object):
     def title(self):
 
         time = self.set_time(self.time)
+        volume = str(self.volume) + '%' if self.volume != 0 else \
+                 color_func(self.c['TITLE']['state'])('✖')
+        loop = '↺' if self.loop else '→'
 
         title = [
             PREFIX_DESELECTED,
@@ -76,8 +79,8 @@ class MainDal(object):
             color_func(self.c['TITLE']['kbps'])(self.song_kbps),
             color_func(self.c['TITLE']['time'])(time),
             # color_func(self.c['TITLE']['rate'])(self.song_rate),
-            color_func(self.c['TITLE']['vol'])(str(self.volume) + '%'),
-            color_func(self.c['TITLE']['state'])(self.loop)]
+            color_func(self.c['TITLE']['vol'])(volume),
+            color_func(self.c['TITLE']['state'])(loop)]
 
         return ' '.join(title)
 

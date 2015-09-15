@@ -8,7 +8,6 @@ import Queue
 from threading import RLock
 from config import db_config
 import functools
-import time
 
 douban = Doubanfm()
 

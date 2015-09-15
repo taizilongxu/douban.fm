@@ -51,6 +51,10 @@ class MainController(object):
         """
         return self.data.playlist.get_song()
 
+    @property
+    def playingsong(self):
+        return self.data.playingsong
+
     @display
     def up(self):
         self.view.up()
@@ -92,9 +96,12 @@ class MainController(object):
                 self.player.quit()
                 self.quit = True
                 self.switch_queue.put('quit')
-            elif k == ' ':
+            elif k == ' ':  # 播放该频道
                 self.set_channel()
                 self.player.start_queue(self)
+            elif k == 'l':
+                self.data.loop = False if self.data.loop else True
+                self.player.loop()
 
             elif k == 'o':  # 歌词
                 self.quit = True
@@ -113,6 +120,7 @@ class MainController(object):
                 self.player.pause()
             elif k == 'n':  # 下一首
                 self.player.next()
+
             elif k == '-':  # 减小音量
                 self.data.change_volume(-1)
                 logger.info(self.data.volume)
@@ -120,6 +128,17 @@ class MainController(object):
             elif k == '+':  # 增大音量
                 self.data.change_volume(1)
                 self.player.set_volume(self.data.volume)
+            elif k == 'm':
+                if self.data.mute:
+                    self.data.volume = self.data.mute
+                    self.data.mute = False
+                    self.player.set_volume(self.data.volume)
+                else:
+                    self.data.mute = self.data.volume
+                    self.data.volume = 0
+                    self.player.set_volume(0)
+
+
 
     def _controller(self):
         """
