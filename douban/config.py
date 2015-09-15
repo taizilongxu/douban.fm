@@ -74,11 +74,9 @@ class Config(object):
         self.user_name = ''
 
     def output(args):
-        '''装饰器，用来改变SUFFIX_SELECTED并在界面输出'''
         def _deco(func):
             def _func(self):
-                print '\033[31m♥\033[0m ',
-                print args,
+                print '\033[31m♥\033[0m ' + args,
                 tmp = func(self)
                 print ' [\033[32m OK \033[0m]'
                 return tmp
@@ -100,7 +98,7 @@ class Config(object):
             self.volume = login_data.get('volume', 50)
             self.channel = login_data.get('channel', 0)
             self.theme_id = login_data.get('theme_id', 0)
-            self.user_name = login_data.get('user name', '')
+            self.user_name = login_data.get('user_name', '')
 
         else:
             # 未登陆
@@ -127,7 +125,6 @@ class Config(object):
             with open(PATH_CONFIG, 'w') as F:
                 F.write(CONFIG)
         else:
-            print '\033[31m♥\033[0m Get local config [\033[32m OK \033[0m]'
             config = ConfigParser.ConfigParser()
             with open(PATH_CONFIG, 'r') as cfgfile:
                 config.readfp(cfgfile)
@@ -149,14 +146,12 @@ class Config(object):
         return history
 
     @property
-    @output('Get theme')
     def theme(self):
         """
         THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
         """
         # Todo
         THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
-        print '\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]'
         return getattr(theme, THEME[self.theme_id])
 
     @theme.setter

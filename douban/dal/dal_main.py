@@ -15,7 +15,10 @@ control和view中间层, 负责生成显示的内容(增加主题色彩)
     dal.suffix_deselected
 """
 from config import db_config
+import logging
 from colorset.colors import on_light_red, color_func  # colors
+
+logger = logging.getLogger('doubanfm')
 
 RATE = ['★'*i for i in range(1, 6)]  # 歌曲评分
 PRO = on_light_red(' PRO ')
@@ -35,15 +38,15 @@ class MainDal(object):
         playingsong = data.playlist.get_playingsong()
         self.song_total_time = playingsong['length']
         self.song_kbps = playingsong['kbps'] + 'kbps'
-        self.song_rate = RATE[int(round(playingsong['rating_avg'])) - 1]
+        # self.song_rate = RATE[int(round(playingsong.get('rating_avg', 0))) - 1]
         self.song_pro = '' if playingsong['kbps'] == '128' else PRO
         self.song_title = playingsong['title']
         self.song_albumtitle = playingsong['albumtitle']
         self.song_artist = playingsong['artist']
-        self.song_public_time = playingsong['public_time']
+        # self.song_public_time = playingsong['public_time']
         self.song_like = playingsong['like']
 
-        self.vol = data.vol
+        self.volume = data.volume
         self.loop = data.loop
         self.time = data.time
         self.user_name = data.user_name
@@ -66,12 +69,14 @@ class MainDal(object):
         title = [
             PREFIX_DESELECTED,
             color_func(self.c['TITLE']['doubanfm'])('DoubanFM'),
+            '\\',
             color_func(self.c['TITLE']['username'])(self.user_name),
+            '>>',
             color_func(self.c['TITLE']['pro'])(self.song_pro),
             color_func(self.c['TITLE']['kbps'])(self.song_kbps),
             color_func(self.c['TITLE']['time'])(time),
-            color_func(self.c['TITLE']['rate'])(self.song_rate),
-            color_func(self.c['TITLE']['vol'])(self.vol),
+            # color_func(self.c['TITLE']['rate'])(self.song_rate),
+            color_func(self.c['TITLE']['vol'])(str(self.volume) + '%'),
             color_func(self.c['TITLE']['state'])(self.loop)]
 
         return ' '.join(title)
@@ -100,14 +105,14 @@ class MainDal(object):
                                (self.song_albumtitle)
         artist = color_func(self.c['PLAYINGSONG']['artist']) \
                            (self.song_artist)
-        public_time = color_func(self.c['PLAYINGSONG']['publictime']) \
-                                (self.song_public_time) or ''
+        # public_time = color_func(self.c['PLAYINGSONG']['publictime']) \
+        #                         (self.song_public_time) or ''
         return (
             love +
             title + ' • ' +
             albumtitle + ' • ' +
-            artist + ' ' +
-            public_time
+            artist + ' '
+            # public_time
         ).replace('\\', '')
 
     @property

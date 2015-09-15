@@ -3,8 +3,11 @@
 import getch
 import functools
 import Queue
+import logging
 from threading import Thread
 from views import main_view
+
+logger = logging.getLogger('doubanfm')
 
 
 class MainController(object):
@@ -18,7 +21,7 @@ class MainController(object):
         self.data = data
         self.view = main_view.Win(self.data)
 
-        self.player.start_queue(self)
+        self.player.start_queue(self, data.volume)
         self.queue = Queue.Queue(0)
 
     def run(self, switch_queue):
@@ -110,10 +113,13 @@ class MainController(object):
                 self.player.pause()
             elif k == 'n':  # 下一首
                 self.player.next()
-            elif k == '-':  # 增大音量
-                self.player.set_volume(50)
-            elif k == '+':  # 减小音量
-                self.player.set_volume(100)
+            elif k == '-':  # 减小音量
+                self.data.change_volume(-1)
+                logger.info(self.data.volume)
+                self.player.set_volume(self.data.volume)
+            elif k == '+':  # 增大音量
+                self.data.change_volume(1)
+                self.player.set_volume(self.data.volume)
 
     def _controller(self):
         """

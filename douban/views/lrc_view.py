@@ -74,8 +74,8 @@ class Lrc(Win):
         tmp = (
             song['title'] +
             song['albumtitle'] +
-            song['artist'] +
-            song['public_time']
+            song['artist']
+            # song['public_time']
         ).replace('\\', '').strip()
         l = self.center_num(tmp)
         if song['like']:

@@ -42,7 +42,7 @@ class Data(object):
         self.lines = Channel().lines
         # self.hitory = History()
         self.key = db_config.keys
-        self.vol = db_config.volume
+        self.volume = db_config.volume
         self.theme = db_config.theme
         self.channel = db_config.channel
         self.user_name = db_config.user_name
@@ -57,6 +57,14 @@ class Data(object):
     @property
     def playingsong(self):
         return self.playlist.get_playingsong()
+
+    def change_volume(self, increment):
+        """调整音量大小"""
+        if increment == 1:
+            self.volume += 5
+        else:
+            self.volume -= 5
+        self.volume = max(min(self.volume, 100), 0)  # 限制在0-100之间
 
 
 class Router(object):
@@ -93,48 +101,6 @@ class Router(object):
 
 Router()
 
-
-# import time
-# time.sleep(10)
-
-# data_main_view = MainDal(playlist.get_playingsong(), mutex_play_state, config)
-
-# print data_main_view.title
-# print data_main_view.suffix_selected
-
-
-
-# def watchdog(self):
-#     '''守护线程，检查歌曲是否播放完毕'''
-#     while not self.q:
-#         if not self.player.is_alive:
-#             # Reduce some CPU use (useful when player not yet started)
-#             time.sleep(1)
-#         logger.debug('Wait till player exit.')
-#         self._player_exit_event.wait()      # Wait for event
-#         self._player_exit_event.clear()     # Clear the event
-#         logger.debug('Noticed player exit.')
-#         # If self.q (about to quit), just quit
-#         if self.q:
-#             return
-#         self.thread(self.douban.submit_music, args=(self.playingsong,))
-#         # If some thread has already called play(), just pass
-#         if not self.lock_start:
-#             self.play()
-
-# def run(self):
-#     while True:
-#         k = getch.getch()
-#         if k == KEYS['UP']:
-#             pass
-#         elif k == KEYS['DOWN']:
-#             pass
-#         elif k == ' ':
-#             pass
-#         elif k == KEYS['BYE']:
-#             pass
-#         elif k == KEYS['NEXT']:
-#             pass
 
 
 # def run(self):
@@ -202,18 +168,6 @@ Router()
 
 
 
-
-#     def info(args):
-#         '''装饰器，用来改变SUFFIX_SELECTED并在界面输出'''
-#         def _deco(func):
-#             def _func(self):
-#                 tmp = self.SUFFIX_SELECTED
-#                 self.SUFFIX_SELECTED = args
-#                 self.display()
-#                 self.SUFFIX_SELECTED = tmp
-#                 func(self)
-#             return _func
-#         return _deco
 
 #     def set_rate(self):
 #         '''歌曲加心，去心'''

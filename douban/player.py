@@ -55,7 +55,7 @@ class Player(object):
     _null_file = open(os.devnull, "w")
 
     @abc.abstractmethod
-    def __init__(self, default_volume=100):
+    def __init__(self, default_volume=50):
         """初始化
 
         子类需要先判断该播放器是否可用（不可用则抛出异常），再调用该方法
@@ -182,8 +182,9 @@ class MPlayer(Player):
             self.start(self.queue.get_song()['url'])
             self.sub_proc.wait()  # Wait for event
 
-    def start_queue(self, queue):
+    def start_queue(self, queue, volume=None):
         self.queue = queue
+        self._volume = volume if volume else self._volume
 
         if not self._exit_queue_event:
             Thread(target=self._watchdog_queue).start()
@@ -191,7 +192,7 @@ class MPlayer(Player):
             self.sub_proc.terminate()
 
     def next(self):
-        self.start_queue(self.queue)
+        self.start_queue(self.queue, self._volume)
 
     def start(self, url):
         self._run_player(['-volume', str(self._volume), url])
@@ -227,6 +228,7 @@ class MPlayer(Player):
 
     def set_volume(self, volume):
         # volume <value> [abs] set if abs is not zero, otherwise just add delta
+        self._volume = volume
         self._send_command("volume %d 1" % volume)
         super(MPlayer, self).set_volume(volume)
 
