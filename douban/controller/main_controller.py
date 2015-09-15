@@ -76,6 +76,13 @@ class MainController(object):
         self.data.channel = self.view.set_channel()  # 获取view里的channel索引
         self.data.playlist.set_channel(self.data.channel)  # 设置API里的channel
 
+    def set_url(self):
+        '''打开豆瓣网页'''
+        import webbrowser
+        url = "http://music.douban.com" + \
+            self.data.playingsong['album'].replace('\/', '/')
+        webbrowser.open(url)
+
     def _watchdog_time(self):
         """
         标题时间显示
@@ -102,12 +109,16 @@ class MainController(object):
             elif k == 'l':
                 self.data.loop = False if self.data.loop else True
                 self.player.loop()
-            elif k == 'r':
+            elif k == 'r':  # 加心/去心
                 self.data.song_like = False if self.data.song_like else True
                 if self.data.song_like:
                     self.data.set_song_like()
                 else:
                     self.data.set_song_unlike()
+
+            elif k == 'w':  # 打开当前歌曲豆瓣专辑
+                self.set_url()
+
 
             elif k == 'o':  # 歌词
                 self.quit = True
