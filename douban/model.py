@@ -80,6 +80,12 @@ class Playlist(object):
         for i in douban.get_playlist():
             self._playlist.put(i)
 
+    def set_song_like(self):
+        douban.rate_music(self._playingsong)
+
+    def set_song_unlike(self):
+        douban.unrate_music(self._playingsong)
+
     @lock
     def get_song(self):
         """

@@ -44,8 +44,8 @@ class MainDal(object):
         self.song_albumtitle = playingsong['albumtitle']
         self.song_artist = playingsong['artist']
         # self.song_public_time = playingsong['public_time']
-        self.song_like = playingsong['like']
 
+        self.song_like = data.song_like
         self.volume = data.volume
         self.loop = data.loop
         self.time = data.time

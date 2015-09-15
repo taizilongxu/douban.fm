@@ -49,7 +49,7 @@ class MainController(object):
         """
         切换歌曲时刷新
         """
-        return self.data.playlist.get_song()
+        return self.data.get_song()
 
     @property
     def playingsong(self):
@@ -102,6 +102,12 @@ class MainController(object):
             elif k == 'l':
                 self.data.loop = False if self.data.loop else True
                 self.player.loop()
+            elif k == 'r':
+                self.data.song_like = False if self.data.song_like else True
+                if self.data.song_like:
+                    self.data.set_song_like()
+                else:
+                    self.data.set_song_unlike()
 
             elif k == 'o':  # 歌词
                 self.quit = True

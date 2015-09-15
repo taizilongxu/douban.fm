@@ -46,6 +46,8 @@ class Data(object):
         self.theme = db_config.theme
         self.channel = db_config.channel
         self.user_name = db_config.user_name
+
+        self.song_like = False
         self.loop = False
         self.pro = False
         self.mute = False
@@ -58,6 +60,19 @@ class Data(object):
     @property
     def playingsong(self):
         return self.playlist.get_playingsong()
+
+    def get_song(self):
+        playingsong = self.playlist.get_song()
+        self.song_like = playingsong['like']
+        return playingsong
+
+    def set_song_like(self):
+        self.song_like = True
+        self.playlist.set_song_like()
+
+    def set_song_unlike(self):
+        self.song_like = False
+        self.playlist.set_song_unlike()
 
     def change_volume(self, increment):
         """调整音量大小"""

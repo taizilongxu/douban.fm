@@ -168,8 +168,8 @@ class MPlayer(Player):
         '-nolirc',          # Get rid of a warning
         '-quiet',           # Cannot use really-quiet because of get_* queries
         '-softvol',         # Avoid using hardware (global) volume
-        '-cache', '5120',   # Use 5MiB cache
-        '-cache-min', '2'   # Start playing after 2% cache filled
+        '-cache', '1024',   # Use 5MiB cache
+        '-cache-min', '1'   # Start playing after 2% cache filled
     ]
 
     def __init__(self, *args):
