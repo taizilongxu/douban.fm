@@ -176,6 +176,8 @@ class MPlayer(Player):
         super(MPlayer, self).__init__(*args)
         self._exit_queue_event = False
         self._loop = False
+        self._pause = False
+        self._time = 0
 
     def _watchdog_queue(self):
         self._exit_queue_event = True
@@ -206,6 +208,10 @@ class MPlayer(Player):
         self._run_player(['-volume', str(self._volume), url])
 
     def pause(self):
+        """
+        pasue状态下如果取时间会使歌曲继续, 这里加了一个_pause状态
+        """
+        self._pause = False if self._pause else True
         self._send_command('pause')
 
     def quit(self):
@@ -225,9 +231,12 @@ class MPlayer(Player):
     def time_pos(self):
 
         try:
+            if self._pause:
+                return self._time
             songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
             if songtime:
-                return int(round(float(songtime)))
+                self._time = int(round(float(songtime)))
+                return self._time
             else:
                 return 0
         except NotPlayingError:
@@ -276,17 +285,3 @@ class MPlayer(Player):
                 # We found it
                 value = split_output[1]
                 return value.strip()
-
-
-def main():
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(logging.StreamHandler())
-    e = Event()
-    player = MPlayer(e, 100)
-    player.start('http://mr3.douban.com/201308250247/4a3de2e8016b5d659821ec76e6a2f35d/view/song/small/p1562725.mp3')
-    time.sleep(10)
-    print player.time_pos
-    player.quit()
-
-if __name__ == '__main__':
-    main()

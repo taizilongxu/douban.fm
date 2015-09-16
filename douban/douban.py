@@ -222,126 +222,12 @@ Router()
 #             self.playingsong['album'].replace('\/', '/')
 #         webbrowser.open(url)
 
-#     def set_quit(self):
-#         '''退出播放'''
-#         self.q = True
-#         self.player.quit()
-#         subprocess.call('echo -e "\033[?25h";clear', shell=True)
-#         logger.debug('Terminal reset.')
-#         # store the token and the default info
-#         self.douban.login_data.update({'volume': self._volume,
-#                                        'channel': self._channel})
-#         logger.info(self.douban.login_data)
-#         db_config.save_config(self.history, self.douban.login_data)
-#         sys.exit(0)
-
-#     @info('正在加载请稍后...')
-#     def set_channel(self):
-#         '''开始播放'''
-#         if self._channel == self.displayline:
-#             return
-#         self._channel = self.displayline
-#         self.douban.set_channel(self._channel)  # 对douban的post_data修改频道
-#         self.get_playlist()
-#         self.lock_loop = False
-#         self.lock_start = True
-#         self.player.quit()
-#         self.play()
-
-#     @info('正在加载请稍后...')
-#     def set_next(self):
-#         '''开始下一曲'''
-#         if self.player.is_alive:
-#             self.lock_loop = False
-#             self.lock_start = True
-#             self.player.quit()
-#             if self.state != 3:
-#                 self.playlist = self.douban.skip_song(self.playingsong)
-#             self.play()
-
-#     @info('不再播放，切换下一首...')
-#     def set_bye(self):
-#         '''不再播放并进入下一曲'''
-#         if self.playingsong:
-#             self.lock_start = True  # 每个play前需self.start置0
-#             self.player.quit()
-#             self.playlist = self.douban.bye(self.playingsong)
-#             self.play()
-
-#     @info('正在查找歌词...')
-#     def set_lrc(self):
-#         '''显示歌词'''
-#         self.state = 1
-#     def reload_theme(self):
-#         # 箭头所指行前缀
-#         Cli.c = db_config.theme
-#         Cli.PREFIX_SELECTED = color_func(self.c['LINE']['arrow'])('  > ')
-#         Cli.LOVE = color_func(self.c['PLAYINGSONG']['like'])(' ❤ ', 'red')
-
-#         self.TITLE = Cli.TITLE + color_func(self.c['TITLE']['doubanfm'])(' Douban Fm ')
-
-#         self.TITLE += '\ ' + \
-#             color_func(self.c['TITLE']['username'])(self.douban.login_data['user_name']) + \
-#             ' >>'
-#         self.set_suffix_selected(self.playingsong)
 
 
-#     def play(self):
-#         '''播放歌曲'''
-#         self.lock_start = True
-#         self.find_lrc = False
-#         self.lrc_dict = {}  # 歌词清空
-#         self.songtime = 0  # 重置歌曲时间
-#         self.playingsong = self.get_song()
-#         if not self.lock_loop:
-#             self.playingsong['time'] = time.strftime("%Y-%m-%d %H:%M:%S",
-#                                                      time.localtime())
-#             self.history.insert(0, self.playingsong)
-#         song = self.playingsong
 
-#         self.thread(self.noti.send_notify, args=(self.playingsong,))  # 桌面通知
 
-#         self.set_suffix_selected(song)
 
-#         logger.debug("Start playing %s - %s.", song['artist'], song['title'])
-#         self.player.start(song['url'].replace('\\', ''))
 
-#         self.lock_pause = False
-
-#         if self.state == 1:  # 获取歌词
-#             self.thread(self.display_lrc)
-#         self.lock_start = False
-
-#     def pause(self):
-#         '''暂停歌曲'''
-#         if self.lock_pause:
-#             self.lock_pause = False
-#             self.noti.send_notify(self.playingsong, '开始播放')
-#         else:
-#             self.noti.send_notify(self.playingsong, '暂停播放')
-#             self.lock_pause = True
-#         self.player.pause()
-#     def change_volume(self, increment):
-#         '''调整音量大小'''
-#         if increment == 1:
-#             self._volume += 5
-#         else:
-#             self._volume -= 5
-#         self._volume = max(min(self._volume, 100), 0)  # 限制在0-100之间
-#         self.lock_muted = False if self._volume else True
-#         self.player.set_volume(self._volume)
-
-#     def mute(self):
-#         '''静音'''
-#         if self.lock_muted:
-#             self.lock_muted = False
-#             if self._volume == 0:
-#                 self._volume = 10
-#             volume = self._volume
-#         else:
-#             self.lock_muted = True
-#             volume = 0
-#         self.player.set_volume(volume)
 
 #     def display_time(self):
 #         '''时间/音量显示线程'''
