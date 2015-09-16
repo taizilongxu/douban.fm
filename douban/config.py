@@ -73,6 +73,8 @@ class Config(object):
         self.theme_id = 0
         self.user_name = ''
 
+        self.login_data = self.get_login_data()
+
     def output(args):
         def _deco(func):
             def _func(self):
@@ -83,8 +85,7 @@ class Config(object):
             return _func
         return _deco
 
-    @property
-    def login_data(self):
+    def get_login_data(self):
         """
         提供登陆的认证
 
@@ -94,25 +95,24 @@ class Config(object):
             # 使用上次登录保存的token
             with open(PATH_TOKEN, 'r') as f:
                 login_data = pickle.load(f)
-
-            self.volume = login_data.get('volume', 50)
-            self.channel = login_data.get('channel', 0)
-            self.theme_id = login_data.get('theme_id', 0)
-            self.user_name = login_data.get('user_name', '')
-
         else:
             # 未登陆
             while True:
                 login_data = request_token()
-                if login_data['r'] == 1:
-                    logger.debug(login_data['err'])
-                    continue
-                login_data.update({'volume': 50,
-                                   'channel': 0,
-                                   'theme_id': 0})
-                break
+                if login_data['r'] == 0:
+                    login_data['volume'] = 50
+                    login_data['channel'] = 0
+                    login_data['theme_id'] = 0
+                    break
+                print login_data['err']
+                logger.debug(login_data['err'])
+
         print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
             login_data['user_name']
+        self.volume = login_data.get('volume', 50)
+        self.channel = login_data.get('channel', 0)
+        self.theme_id = login_data.get('theme_id', 0)
+        self.user_name = login_data.get('user_name', '')
         return login_data
 
     @property
@@ -136,7 +136,6 @@ class Config(object):
         return KEYS
 
     @property
-    @output('Get hitory')
     def history(self):
         try:
             with open(PATH_HISTORY, 'r') as f:
@@ -161,16 +160,18 @@ class Config(object):
         """
         self.theme_id = value
 
-    @staticmethod
-    def save_config(history, login_data):
+    def save_config(self, volume, channel, theme):
         """
         存储历史记录和登陆信息
         """
+        self.login_data['volume'] = volume
+        self.login_data['channel'] = channel
+        self.login_data['theme_id'] = theme
         with open(PATH_TOKEN, 'w') as f:
-            pickle.dump(login_data, f)
+            pickle.dump(self.login_data, f)
 
-        with open(PATH_HISTORY, 'w') as f:
-            pickle.dump(history, f)
+        # with open(PATH_HISTORY, 'w') as f:
+        #     pickle.dump(history, f)
 
 
 db_config = Config()

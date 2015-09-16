@@ -1,38 +1,34 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from lrc_view import Lrc
+from dal.dal_help import HelpDal
+import subprocess
 
-class Help(cli.Cli):
-    '''帮助界面，查看快捷键'''
-    def __init__(self, win):
-        self.win = win
-        self.win.thread(self.display_help)
 
-    def display_help(self):
-        while self.win.state == 2:
-            self.display()
-            time.sleep(1)
+class Help(Lrc):
+    """帮助界面"""
+    def __init__(self, data):
+        super(Help, self).__init__(data)
 
-    def __del__(self):
-        self.win.state = 0
+    def set_dal(self):
+        dal = HelpDal(self.data)
+        self.c = dal.c  # 主题
+        self.set_title(dal.title)
+        self.set_suffix_selected(dal.suffix_selected)
+        self.set_lines(dal.lines)
 
     def display(self):
-        keys = self.win.KEYS
-        subprocess.call('clear', shell=True)
-        print
-        print self.win.TITLE
-        print
-        print ' '*5 + green('移动') + ' '*17 + green('音乐') + '\r'
-        print ' '*5 + '[%(DOWN)s] ---> 下          [space] ---> 播放' % keys + '\r'
-        print ' '*5 + '[%(UP)s] ---> 上          [%(OPENURL)s] ---> 打开歌曲主页' % keys + '\r'
-        print ' '*5 + '[%(TOP)s] ---> 移到最顶    [%(NEXT)s] ---> 下一首' % keys + '\r'
-        print ' '*5 + '[%(BOTTOM)s] ---> 移到最底    [%(RATE)s] ---> 喜欢/取消喜欢' % keys + '\r'
-        print ' '*26 + '[%(BYE)s] ---> 不再播放' % keys + '\r'
+        self.set_dal()
+        for i in self.display_lines:
+            print i
 
-        print ' '*5 + green('音量') + ' '*17 + '[%(PAUSE)s] ---> 暂停' % keys + '\r'
-        print ' '*5 + '[=] ---> 增          [%(QUIT)s] ---> 退出' % keys + '\r'
-        print ' '*5 + '[-] ---> 减          [%(LOOP)s] ---> 单曲循环' % keys + '\r'
-        print ' '*5 + '[%(MUTE)s] ---> 静音        [e] ---> 播放列表' % keys + '\r'
+    def make_display_lines(self):
+        self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
-        print
-        print ' '*5 + green('歌词') + '\r'
-        print ' '*5 + '[%(LRC)s] ---> 歌词' % keys + '\r'
+        display_lines = ['\n']
+        display_lines.append(self._title + '\r')
+        display_lines.append('\n')
+
+        display_lines += self._lines
+
+        self.display_lines = display_lines

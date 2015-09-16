@@ -231,7 +231,7 @@ class MPlayer(Player):
     def time_pos(self):
 
         try:
-            if self._pause:
+            if self._pause:  # 暂停时直接返回_time
                 return self._time
             songtime = self._send_command('get_time_pos', 'ANS_TIME_POSITION')
             if songtime:

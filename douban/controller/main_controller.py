@@ -19,6 +19,7 @@ class MainController(object):
         # 接受player, data, view
         self.player = player
         self.data = data
+        self.keys = data.keys
         self.view = main_view.Win(self.data)
 
         self.player.start_queue(self, data.volume)
@@ -99,53 +100,58 @@ class MainController(object):
         """
         while not self.quit:
             k = self.queue.get()
-            if k == 'q':  # 退出
+            if k == self.keys['QUIT']:  # 退出
                 self.player.quit()
                 self.quit = True
                 self.switch_queue.put('quit')
             elif k == ' ':  # 播放该频道
                 self.set_channel()
                 self.player.start_queue(self)
-            elif k == 'l':
+            elif k == self.keys['LOOP']:  # 单曲循环
                 self.data.loop = False if self.data.loop else True
                 self.player.loop()
-            elif k == 'r':  # 加心/去心
+            elif k == self.keys['RATE']:  # 加心/去心
                 self.data.song_like = False if self.data.song_like else True
                 if self.data.song_like:
                     self.data.set_song_like()
                 else:
                     self.data.set_song_unlike()
 
-            elif k == 'w':  # 打开当前歌曲豆瓣专辑
+            elif k == self.keys['OPENURL']:  # 打开当前歌曲豆瓣专辑
                 self.set_url()
 
 
-            elif k == 'o':  # 歌词
+            elif k == self.keys['LRC']:  # 歌词
                 self.quit = True
                 self.switch_queue.put('lrc')
+            elif k == self.keys['HELP']:
+                self.quit = True
+                self.switch_queue.put('help')
 
-            elif k == 'k':  # 向下
+            # getch will return multiple ASCII codes for arrow keys
+            # A, B, C, D are the first code of UP, DOWN, LEFT, RIGHT
+            elif k == self.keys['UP'] or k == 'B':  # 向下
                 self.up()
-            elif k == 'j':  # 向上
+            elif k == self.keys['DOWN'] or k == 'A':  # 向上
                 self.down()
-            elif k == 'G':
+            elif k == self.keys['BOTTOM']:
                 self.go_bottom()
-            elif k == 'g':
+            elif k == self.keys['TOP']:
                 self.go_top()
 
-            elif k == 'p':  # 暂停
+            elif k == self.keys['PAUSE']:  # 暂停
                 self.player.pause()
-            elif k == 'n':  # 下一首
+            elif k == self.keys['NEXT']:  # 下一首
                 self.player.next()
 
-            elif k == '-':  # 减小音量
+            elif k == '-' or k == '_':  # 减小音量
                 self.data.change_volume(-1)
                 logger.info(self.data.volume)
                 self.player.set_volume(self.data.volume)
-            elif k == '+':  # 增大音量
+            elif k == '+' or k == '=':  # 增大音量
                 self.data.change_volume(1)
                 self.player.set_volume(self.data.volume)
-            elif k == 'm':
+            elif k == self.keys['MUTE']:
                 if self.data.mute:
                     self.data.volume = self.data.mute
                     self.data.mute = False
@@ -164,5 +170,5 @@ class MainController(object):
         while not self.quit:
             k = getch.getch()
             self.queue.put(k)
-            if k == 'o' or k == 'q':
+            if k == 'o' or k == 'q' or k == 'h':
                 break

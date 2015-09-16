@@ -47,7 +47,6 @@ class Lrc(Win):
     def make_display_lines(self):
         """通过歌词生成屏幕需要显示的内容"""
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
-        subprocess.call('clear', shell=True)
 
         display_lines = ['\n']
         display_lines.append(self._title + '\r')
@@ -69,6 +68,11 @@ class Lrc(Win):
                     line = color_func(self.c['LRC']['line'])(line)
                     display_lines.append(' ' * flag_num + line + '\r')
 
+        display_lines.append(self.center_suffix_selected())  # 歌词页面标题
+
+        self.display_lines = display_lines
+
+    def center_suffix_selected(self):
         # 歌曲信息居中
         song = self.data.playingsong
         tmp = (
@@ -81,6 +85,4 @@ class Lrc(Win):
         if song['like']:
             l += 2
         flag_num = (self.screen_width - l) / 2
-        display_lines.append(' ' * flag_num + self._suffix_selected + '\r')  # 歌词页面标题
-
-        self.display_lines = display_lines
+        return ' ' * flag_num + self._suffix_selected + '\r'  # 歌词页面标题
