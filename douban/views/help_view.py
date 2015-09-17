@@ -19,15 +19,17 @@ class Help(Lrc):
 
     def display(self):
         self.set_dal()
+        self.make_display_lines()
+        subprocess.call('clear', shell=True)
         for i in self.display_lines:
             print i
 
     def make_display_lines(self):
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
-        display_lines = ['\n']
+        display_lines = ['']
         display_lines.append(self._title + '\r')
-        display_lines.append('\n')
+        display_lines.append('')
 
         display_lines += self._lines
 
