@@ -83,6 +83,3 @@ on_light_blue = basic_color('104')
 on_light_magenta = basic_color('105')
 on_light_cyan = basic_color('106')
 on_white = basic_color('107')
-
-
-c = db_config.theme

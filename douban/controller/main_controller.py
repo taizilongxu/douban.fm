@@ -12,15 +12,22 @@ logger = logging.getLogger('doubanfm')
 
 class MainController(object):
     """
-    按键控制
+    主界面控制:
+
+    提供run方法以调用该控制
+    run方法启动三个进程:
+        1. _controller: 提供按键监听
+        2. _watchdog_queue: 操作按键对应的命令
+        3. _watchdog_time: 标题行需要显示歌曲播放进度
+
     """
 
     def __init__(self, player, data):
-        # 接受player, data, view
+        # 接受player, data
         self.player = player
         self.data = data
         self.keys = data.keys
-        self.view = main_view.Win(self.data)
+        self.view = main_view.Win(self.data)  # 绑定view
 
         self.player.start_queue(self, data.volume)
         self.queue = Queue.Queue(0)
@@ -151,7 +158,7 @@ class MainController(object):
             elif k == '+' or k == '=':  # 增大音量
                 self.data.change_volume(1)
                 self.player.set_volume(self.data.volume)
-            elif k == self.keys['MUTE']:
+            elif k == self.keys['MUTE']:  # 静音
                 if self.data.mute:
                     self.data.volume = self.data.mute
                     self.data.mute = False
@@ -161,7 +168,8 @@ class MainController(object):
                     self.data.volume = 0
                     self.player.set_volume(0)
 
-
+            elif k in ['1', '2', '3', '4']:  # 主题选取
+                self.data.set_theme_id(int(k) - 1)
 
     def _controller(self):
         """

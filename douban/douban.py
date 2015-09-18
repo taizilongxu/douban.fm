@@ -14,6 +14,7 @@ import os
 from threading import Thread
 from model import Playlist, Channel
 from config import db_config
+from colorset import theme
 
 from controller.main_controller import MainController
 from controller.lrc_controller import LrcController
@@ -44,7 +45,6 @@ class Data(object):
         # self.hitory = History()
         self.keys = db_config.keys  # keys
         self.volume = db_config.volume  # 声量
-        self.theme = db_config.theme  # 主题
         self.theme_id = db_config.theme_id  # 主题id
         self.channel = db_config.channel  # 当前频道
         self.user_name = db_config.user_name  # 用户名
@@ -54,6 +54,14 @@ class Data(object):
         self.pro = False  # pro用户
         self.mute = False  # 静音
         self.time = 0  # 时间/秒
+
+    @property
+    def theme(self):
+        THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
+        return getattr(theme, THEME[self.theme_id])
+
+    def set_theme_id(self, value):
+        self.theme_id = value
 
     @property
     def lrc(self):

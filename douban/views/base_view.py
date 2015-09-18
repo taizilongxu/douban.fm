@@ -142,6 +142,7 @@ class Cli(object):
     def is_cn_char(self, i):
         """
         判断是否为中文字符(歌词居中使用)
+        : TODO 日语好像会有bug
         """
         return 0x4e00 <= ord(i) < 0x9fa6
 

@@ -5,7 +5,7 @@
 
 control和view中间层, 负责生成显示的内容(增加主题色彩)
 
-    dal = MainDal(playingsong, play_state, config)
+    dal = MainDal(data)
 
     dal.title
     dal.love
@@ -13,6 +13,7 @@ control和view中间层, 负责生成显示的内容(增加主题色彩)
     dal.prefix_deselected
     dal.suffix_selected
     dal.suffix_deselected
+    dal.lines
 """
 from config import db_config
 import logging
@@ -32,7 +33,7 @@ SUFFXI_DESELECTED = ''
 class MainDal(object):
 
     def __init__(self, data):
-        self.c = db_config.theme
+        self.c = data.theme
         self.data = data
 
         playingsong = data.playlist.get_playingsong()
