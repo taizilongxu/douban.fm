@@ -4,13 +4,14 @@
 豆瓣FM API
 """
 import requests
-import urllib
 import logging
+import urllib
 import json
 import sys
-from config import db_config
-from lrc2dic import lrc2dict
-from json_utils import decode_dict
+
+from doubanfm.config import db_config
+from doubanfm.lrc2dic import lrc2dict
+from doubanfm.API.json_utils import decode_dict
 
 
 logger = logging.getLogger('doubanfm')  # get logger

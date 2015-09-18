@@ -15,9 +15,9 @@ control和view中间层, 负责生成显示的内容(增加主题色彩)
     dal.suffix_deselected
     dal.lines
 """
-from config import db_config
 import logging
-from colorset.colors import on_light_red, color_func  # colors
+
+from doubanfm.colorset.colors import on_light_red, color_func  # colors
 
 logger = logging.getLogger('doubanfm')
 

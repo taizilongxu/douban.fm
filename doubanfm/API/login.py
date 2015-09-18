@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import getpass
 import requests
+import getpass
 import json
-from json_utils import decode_dict
+
+from doubanfm.API.json_utils import decode_dict
 
 
 def win_login():

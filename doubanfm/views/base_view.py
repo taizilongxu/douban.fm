@@ -157,5 +157,5 @@ class Cli(object):
             l += 2 if self.is_cn_char(i) else 1
         return l
 
-    def __del__(self):
-        subprocess.call('echo -e "\033[?25h";clear', shell=True)
+    # def __del__(self):
+    #     subprocess.call('echo -e "\033[?25h";clear', shell=True)

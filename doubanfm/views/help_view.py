@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-from lrc_view import Lrc
-from dal.dal_help import HelpDal
 import subprocess
+
+from doubanfm.views.lrc_view import Lrc
+from doubanfm.dal.dal_help import HelpDal
 
 
 class Help(Lrc):

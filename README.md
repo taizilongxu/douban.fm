@@ -2,6 +2,14 @@
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
+### Authors
+
+* [Fansion](https://github.com/Fansion)
+* [Cloverstd](https://github.com/cloverstd)
+* [skyline75489](https://github.com/skyline75489)
+* [Hexcles](https://github.com/Hexcles)
+* [killpanda](https://github.com/killpanda)
+
 ### Screenshots
 
 V0.3.0
@@ -59,19 +67,24 @@ OS X:
  [q]     --> 退出
  [p]     --> 暂停
  [l]     --> 单曲循环
-音量(>=V0.2.9)
+音量
  [=]     --> 增
  [-]     --> 减
  [m]     --> 静音
  [e]     --> 播放/历史/红心列表
-歌词(>=v0.2.9)
+歌词
  [o]     --> 显示歌词
  [q]     --> 退出歌词
-帮助(>=v0.2.12)
+帮助
  [h]     --> 查看快捷键
+主题
+ [1]
+ [2]
+ [3]
+ [4]
 ```
 
-### Configuration(>=v0.2.8)
+### Configuration
 
 .doubanfm_config保存在了~/.doubanfm_config,根据需要可以修改按键的映射
 
@@ -99,12 +112,6 @@ HELP = h     # 查看帮助
 * 离线歌曲
 * 兼容mvp播放器
 
-### Authors
-
-* [Fansion](https://github.com/Fansion)
-* [Cloverstd](https://github.com/cloverstd)
-* [skyline75489](https://github.com/skyline75489)
-* [Hexcles](https://github.com/Hexcles)
 
 ### Reference
 
@@ -112,6 +119,8 @@ HELP = h     # 查看帮助
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.4.0 重构项目, 更快的页面切换时间, 更清晰的逻辑
 
 V0.3.0 改进mplayer交互,歌词匹配更准确,增加了Playlist,History,Rate几个标签页,音量调节转换为 mplayer 音量内部调节,退出时会保存频道和音量,等等
 

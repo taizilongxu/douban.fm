@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import Queue
 import logging
-from views import help_view
-from lrc_controller import LrcController
+
+from doubanfm.views import help_view
+from doubanfm.controller.lrc_controller import LrcController
 
 logger = logging.getLogger('doubanfm')  # get logger
 

@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from base_view import Cli
 import subprocess
-from colorset.colors import color_func  # colors
-from dal.dal_main import MainDal
+from doubanfm.colorset.colors import color_func  # colors
+from doubanfm.dal.dal_main import MainDal
 
 
 class Win(Cli):

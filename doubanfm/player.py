@@ -21,13 +21,13 @@ queue自定义get_song方法, 从中取出url, 进行播放(暂时, 以后可以
     player.start_queue(queue)
 """
 import subprocess
-from threading import Thread, Event
-import time
 import logging
-import abc
-import fcntl
-import os
 import signal
+import fcntl
+import time
+import abc
+import os
+from threading import Thread, Event
 
 logger = logging.getLogger('doubanfm.player')
 
@@ -168,7 +168,7 @@ class MPlayer(Player):
         '-nolirc',          # Get rid of a warning
         '-quiet',           # Cannot use really-quiet because of get_* queries
         '-softvol',         # Avoid using hardware (global) volume
-        '-cache', '1024',   # Use 5MiB cache
+        '-cache', '5120',   # Use 5MiB cache
         '-cache-min', '1'   # Start playing after 2% cache filled
     ]
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from main_view import Win
-import subprocess
-from colorset.colors import color_func  # colors
-from dal.dal_lrc import LrcDal
+
+from doubanfm.colorset.colors import color_func  # colors
+from doubanfm.dal.dal_lrc import LrcDal
 
 
 class Lrc(Win):

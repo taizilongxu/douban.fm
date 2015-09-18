@@ -4,8 +4,8 @@ import os
 import ConfigParser
 import cPickle as pickle
 import logging
-from colorset import theme
-from API.login import request_token
+
+from doubanfm.API.login import request_token
 
 logger = logging.getLogger('doubanfm')  # get logger
 

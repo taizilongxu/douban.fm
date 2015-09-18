@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-from dal_main import MainDal
+from doubanfm.dal.dal_main import MainDal
 
 
 class LrcDal(MainDal):

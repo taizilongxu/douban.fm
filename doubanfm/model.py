@@ -3,11 +3,12 @@
 """
 数据层
 """
-from API.api import Doubanfm
 import Queue
 from threading import RLock
-from config import db_config
 import functools
+
+from doubanfm.API.api import Doubanfm
+from doubanfm.config import db_config
 
 douban = Doubanfm()
 

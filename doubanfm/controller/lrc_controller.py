@@ -1,11 +1,12 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import getch
 import Queue
 import time
 import logging
 from threading import Thread
-from views import lrc_view
+
+from doubanfm import getch
+from doubanfm.views import lrc_view
 
 logger = logging.getLogger('doubanfm')  # get logger
 

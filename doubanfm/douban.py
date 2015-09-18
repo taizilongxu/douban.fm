@@ -3,22 +3,20 @@
 """
 豆瓣fm主程序
 """
-# local
 from player import MPlayer       # player
 # import notification             # desktop notification
-# from config import db_config    # config
-# from colorset.colors import on_light_red, color_func  # colors
 import Queue
 import logging
 import os
+import subprocess
 from threading import Thread
-from model import Playlist, Channel
-from config import db_config
-from colorset import theme
+from .config import db_config
+from .model import Playlist, Channel
+from .colorset import theme
 
-from controller.main_controller import MainController
-from controller.lrc_controller import LrcController
-from controller.help_controller import HelpController
+from .controller.main_controller import MainController
+from .controller.lrc_controller import LrcController
+from .controller.help_controller import HelpController
 
 # root logger config
 logging.basicConfig(
@@ -114,6 +112,7 @@ class Router(object):
             'quit': False
         }
 
+        subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
         # 切换线程
         Thread(target=self._watchdog_switch).start()
 
@@ -129,34 +128,21 @@ class Router(object):
                 self.view_control_map[key].run(self.switch_queue)
 
         # 退出保存信息
+        self.quit()
+
+    def quit(self):
+        # 退出保存信息
         self.data.save()
+        subprocess.call('echo -e "\033[?25h";clear', shell=True)
 
-
-Router()
-
-
-
-# def run(self):
-#     '''主交互逻辑 (key event loop)'''
-#     while True:
-#         self.display()
-#         k = getch.getch()
-#         if self.state != 1:  # 歌词模式下除了方向键都可以用
-#         if k == self.KEYS['HELP']:     # help界面
-#             self.state = 2
-#             Help(self)
 #         elif k == 'e' and self.state == 0:
 #             self.state = 3
 #             History(self)
 #         elif k == self.KEYS['BYE']:      # b不再播放
 #             self.set_bye()
-#         elif k in ['1', '2', '3', '4']:
-#             db_config.theme = int(k) - 1
-#             self.reload_theme()
 
+def main():
+    Router()
 
-# def main():
-#     Win(douban)
-
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
