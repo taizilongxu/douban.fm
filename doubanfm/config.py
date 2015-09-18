@@ -84,15 +84,7 @@ class Config(object):
                 login_data = pickle.load(f)
         else:
             # 未登陆
-            while True:
-                login_data = request_token()
-                if login_data['r'] == 0:
-                    login_data['volume'] = 50
-                    login_data['channel'] = 0
-                    login_data['theme_id'] = 0
-                    break
-                print login_data['err']
-                logger.debug(login_data['err'])
+            login_data = request_token()
 
         print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
             login_data['user_name']

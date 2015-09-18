@@ -6,17 +6,18 @@
 from player import MPlayer       # player
 # import notification             # desktop notification
 import Queue
+
 import logging
 import os
 import subprocess
 from threading import Thread
-from .config import db_config
-from .model import Playlist, Channel
-from .colorset import theme
+from doubanfm.config import db_config
+from doubanfm.model import Playlist, Channel
+from doubanfm.colorset import theme
 
-from .controller.main_controller import MainController
-from .controller.lrc_controller import LrcController
-from .controller.help_controller import HelpController
+from doubanfm.controller.main_controller import MainController
+from doubanfm.controller.lrc_controller import LrcController
+from doubanfm.controller.help_controller import HelpController
 
 # root logger config
 logging.basicConfig(

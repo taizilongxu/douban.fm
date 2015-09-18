@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import functools
-import Queue
 import logging
+import Queue
 from threading import Thread
 
 from doubanfm import getch
