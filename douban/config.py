@@ -131,22 +131,6 @@ class Config(object):
             history = []
         return history
 
-    @property
-    def theme(self):
-        """
-        THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
-        """
-        # Todo
-        THEME = ['default', 'larapaste', 'monokai', 'tomorrow']
-        return getattr(theme, THEME[self.theme_id])
-
-    @theme.setter
-    def theme(self, value):
-        """
-        :param value: 0, 1, 2, 3
-        """
-        self.theme_id = value
-
     def save_config(self, volume, channel, theme):
         """
         存储历史记录和登陆信息

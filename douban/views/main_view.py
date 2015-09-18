@@ -12,6 +12,7 @@ class Win(Cli):
     def __init__(self, data):
         super(Win, self).__init__()
         self.data = data
+        self.displayline = data.channel
 
         self.display_lines = ''  # 展示所有的行
         self.disable = False  # 设置显示失效
