@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-from base_view import Cli
 import subprocess
+
 from doubanfm.colorset.colors import color_func  # colors
 from doubanfm.dal.dal_main import MainDal
+from doubanfm.views.base_view import Cli
 
 
 class Win(Cli):

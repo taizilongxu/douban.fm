@@ -109,7 +109,6 @@ class MainController(object):
         while not self.quit:
             k = self.queue.get()
             if k == self.keys['QUIT']:  # 退出
-                self.player.quit()
                 self.quit = True
                 self.switch_queue.put('quit')
             elif k == ' ':  # 播放该频道

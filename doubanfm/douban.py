@@ -18,6 +18,7 @@ from doubanfm.colorset import theme
 from doubanfm.controller.main_controller import MainController
 from doubanfm.controller.lrc_controller import LrcController
 from doubanfm.controller.help_controller import HelpController
+from doubanfm.controller.quit_controller import QuitController
 
 # root logger config
 logging.basicConfig(
@@ -103,6 +104,7 @@ class Router(object):
     def __init__(self):
         self.player = MPlayer()
         self.data = Data()
+        self.quit_quit = False
 
         self.switch_queue = Queue.Queue(0)
 
@@ -110,7 +112,7 @@ class Router(object):
             'main': MainController(self.player, self.data),
             'lrc': LrcController(self.player, self.data),
             'help': HelpController(self.player, self.data),
-            'quit': False
+            'quit': QuitController(self.player, self.data)
         }
 
         subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
@@ -118,14 +120,18 @@ class Router(object):
         Thread(target=self._watchdog_switch).start()
 
     def _watchdog_switch(self):
+        """
+        切换页面线程
+        """
         # init
         self.view_control_map['main'].run(self.switch_queue)
 
-        while not self.view_control_map['quit']:
+        while not self.quit_quit:
             key = self.switch_queue.get()
-            if key == 'quit':
-                self.view_control_map['quit'] = True
+            if key == 'quit_quit':
+                self.quit_quit = True
             else:
+                logger.info("switch" + key)
                 self.view_control_map[key].run(self.switch_queue)
 
         # 退出保存信息
