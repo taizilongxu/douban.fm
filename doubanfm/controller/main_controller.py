@@ -111,6 +111,9 @@ class MainController(object):
             if k == self.keys['QUIT']:  # 退出
                 self.quit = True
                 self.switch_queue.put('quit')
+            elif k == self.keys['BYE']:
+                self.data.bye()
+                self.player.start_queue(self)
             elif k == ' ':  # 播放该频道
                 self.set_channel()
                 self.player.start_queue(self)
@@ -126,7 +129,6 @@ class MainController(object):
 
             elif k == self.keys['OPENURL']:  # 打开当前歌曲豆瓣专辑
                 self.set_url()
-
 
             elif k == self.keys['LRC']:  # 歌词
                 self.quit = True

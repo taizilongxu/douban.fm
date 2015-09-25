@@ -88,6 +88,14 @@ class Playlist(object):
         douban.unrate_music(self._playingsong)
 
     @lock
+    def bye(self):
+        """
+        不再播放, 返回新列表
+        """
+        for i in douban.bye(self._playingsong):
+            self._playlist.put(i)
+
+    @lock
     def get_song(self):
         """
         获取歌曲, 如果获取完歌曲列表为空则重新获取列表
@@ -110,8 +118,7 @@ class Playlist(object):
         """
         清空playlist
         """
-        for _ in range(self._playlist.qsize()):
-            self._playlist.get()
+        self._playlist.clear()
 
     @lock
     def is_empty(self):

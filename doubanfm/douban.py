@@ -71,6 +71,9 @@ class Data(object):
     def playingsong(self):
         return self.playlist.get_playingsong()
 
+    def bye(self):
+        self.playlist.bye()
+
     def get_song(self):
         playingsong = self.playlist.get_song()
         self.song_like = playingsong['like']
