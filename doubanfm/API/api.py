@@ -150,8 +150,9 @@ class Doubanfm(object):
     def bye(self, playingsong):
         """
         不再播放
-
-        return: list
+        
+        : params playingsong
+        : return: list
         """
         s = self.requests_url('b', sid=playingsong['sid'])
         return json.loads(s, object_hook=decode_dict)['song']

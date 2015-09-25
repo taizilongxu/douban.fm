@@ -149,6 +149,7 @@ class MainController(object):
                 self.go_top()
 
             elif k == self.keys['PAUSE']:  # 暂停
+                self.data.pause = False if self.data.pause else True
                 self.player.pause()
             elif k == self.keys['NEXT']:  # 下一首
                 self.player.next()

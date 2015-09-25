@@ -49,6 +49,7 @@ class MainDal(object):
         self.song_like = data.song_like
         self.volume = data.volume
         self.loop = data.loop
+        self.pause = data.pause
         self.time = data.time
         self.user_name = data.user_name
 
@@ -68,7 +69,13 @@ class MainDal(object):
         time = self.set_time(self.time)
         volume = str(self.volume) + '%' if self.volume != 0 else \
                  color_func(self.c['TITLE']['state'])('✖')
-        loop = '↺' if self.loop else '→'
+
+        if self.pause:
+            loop = 'P'
+        elif self.loop:
+            loop = '⟲'
+        else:
+            loop = '→'
 
         title = [
             PREFIX_DESELECTED,

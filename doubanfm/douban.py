@@ -50,6 +50,7 @@ class Data(object):
         self.user_name = db_config.user_name  # 用户名
 
         self.song_like = False  # 当前歌词是否like
+        self.pause = False  # 歌曲暂停
         self.loop = False  # 单曲循环
         self.pro = False  # pro用户
         self.mute = False  # 静音
