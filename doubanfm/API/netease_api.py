@@ -64,7 +64,7 @@ class Netease(object):
         url = 'http://m1.music.126.net/'
         if song_id:
             url += self.encrypted_id(song_id) + '/' + str(song_id) + '.mp3'
-            bitrate = str(bitrate/1000) + 'k'
+            bitrate = str(bitrate/1000)
             return url, bitrate
         else:
             return None, None

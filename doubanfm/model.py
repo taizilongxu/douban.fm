@@ -8,6 +8,7 @@ from threading import RLock
 import functools
 
 from doubanfm.API.api import Doubanfm
+from doubanfm.API.netease_api import Netease
 from doubanfm.config import db_config
 
 douban = Doubanfm()
@@ -104,6 +105,12 @@ class Playlist(object):
             self._get_list()
 
         song = self._playlist.get(True)
+
+        # 网易320k音乐
+        url, kbps = Netease().get_url_and_bitrate(song['title'])
+        if url and kbps:
+            song['url'] = url
+            song['kbps'] = kbps
 
         self._playingsong = song
 
