@@ -120,10 +120,6 @@ class Playlist(object):
         """
         self._playlist.clear()
 
-    @lock
-    def is_empty(self):
-        return self._playlist.empty
-
 
 class History(object):
 
