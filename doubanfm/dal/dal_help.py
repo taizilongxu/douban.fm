@@ -26,7 +26,7 @@ class HelpDal(MainDal):
         lines.append(' '*5 + color_func(self.c['PLAYINGSONG']['title'])('音量') + ' '*17 + '[%(PAUSE)s] ---> 暂停' % keys + '\r')
         lines.append(' '*5 + '[=] ---> 增          [%(QUIT)s] ---> 退出' % keys + '\r')
         lines.append(' '*5 + '[-] ---> 减          [%(LOOP)s] ---> 单曲循环' % keys + '\r')
-        lines.append(' '*5 + '[%(MUTE)s] ---> 静音        [e] ---> 播放列表' % keys + '\r')
+        lines.append(' '*5 + '[%(MUTE)s] ---> 静音        [i] ---> 网易320k音乐' % keys + '\r')
 
         lines.append('')
         lines.append(' '*5 + color_func(self.c['PLAYINGSONG']['title'])('歌词') + '\r')
