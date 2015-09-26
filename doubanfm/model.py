@@ -43,10 +43,10 @@ class Playlist(object):
         互斥锁
         """
         @functools.wraps(func)
-        def _func(self):
+        def _func(*args, **kwargs):
             mutex.acquire()
             try:
-                return func(self)
+                return func(*args, **kwargs)
             finally:
                 mutex.release()
         return _func
@@ -97,7 +97,7 @@ class Playlist(object):
             self._playlist.put(i)
 
     @lock
-    def get_song(self):
+    def get_song(self, netease=False):
         """
         获取歌曲, 如果获取完歌曲列表为空则重新获取列表
         """
@@ -107,10 +107,10 @@ class Playlist(object):
         song = self._playlist.get(True)
 
         # 网易320k音乐
-        url, kbps = Netease().get_url_and_bitrate(song['title'])
-        if url and kbps:
-            song['url'] = url
-            song['kbps'] = kbps
+        if netease:
+            url, kbps = Netease().get_url_and_bitrate(song['title'])
+            if url and kbps:
+                song['url'], song['kbps'] = url, kbps
 
         self._playingsong = song
 

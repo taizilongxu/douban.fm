@@ -49,6 +49,7 @@ class Data(object):
         self.channel = db_config.channel  # 当前频道
         self.user_name = db_config.user_name  # 用户名
 
+        self.netease = db_config.netease  # 网易高品质音乐
         self.song_like = False  # 当前歌词是否like
         self.pause = False  # 歌曲暂停
         self.loop = False  # 单曲循环
@@ -76,7 +77,7 @@ class Data(object):
         self.playlist.bye()
 
     def get_song(self):
-        playingsong = self.playlist.get_song()
+        playingsong = self.playlist.get_song(self.netease)
         self.song_like = playingsong['like']
         return playingsong
 
@@ -97,7 +98,10 @@ class Data(object):
         self.volume = max(min(self.volume, 100), 0)  # 限制在0-100之间
 
     def save(self):
-        db_config.save_config(self.volume, self.channel, self.theme_id)
+        db_config.save_config(self.volume,
+                              self.channel,
+                              self.theme_id,
+                              self.netease)
 
 
 class Router(object):

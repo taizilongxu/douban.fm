@@ -136,6 +136,8 @@ class MainController(object):
             elif k == self.keys['HELP']:
                 self.quit = True
                 self.switch_queue.put('help')
+            elif k == self.keys['HIGH']:  # 高品质音乐
+                self.data.netease = False if self.data.netease else True
 
             # getch will return multiple ASCII codes for arrow keys
             # A, B, C, D are the first code of UP, DOWN, LEFT, RIGHT

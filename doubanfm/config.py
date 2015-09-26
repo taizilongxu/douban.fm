@@ -28,6 +28,8 @@ PAUSE = p
 LOOP = l
 MUTE = m
 LRC = o
+HELP = h
+HIGH = i
 '''
 KEYS = {
     'UP': 'k',
@@ -43,7 +45,8 @@ KEYS = {
     'LOOP': 'l',
     'MUTE': 'm',
     'LRC': 'o',
-    'HELP': 'h'
+    'HELP': 'h',
+    'HIGH': 'i'
     }
 
 
@@ -86,12 +89,16 @@ class Config(object):
             # 未登陆
             login_data = request_token()
 
+        self.user_name = login_data.get('user_name', '')
         print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
             login_data['user_name']
-        self.volume = login_data.get('volume', 50)
         self.channel = login_data.get('channel', 0)
+        print '\033[31m♥\033[0m Get channel [\033[32m OK \033[0m]'
+        self.volume = login_data.get('volume', 50)
+        print '\033[31m♥\033[0m Get volume [\033[32m OK \033[0m]'
         self.theme_id = login_data.get('theme_id', 0)
-        self.user_name = login_data.get('user_name', '')
+        print '\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]'
+        self.netease = login_data.get('netease', False)
         return login_data
 
     @property
@@ -123,13 +130,14 @@ class Config(object):
             history = []
         return history
 
-    def save_config(self, volume, channel, theme):
+    def save_config(self, volume, channel, theme, netease):
         """
         存储历史记录和登陆信息
         """
         self.login_data['volume'] = volume
         self.login_data['channel'] = channel
         self.login_data['theme_id'] = theme
+        self.login_data['netease'] = netease
         with open(PATH_TOKEN, 'w') as f:
             pickle.dump(self.login_data, f)
 

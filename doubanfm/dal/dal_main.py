@@ -47,6 +47,7 @@ class MainDal(object):
         # self.song_public_time = playingsong['public_time']
 
         self.song_like = data.song_like
+        self.netease = data.netease
         self.volume = data.volume
         self.loop = data.loop
         self.pause = data.pause
@@ -77,13 +78,16 @@ class MainDal(object):
         else:
             loop = '→'
 
+        source = '网易' if self.netease else ''
+
         title = [
             PREFIX_DESELECTED,
             color_func(self.c['TITLE']['doubanfm'])('DoubanFM'),
             '\\',
             color_func(self.c['TITLE']['username'])(self.user_name),
             '>>',
-            color_func(self.c['TITLE']['pro'])(self.song_pro),
+            # color_func(self.c['TITLE']['pro'])(self.song_pro),
+            color_func(self.c['PLAYINGSONG']['like'])(source),
             color_func(self.c['TITLE']['kbps'])(self.song_kbps),
             color_func(self.c['TITLE']['time'])(time),
             # color_func(self.c['TITLE']['rate'])(self.song_rate),
