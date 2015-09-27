@@ -3,9 +3,9 @@
 """
 数据层
 """
-import Queue
 from threading import RLock
 import functools
+import Queue
 
 from doubanfm.API.api import Doubanfm
 from doubanfm.API.netease_api import Netease
