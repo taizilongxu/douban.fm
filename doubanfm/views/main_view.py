@@ -1,10 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import subprocess
+from threading import RLock
 
 from doubanfm.colorset.colors import color_func  # colors
 from doubanfm.dal.dal_main import MainDal
 from doubanfm.views.base_view import Cli
+
+mutex = RLock()
 
 
 class Win(Cli):
@@ -33,11 +36,15 @@ class Win(Cli):
         self.disable = True
 
     def display(self):
-        if not self.disable:
+        mutex.acquire()
+        try:
             self.set_dal()
             self.make_display_lines()
+            subprocess.call('clear', shell=True)  # 清屏
             for i in self.display_lines:
                 print i
+        finally:
+            mutex.release()
 
     def make_display_lines(self):
         """
@@ -46,7 +53,6 @@ class Win(Cli):
         注意: 多线程终端同时输出会有bug, 导致起始位置偏移
         """
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
-        subprocess.call('clear', shell=True)  # 清屏
 
         display_lines = ['\n\r']
         display_lines.append(self._title + '\r')

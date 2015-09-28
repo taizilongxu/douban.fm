@@ -1,9 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+import subprocess
 from main_view import Win
+from threading import RLock
 
 from doubanfm.colorset.colors import color_func  # colors
 from doubanfm.dal.dal_lrc import LrcDal
+
+mutex = RLock()
 
 
 class Lrc(Win):
@@ -21,11 +25,16 @@ class Lrc(Win):
         self.set_sort_lrc_dict(dal.sort_lrc_dict)
 
     def display(self):
-        self.set_dal()
-        self.markline = self.find_line()
-        self.make_display_lines()
-        for i in self.display_lines:
-            print i
+        mutex.acquire()
+        try:
+            self.set_dal()
+            self.markline = self.find_line()
+            self.make_display_lines()
+            subprocess.call('clear', shell=True)  # 清屏
+            for i in self.display_lines:
+                print i
+        finally:
+            mutex.release()
 
     def find_line(self):
         """第一次载入时查找歌词"""

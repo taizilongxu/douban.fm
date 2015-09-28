@@ -153,8 +153,7 @@ class Router(object):
 #         elif k == 'e' and self.state == 0:
 #             self.state = 3
 #             History(self)
-#         elif k == self.KEYS['BYE']:      # b不再播放
-#             self.set_bye()
+
 
 def main():
     Router()

@@ -56,12 +56,12 @@ class Config(object):
     """
 
     def __init__(self):
-        # TODO 加入config里
-        self.__theme = 'tomorrow'
-        self.volume = 50
-        self.channel = 0
-        self.theme_id = 0
-        self.user_name = ''
+        self.volume = 50  # 音量
+        self.channel = 0  # 频道
+        self.theme_id = 0  # 主题
+        self.user_name = ''  # 用户名
+        self.netease = False  # 是否使用网易320k音乐播放
+        self.run_times = 0  # 登陆次数
 
         self.login_data = self.get_login_data()
 
@@ -79,7 +79,7 @@ class Config(object):
         """
         提供登陆的认证
 
-        这里顺带增加了 volume, channel, theme_id 的默认值
+        这里顺带增加了 volume, channel, theme_id , netease, run_times的默认值
         """
         if os.path.exists(PATH_TOKEN):
             # 使用上次登录保存的token
@@ -89,17 +89,35 @@ class Config(object):
             # 未登陆
             login_data = request_token()
 
+        self.get_default_set(login_data)
+        self.get_user_states(login_data)
+
+        return login_data
+
+    def get_default_set(self, login_data):
+        """
+        记录退出时的播放状态
+        """
         self.user_name = login_data.get('user_name', '')
         print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
             login_data['user_name']
+
         self.channel = login_data.get('channel', 0)
         print '\033[31m♥\033[0m Get channel [\033[32m OK \033[0m]'
+
         self.volume = login_data.get('volume', 50)
         print '\033[31m♥\033[0m Get volume [\033[32m OK \033[0m]'
+
         self.theme_id = login_data.get('theme_id', 0)
         print '\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]'
+
         self.netease = login_data.get('netease', False)
-        return login_data
+
+    def get_user_states(self, login_data):
+        """
+        统计用户信息
+        """
+        self.run_times = login_data.get('run_times', 0)
 
     @property
     @output('Get keys')
@@ -138,6 +156,7 @@ class Config(object):
         self.login_data['channel'] = channel
         self.login_data['theme_id'] = theme
         self.login_data['netease'] = netease
+        self.login_data['run_times'] = self.run_times + 1
         with open(PATH_TOKEN, 'w') as f:
             pickle.dump(self.login_data, f)
 
