@@ -3,13 +3,12 @@
 import functools
 import logging
 import Queue
-from threading import Thread, RLock
+from threading import Thread
 
 from doubanfm import getch
 from doubanfm.views import main_view
 
 logger = logging.getLogger('doubanfm')
-mutex = RLock()
 
 
 class MainController(object):
@@ -48,13 +47,9 @@ class MainController(object):
     def display(func):
         @functools.wraps(func)
         def _func(self):
-            mutex.acquire()
-            try:
-                tmp = func(self)
-                if self.view:
-                    self.view.display()
-            finally:
-                mutex.release()
+            tmp = func(self)
+            if self.view:
+                self.view.display()
             return tmp
         return _func
 

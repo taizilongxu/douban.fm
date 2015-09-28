@@ -132,8 +132,11 @@ class Cli(object):
         self.updown(1)
 
     def go_bottom(self):
-        self.markline = self.screen_height
-        self.topline = len(self._lines) - self.screen_height - 1
+        if len(self._lines) < self.screen_height:
+            self.markline = len(self._lines) - 1
+        else:
+            self.markline = self.screen_height
+            self.topline = len(self._lines) - self.screen_height - 1
 
     def go_top(self):
         self.markline = 0
