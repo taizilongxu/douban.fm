@@ -4,6 +4,7 @@ import os
 import ConfigParser
 import cPickle as pickle
 import logging
+import time
 
 from doubanfm.API.login import request_token
 
@@ -62,6 +63,8 @@ class Config(object):
         self.user_name = ''  # 用户名
         self.netease = False  # 是否使用网易320k音乐播放
         self.run_times = 0  # 登陆次数
+        self.last_time = time.time()  # 当前登陆时间戳
+        self.total_time = 0  # 总共登陆时间
 
         self.login_data = self.get_login_data()
 
@@ -118,6 +121,7 @@ class Config(object):
         统计用户信息
         """
         self.run_times = login_data.get('run_times', 0)
+        self.total_time = login_data.get('total_time', 0)
 
     @property
     @output('Get keys')
@@ -157,6 +161,9 @@ class Config(object):
         self.login_data['theme_id'] = theme
         self.login_data['netease'] = netease
         self.login_data['run_times'] = self.run_times + 1
+        self.login_data['last_time'] = self.last_time
+        self.login_data['total_time'] = self.total_time +\
+                                        time.time() - self.last_time
         with open(PATH_TOKEN, 'w') as f:
             pickle.dump(self.login_data, f)
 
