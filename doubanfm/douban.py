@@ -17,6 +17,7 @@ from doubanfm.colorset import theme
 from doubanfm.controller.main_controller import MainController
 from doubanfm.controller.lrc_controller import LrcController
 from doubanfm.controller.help_controller import HelpController
+from doubanfm.controller.manager_controller import ManagerController
 from doubanfm.controller.quit_controller import QuitController
 
 # root logger config
@@ -120,6 +121,7 @@ class Router(object):
             'main': MainController(self.player, self.data),
             'lrc': LrcController(self.player, self.data),
             'help': HelpController(self.player, self.data),
+            'manager': ManagerController(self.player, self.data),
             'quit': QuitController(self.player, self.data)
         }
 

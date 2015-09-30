@@ -138,6 +138,9 @@ class MainController(object):
                 self.switch_queue.put('help')
             elif k == self.keys['HIGH']:  # 高品质音乐
                 self.data.netease = False if self.data.netease else True
+            elif k == 't':  # 高品质音乐
+                self.quit = True
+                self.switch_queue.put('manager')
 
             # getch will return multiple ASCII codes for arrow keys
             # A, B, C, D are the first code of UP, DOWN, LEFT, RIGHT
@@ -183,5 +186,6 @@ class MainController(object):
         while not self.quit:
             k = getch.getch()
             self.queue.put(k)
-            if k == 'o' or k == 'q' or k == 'h':
+            # 此处退出时需要做一下判断, 不然会引发切换线程无法读取的bug
+            if k == 'o' or k == 'q' or k == 'h' or k == 't':
                 break
