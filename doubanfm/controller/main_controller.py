@@ -46,8 +46,8 @@ class MainController(object):
 
     def display(func):
         @functools.wraps(func)
-        def _func(self):
-            tmp = func(self)
+        def _func(self, *args):
+            tmp = func(self, *args)
             if self.view:
                 self.view.display()
             return tmp
@@ -85,6 +85,44 @@ class MainController(object):
         self.data.channel = self.view.set_channel()  # 获取view里的channel索引
         self.data.playlist.set_channel(self.data.channel)  # 设置API里的channel
 
+    @display
+    def set_mute(self):
+        if self.data.mute:
+            self.data.volume = self.data.mute
+            self.data.mute = False
+            self.player.set_volume(self.data.volume)
+        else:
+            self.data.mute = self.data.volume
+            self.data.volume = 0
+            self.player.set_volume(0)
+
+    @display
+    def set_loop(self):
+        self.data.loop = False if self.data.loop else True
+        self.player.loop()
+
+    @display
+    def set_rate(self):
+        self.data.song_like = False if self.data.song_like else True
+        if self.data.song_like:
+            self.data.set_song_like()
+        else:
+            self.data.set_song_unlike()
+
+    @display
+    def set_pause(self):
+        self.data.pause = False if self.data.pause else True
+        self.player.pause()
+
+    @display
+    def set_volume(self, vol):
+        self.data.change_volume(vol)
+        self.player.set_volume(self.data.volume)
+
+    @display
+    def set_high(self):
+        self.data.netease = False if self.data.netease else True
+
     def set_url(self):
         '''打开豆瓣网页'''
         import webbrowser
@@ -118,14 +156,9 @@ class MainController(object):
                 self.set_channel()
                 self.player.start_queue(self)
             elif k == self.keys['LOOP']:  # 单曲循环
-                self.data.loop = False if self.data.loop else True
-                self.player.loop()
+                self.set_loop()
             elif k == self.keys['RATE']:  # 加心/去心
-                self.data.song_like = False if self.data.song_like else True
-                if self.data.song_like:
-                    self.data.set_song_like()
-                else:
-                    self.data.set_song_unlike()
+                self.set_rate()
 
             elif k == self.keys['OPENURL']:  # 打开当前歌曲豆瓣专辑
                 self.set_url()
@@ -137,8 +170,8 @@ class MainController(object):
                 self.quit = True
                 self.switch_queue.put('help')
             elif k == self.keys['HIGH']:  # 高品质音乐
-                self.data.netease = False if self.data.netease else True
-            elif k == 't':  # 高品质音乐
+                self.set_high()
+            elif k == 't':
                 self.quit = True
                 self.switch_queue.put('manager')
 
@@ -154,27 +187,16 @@ class MainController(object):
                 self.go_top()
 
             elif k == self.keys['PAUSE']:  # 暂停
-                self.data.pause = False if self.data.pause else True
-                self.player.pause()
+                self.set_pause()
             elif k == self.keys['NEXT']:  # 下一首
                 self.player.next()
 
             elif k == '-' or k == '_':  # 减小音量
-                self.data.change_volume(-1)
-                logger.info(self.data.volume)
-                self.player.set_volume(self.data.volume)
+                self.set_volume(-1)
             elif k == '+' or k == '=':  # 增大音量
-                self.data.change_volume(1)
-                self.player.set_volume(self.data.volume)
+                self.set_volume(1)
             elif k == self.keys['MUTE']:  # 静音
-                if self.data.mute:
-                    self.data.volume = self.data.mute
-                    self.data.mute = False
-                    self.player.set_volume(self.data.volume)
-                else:
-                    self.data.mute = self.data.volume
-                    self.data.volume = 0
-                    self.player.set_volume(0)
+                self.set_mute()
 
             elif k in ['1', '2', '3', '4']:  # 主题选取
                 self.data.set_theme_id(int(k) - 1)
