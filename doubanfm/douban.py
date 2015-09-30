@@ -3,18 +3,17 @@
 """
 豆瓣fm主程序
 """
+from threading import Thread
 from player import MPlayer       # player
 # import notification             # desktop notification
-import Queue
-
-import logging
-import os
 import subprocess
-from threading import Thread
+import logging
+import Queue
+import os
+
 from doubanfm.config import db_config
 from doubanfm.model import Playlist, Channel
 from doubanfm.colorset import theme
-
 from doubanfm.controller.main_controller import MainController
 from doubanfm.controller.lrc_controller import LrcController
 from doubanfm.controller.help_controller import HelpController
@@ -36,7 +35,8 @@ logger.setLevel(logging.INFO)
 
 class Data(object):
     """
-    所有需要的数据统一在一起
+    集合所有数据, 并提供方法
+    所有外部接口都只会调用这个类/方法
     """
 
     def __init__(self):
