@@ -123,6 +123,10 @@ class MainController(object):
     def set_high(self):
         self.data.netease = False if self.data.netease else True
 
+    @display
+    def set_theme(self, k):
+        self.data.set_theme_id(int(k) - 1)
+
     def set_url(self):
         '''打开豆瓣网页'''
         import webbrowser
@@ -171,7 +175,7 @@ class MainController(object):
                 self.switch_queue.put('help')
             elif k == self.keys['HIGH']:  # 高品质音乐
                 self.set_high()
-            elif k == 't':
+            elif k == 't':  # 管理界面
                 self.quit = True
                 self.switch_queue.put('manager')
 
@@ -199,7 +203,7 @@ class MainController(object):
                 self.set_mute()
 
             elif k in ['1', '2', '3', '4']:  # 主题选取
-                self.data.set_theme_id(int(k) - 1)
+                self.set_theme(k)
 
     def _controller(self):
         """
