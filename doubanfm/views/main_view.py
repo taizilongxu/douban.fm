@@ -20,6 +20,8 @@ class Win(Cli):
 
         self.display_lines = ''  # 展示所有的行
         self.disable = False  # 设置显示失效
+        self.override = False
+        self.info = None
 
     def set_dal(self):
         dal = MainDal(self.data)
@@ -28,9 +30,24 @@ class Win(Cli):
         self.set_love(dal.love)
         self.set_prefix_selected(dal.prefix_selected)
         self.set_prefix_deselected(dal.prefix_deselected)
-        self.set_suffix_selected(dal.suffix_selected)
+        if self.override:
+            self.set_suffix_selected(self.info)
+        else:
+            self.set_suffix_selected(dal.suffix_selected)
         self.set_suffix_deselected(dal.suffix_deselected)
         self.set_lines(dal.lines)
+
+    def override_suffix_selected(self, info):
+        """
+        设置显示信息
+        """
+        if info:
+            self.override = True
+            self.info = info
+
+    def cancel_override(self):
+        self.override = False
+        self.info = None
 
     def set_disable(self):
         self.disable = True
@@ -50,7 +67,7 @@ class Win(Cli):
         """
         生成输出行
 
-        注意: 多线程终端同时输出会有bug, 导致起始位置偏移
+        注意: 多线程终端同时输出会有bug, 导致起始位置偏移, 需要在每行加\r
         """
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
@@ -75,5 +92,5 @@ class Win(Cli):
             line = '%s %s %s' % (prefix, i, suffix)
             line = color_func(self.c['LINE']['line'])(line)
 
-            display_lines.append(line + '\r')  # 为什么加\r,我不知道,如果不加会出bug
+            display_lines.append(line + '\r')
         self.display_lines = display_lines

@@ -44,48 +44,51 @@ class MainController(object):
         Thread(target=self._watchdog_queue).start()
         Thread(target=self._watchdog_time).start()
 
-    def display(func):
-        @functools.wraps(func)
-        def _func(self, *args):
-            tmp = func(self, *args)
-            if self.view:
-                self.view.display()
-            return tmp
-        return _func
+    def display(info):
+        def _deco(func):
+            def _func(self, *args, **kwargs):
+                tmp = func(self, *args, **kwargs)
+                if self.view:
+                    self.view.override_suffix_selected(info)
+                    self.view.display()
+                    self.view.cancel_override()
+                return tmp
+            return _func
+        return _deco
 
-    @display
+    @property
+    def playingsong(self):
+        return self.data.playingsong
+
+    @display('正在加载歌曲...')
     def get_song(self):
         """
         切换歌曲时刷新
         """
         return self.data.get_song()
 
-    @property
-    def playingsong(self):
-        return self.data.playingsong
-
-    @display
+    @display('')
     def up(self):
         self.view.up()
 
-    @display
+    @display('')
     def down(self):
         self.view.down()
 
-    @display
+    @display('')
     def go_bottom(self):
         self.view.go_bottom()
 
-    @display
+    @display('')
     def go_top(self):
         self.view.go_top()
 
-    @display
+    @display('切换频道中...')
     def set_channel(self):
         self.data.channel = self.view.set_channel()  # 获取view里的channel索引
         self.data.playlist.set_channel(self.data.channel)  # 设置API里的channel
 
-    @display
+    @display('')
     def set_mute(self):
         if self.data.mute:
             self.data.volume = self.data.mute
@@ -96,12 +99,12 @@ class MainController(object):
             self.data.volume = 0
             self.player.set_volume(0)
 
-    @display
+    @display('')
     def set_loop(self):
         self.data.loop = False if self.data.loop else True
         self.player.loop()
 
-    @display
+    @display('')
     def set_rate(self):
         self.data.song_like = False if self.data.song_like else True
         if self.data.song_like:
@@ -109,23 +112,28 @@ class MainController(object):
         else:
             self.data.set_song_unlike()
 
-    @display
+    @display('')
     def set_pause(self):
         self.data.pause = False if self.data.pause else True
         self.player.pause()
 
-    @display
+    @display('')
     def set_volume(self, vol):
         self.data.change_volume(vol)
         self.player.set_volume(self.data.volume)
 
-    @display
+    @display('')
     def set_high(self):
         self.data.netease = False if self.data.netease else True
 
-    @display
+    @display('')
     def set_theme(self, k):
         self.data.set_theme_id(int(k) - 1)
+
+    @display('获取歌词中...')
+    def set_lrc(self):
+        self.quit = True
+        self.switch_queue.put('lrc')
 
     def set_url(self):
         '''打开豆瓣网页'''
@@ -168,8 +176,7 @@ class MainController(object):
                 self.set_url()
 
             elif k == self.keys['LRC']:  # 歌词
-                self.quit = True
-                self.switch_queue.put('lrc')
+                self.set_lrc()
             elif k == self.keys['HELP']:
                 self.quit = True
                 self.switch_queue.put('help')
