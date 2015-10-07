@@ -2,6 +2,10 @@
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
+### Developer Wiki
+
+https://github.com/taizilongxu/douban.fm/wiki
+
 ### Authors
 
 * [Fansion](https://github.com/Fansion)
@@ -12,7 +16,7 @@ Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/dou
 
 ### Screenshots
 
-V0.3.0
+V0.4.1
 
 ![](img/doubanfm.gif)
 
