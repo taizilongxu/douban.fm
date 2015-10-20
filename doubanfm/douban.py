@@ -90,6 +90,10 @@ class Data(object):
         self.song_like = False
         self.playlist.set_song_unlike()
 
+    def submit_music(self):
+        self.playlist.submit_music()
+
+
     def change_volume(self, increment):
         """调整音量大小"""
         if increment == 1:
@@ -141,7 +145,7 @@ class Router(object):
             if key == 'quit_quit':
                 self.quit_quit = True
             else:
-                logger.info("switch" + key)
+                logger.info("switch to " + key)
                 self.view_control_map[key].run(self.switch_queue)
 
         # 退出保存信息

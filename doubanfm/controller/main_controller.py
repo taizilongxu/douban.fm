@@ -45,6 +45,18 @@ class MainController(object):
         Thread(target=self._watchdog_queue).start()
         Thread(target=self._watchdog_time).start()
 
+    def before_play(self):
+        """
+        """
+        pass
+
+    def after_play(self):
+        """
+        """
+        logger.info('after_play')
+        self.data.submit_music()
+        pass
+
     def display(info):
         def _deco(func):
             def _func(self, *args, **kwargs):
@@ -109,10 +121,10 @@ class MainController(object):
     @display('')
     def set_rate(self):
         self.data.song_like = False if self.data.song_like else True
-        if self.data.song_like:
-            self.data.set_song_like()
-        else:
-            self.data.set_song_unlike()
+        # if self.data.song_like:
+        #     self.data.set_song_like()
+        # else:
+        #     self.data.set_song_unlike()
 
     @display('')
     def set_pause(self):

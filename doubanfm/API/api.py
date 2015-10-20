@@ -150,7 +150,7 @@ class Doubanfm(object):
     def bye(self, playingsong):
         """
         不再播放
-        
+
         : params playingsong
         : return: list
         """

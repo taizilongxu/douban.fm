@@ -113,9 +113,12 @@ class Player(object):
         logger.debug("Watching %s[%d]",
                      self._player_command, self.sub_proc.pid)
         returncode = self.sub_proc.wait()
-        self._exit_event.set()
+        logger.info('returncode=' + str(returncode))
+        if self.queue:
+            self.queue.after_play()
         logger.debug("%s[%d] exit with code %d",
                      self._player_command, self.sub_proc.pid, returncode)
+        self._exit_event.set()
 
     @property
     def is_alive(self):
@@ -131,7 +134,7 @@ class Player(object):
         """
         if not self.is_alive:
             return
-        self.sub_proc.terminate()
+        self.sub_proc.kill()
 
     # Abstract methods
 
@@ -199,7 +202,7 @@ class MPlayer(Player):
         if not self._exit_queue_event:
             Thread(target=self._watchdog_queue).start()
         else:
-            self.sub_proc.terminate()
+            self.sub_proc.kill()
 
     def loop(self):
         self._loop = False if self._loop else True
@@ -208,6 +211,8 @@ class MPlayer(Player):
         self.start_queue(self.queue, self._volume)
 
     def start(self, url):
+        if self.queue:
+            self.queue.before_play()
         self._run_player(['-volume', str(self._volume), url])
 
     def pause(self):

@@ -127,6 +127,9 @@ class Playlist(object):
         """
         self._playlist.clear()
 
+    def submit_music(self):
+        douban.submit_music(self._playingsong)
+
 
 class History(object):
 
