@@ -58,8 +58,7 @@ class Win(Cli):
             self.set_dal()
             self.make_display_lines()
             subprocess.call('clear', shell=True)  # 清屏
-            for i in self.display_lines:
-                print i
+            print '\n'.join(self.display_lines)
         finally:
             mutex.release()
 

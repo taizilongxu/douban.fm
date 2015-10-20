@@ -1,17 +1,16 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import Queue
-import time
 import logging
-from threading import Thread
 
 from doubanfm import getch
 from doubanfm.views import lrc_view
+from doubanfm.controller.main_controller import MainController
 
 logger = logging.getLogger('doubanfm')  # get logger
 
 
-class LrcController(object):
+class LrcController(MainController):
     """
     按键控制
     """
@@ -20,28 +19,10 @@ class LrcController(object):
         # 接受player, data, view
         self.player = player
         self.data = data
+        self.keys = data.keys
+        self.quit = False
         self.view = lrc_view.Lrc(self.data)
         self.queue = Queue.Queue(0)
-
-    def run(self, switch_queue):
-        """
-        每个controller需要提供run方法, 来提供启动
-        """
-        self.switch_queue = switch_queue
-        self.quit = False
-
-        Thread(target=self._watchdog_queue).start()
-        Thread(target=self._controller).start()
-        Thread(target=self._watchdog_time).start()
-
-    def _watchdog_time(self):
-        """
-        标题时间显示
-        """
-        while not self.quit:
-            self.data.time = self.player.time_pos
-            self.view.display()
-            time.sleep(1)
 
     def _watchdog_queue(self):
         """
@@ -49,9 +30,32 @@ class LrcController(object):
         """
         while not self.quit:
             k = self.queue.get()
-            if k == 'q':  # 退出
+            if k == self.keys['QUIT']:  # 退出
                 self.quit = True
                 self.switch_queue.put('main')
+            elif k == self.keys['BYE']:
+                self.data.bye()
+                self.player.start_queue(self)
+            elif k == self.keys['LOOP']:  # 单曲循环
+                self.set_loop()
+            elif k == self.keys['RATE']:  # 加心/去心
+                self.set_rate()
+            elif k == self.keys['OPENURL']:  # 打开当前歌曲豆瓣专辑
+                self.set_url()
+            elif k == self.keys['HIGH']:  # 高品质音乐
+                self.set_high()
+            elif k == self.keys['PAUSE']:  # 暂停
+                self.set_pause()
+            elif k == self.keys['NEXT']:  # 下一首
+                self.player.next()
+            elif k == '-' or k == '_':  # 减小音量
+                self.set_volume(-1)
+            elif k == '+' or k == '=':  # 增大音量
+                self.set_volume(1)
+            elif k == self.keys['MUTE']:  # 静音
+                self.set_mute()
+            elif k in ['1', '2', '3', '4']:  # 主题选取
+                self.set_theme(k)
 
     def _controller(self):
         """
@@ -59,7 +63,6 @@ class LrcController(object):
         """
         while not self.quit:
             k = getch.getch()
-            logger.info(k)
             self.queue.put(k)
-            if k == 'q':
+            if k == self.keys['QUIT']:
                 break

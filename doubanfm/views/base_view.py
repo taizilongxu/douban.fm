@@ -149,14 +149,14 @@ class Cli(object):
         """
         return 0x4e00 <= ord(i) < 0x9fa6
 
-    def center_num(self, tmp):
+    def center_num(self, string):
         """
         返回总字符数(考虑英文和中文在终端所占字块)
 
         return: int
         """
         l = 0
-        for i in tmp:
+        for i in string:
             l += 2 if self.is_cn_char(i) else 1
         return l
 

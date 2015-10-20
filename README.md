@@ -16,8 +16,6 @@ https://github.com/taizilongxu/douban.fm/wiki
 
 ### Screenshots
 
-V0.4.1
-
 ![](img/doubanfm.gif)
 
 ### Support
@@ -124,7 +122,11 @@ HELP = h     # 查看帮助
 
 ###Log
 
-V0.4.2(未发布) 网易320k音乐替换原音乐
+V0.4.4 增加在歌词页面的按键响应, 包括不再播放, 下一首, 音量控制等
+
+V0.4.3 增加一些按键反应速度
+
+V0.4.2 网易320k音乐替换原音乐
 
 V0.4.0 重构项目, 更快的页面切换时间, 更清晰的逻辑
 

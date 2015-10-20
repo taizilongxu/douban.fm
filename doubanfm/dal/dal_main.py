@@ -36,7 +36,7 @@ class MainDal(object):
         self.c = data.theme
         self.data = data
 
-        playingsong = data.playlist.get_playingsong()
+        playingsong = data.playingsong
         self.song_total_time = playingsong['length']
         self.song_kbps = playingsong['kbps'] + 'kbps'
         # self.song_rate = RATE[int(round(playingsong.get('rating_avg', 0))) - 1]

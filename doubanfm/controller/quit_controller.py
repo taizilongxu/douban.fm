@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import logging
-from threading import Thread
 
 from doubanfm.views import quit_view
 from doubanfm import getch
@@ -25,7 +24,7 @@ class QuitController(LrcController):
         从queue里取出字符执行命令
         """
         k = self.queue.get()
-        if k == 'q':  # 退出
+        if k == self.keys['QUIT']:  # 退出
             self.player.quit()
             self.switch_queue.put('quit_quit')
         else:

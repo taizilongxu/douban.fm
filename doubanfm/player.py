@@ -76,7 +76,8 @@ class Player(object):
         return '<{0} ({1})>'.format(self.__class__.__name__, status)
 
     def _run_player(self, extra_cmd):
-        """运行播放器（若当前已有正在运行的，强制推出）
+        """
+        运行播放器（若当前已有正在运行的，强制推出）
 
         extra_cmd: 额外的参数 (list)
         """
@@ -100,9 +101,11 @@ class Player(object):
         Thread(target=self._watchdog).start()
 
     def _watchdog(self):
-        """监控正在运行的播放器（独立线程）
+        """
+        监控正在运行的播放器（独立线程）
 
-        播放器退出后将会设置 _exit_event"""
+        播放器退出后将会设置 _exit_event
+        """
         if not self.is_alive:
             logger.debug("Player has already terminated.")
             self._exit_event.set()

@@ -163,7 +163,7 @@ class Config(object):
         self.login_data['run_times'] = self.run_times + 1
         self.login_data['last_time'] = self.last_time
         self.login_data['total_time'] = self.total_time +\
-                                        time.time() - self.last_time
+            time.time() - self.last_time
         with open(PATH_TOKEN, 'w') as f:
             pickle.dump(self.login_data, f)
 

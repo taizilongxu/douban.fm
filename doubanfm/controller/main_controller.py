@@ -16,7 +16,7 @@ class MainController(object):
     主界面控制:
 
     提供run方法以调用该控制
-    run方法启动三个进程:
+    run方法启动三个线程:
         1. _controller: 提供按键监听
         2. _watchdog_queue: 操作按键对应的命令
         3. _watchdog_time: 标题行需要显示歌曲播放进度
@@ -28,6 +28,7 @@ class MainController(object):
         self.player = player
         self.data = data
         self.keys = data.keys
+        self.quit = False
         self.view = main_view.Win(self.data)  # 绑定view
 
         self.player.start_queue(self, data.volume)
@@ -48,7 +49,7 @@ class MainController(object):
         def _deco(func):
             def _func(self, *args, **kwargs):
                 tmp = func(self, *args, **kwargs)
-                if self.view:
+                if self.view and not self.quit:
                     self.view.override_suffix_selected(info)
                     self.view.display()
                     self.view.cancel_override()
@@ -56,6 +57,7 @@ class MainController(object):
             return _func
         return _deco
 
+    # 提供给player的两个方法
     @property
     def playingsong(self):
         return self.data.playingsong
@@ -220,5 +222,6 @@ class MainController(object):
             k = getch.getch()
             self.queue.put(k)
             # 此处退出时需要做一下判断, 不然会引发切换线程无法读取的bug
+            # TODO: 按键映射
             if k == 'o' or k == 'q' or k == 'h' or k == 't':
                 break
