@@ -134,7 +134,7 @@ class Player(object):
         """
         if not self.is_alive:
             return
-        self.sub_proc.kill()
+        self.sub_proc.terminate()
 
     # Abstract methods
 
@@ -202,7 +202,10 @@ class MPlayer(Player):
         if not self._exit_queue_event:
             Thread(target=self._watchdog_queue).start()
         else:
-            self.sub_proc.kill()
+            try:
+                self.sub_proc.terminate()
+            except OSError:
+                logger.info('wrong with start_queue')
 
     def loop(self):
         self._loop = False if self._loop else True

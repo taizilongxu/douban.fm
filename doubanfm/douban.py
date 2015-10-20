@@ -93,7 +93,6 @@ class Data(object):
     def submit_music(self):
         self.playlist.submit_music()
 
-
     def change_volume(self, increment):
         """调整音量大小"""
         if increment == 1:
@@ -153,7 +152,9 @@ class Router(object):
 
     def quit(self):
         # 退出保存信息
+        logger.info('quit_before')
         self.data.save()
+        logger.info('quit_after')
         subprocess.call('echo -e "\033[?25h";clear', shell=True)
 
 #         elif k == 'e' and self.state == 0:

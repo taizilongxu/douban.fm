@@ -36,14 +36,14 @@ class MainDal(object):
         self.c = data.theme
         self.data = data
 
-        playingsong = data.playingsong
-        self.song_total_time = playingsong['length']
-        self.song_kbps = playingsong['kbps'] + 'kbps'
+        playingsong = data.playingsong if data.playingsong else {}
+        self.song_total_time = playingsong.get('length', '0')
+        self.song_kbps = playingsong.get('kbps', '0') + 'kbps'
         # self.song_rate = RATE[int(round(playingsong.get('rating_avg', 0))) - 1]
-        self.song_pro = '' if playingsong['kbps'] == '128' else PRO
-        self.song_title = playingsong['title']
-        self.song_albumtitle = playingsong['albumtitle']
-        self.song_artist = playingsong['artist']
+        self.song_pro = '' if playingsong.get('kbps', '0') == '128' else PRO
+        self.song_title = playingsong.get('title', '')
+        self.song_albumtitle = playingsong.get('albumtitle', '')
+        self.song_artist = playingsong.get('artist', '')
         # self.song_public_time = playingsong['public_time']
 
         self.song_like = data.song_like

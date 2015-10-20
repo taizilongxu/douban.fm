@@ -33,6 +33,7 @@ class MainController(object):
 
         self.player.start_queue(self, data.volume)
         self.queue = Queue.Queue(0)
+        self.rate_times = 0
 
     def run(self, switch_queue):
         """
@@ -53,9 +54,21 @@ class MainController(object):
     def after_play(self):
         """
         """
-        logger.info('after_play')
+        if not self.quit:
+            logger.info('after_play')
+            # 提交播放完毕
+            Thread(target=self.submit_music).start()
+            Thread(target=self.submit_rate).start()
+
+    def submit_music(self):
         self.data.submit_music()
-        pass
+
+    def submit_rate(self):
+        if self.rate_times % 2 == 0:
+            if self.data.song_like:
+                self.data.set_song_like()
+            else:
+                self.data.set_song_unlike()
 
     def display(info):
         def _deco(func):
@@ -121,10 +134,7 @@ class MainController(object):
     @display('')
     def set_rate(self):
         self.data.song_like = False if self.data.song_like else True
-        # if self.data.song_like:
-        #     self.data.set_song_like()
-        # else:
-        #     self.data.set_song_unlike()
+        self.rate_times += 1
 
     @display('')
     def set_pause(self):
@@ -150,6 +160,12 @@ class MainController(object):
 
     @display('等待播放器装填...')
     def set_next(self):
+        self.player.next()
+
+    @display('不再播放...')
+    def set_bye(self):
+        self.data.bye()
+        # self.player.start_queue(self)
         self.player.next()
 
     def set_url(self):
@@ -179,8 +195,7 @@ class MainController(object):
                 self.quit = True
                 self.switch_queue.put('quit')
             elif k == self.keys['BYE']:
-                self.data.bye()
-                self.player.start_queue(self)
+                self.set_bye()
             elif k == ' ':  # 播放该频道
                 self.set_channel()
                 self.player.start_queue(self)
