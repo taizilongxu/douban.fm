@@ -134,8 +134,11 @@ class MainController(object):
 
     @display('获取歌词中...')
     def set_lrc(self):
-        self.quit = True
         self.switch_queue.put('lrc')
+
+    @display('等待播放器装填...')
+    def set_next(self):
+        self.player.next()
 
     def set_url(self):
         '''打开豆瓣网页'''
@@ -179,6 +182,7 @@ class MainController(object):
 
             elif k == self.keys['LRC']:  # 歌词
                 self.set_lrc()
+                self.quit = True
             elif k == self.keys['HELP']:
                 self.quit = True
                 self.switch_queue.put('help')
@@ -202,7 +206,7 @@ class MainController(object):
             elif k == self.keys['PAUSE']:  # 暂停
                 self.set_pause()
             elif k == self.keys['NEXT']:  # 下一首
-                self.player.next()
+                self.set_next()
 
             elif k == '-' or k == '_':  # 减小音量
                 self.set_volume(-1)
