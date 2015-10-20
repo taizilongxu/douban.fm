@@ -66,7 +66,6 @@ class MainDal(object):
 
     @property
     def title(self):
-
         time = self.set_time(self.time)
         volume = str(self.volume) + '%' if self.volume != 0 else \
                  color_func(self.c['TITLE']['state'])('✖')

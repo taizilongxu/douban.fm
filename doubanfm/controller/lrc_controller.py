@@ -22,6 +22,7 @@ class LrcController(MainController):
         self.keys = data.keys
         self.quit = False
         self.view = lrc_view.Lrc(self.data)
+        self.rate_times = 0
         self.queue = Queue.Queue(0)
 
     def _watchdog_queue(self):
@@ -56,6 +57,10 @@ class LrcController(MainController):
                 self.set_mute()
             elif k in ['1', '2', '3', '4']:  # 主题选取
                 self.set_theme(k)
+            elif k == self.keys['UP'] or k == 'B':  # 向下
+                self.up()
+            elif k == self.keys['DOWN'] or k == 'A':  # 向上
+                self.down()
 
     def _controller(self):
         """

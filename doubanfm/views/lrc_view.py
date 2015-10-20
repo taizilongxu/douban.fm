@@ -1,12 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import subprocess
+import logging
 from main_view import Win
 from threading import RLock
 
 from doubanfm.colorset.colors import color_func  # colors
 from doubanfm.dal.dal_lrc import LrcDal
 
+logger = logging.getLogger('doubanfm')
 mutex = RLock()
 
 
@@ -15,9 +17,10 @@ class Lrc(Win):
 
     def __init__(self, data):
         super(Lrc, self).__init__(data)
+        self.lrc_offset = 0
 
     def set_dal(self):
-        dal = LrcDal(self.data)
+        dal = LrcDal(self.data, self.lrc_offset)
         self.c = dal.c  # 主题
         self.set_title(dal.title)
         self.set_suffix_selected(dal.suffix_selected)
@@ -31,6 +34,8 @@ class Lrc(Win):
             self.markline = self.find_line()
             self.make_display_lines()
             subprocess.call('clear', shell=True)  # 清屏
+            # logger.info(self.display_lines)
+            # print '\n'.join(self.display_lines)
             for i in self.display_lines:
                 print i
         finally:
@@ -42,7 +47,7 @@ class Lrc(Win):
             locate = [index for index, i in enumerate(self._sort_lrc_dict)
                       if i[0] == now_time]  # 查找歌词在self.sort_lrc_dict中的位置
             if locate:
-                return locate[0]
+                return locate[0] + self.lrc_offset
         return 0
 
     # def display_line(self):
@@ -95,3 +100,11 @@ class Lrc(Win):
             l += 2
         flag_num = (self.screen_width - l) / 2
         return ' ' * flag_num + self._suffix_selected + '\r'  # 歌词页面标题
+
+    def up(self):
+        self.lrc_offset -= 1
+        self.display()
+
+    def down(self):
+        self.lrc_offset += 1
+        self.display()
