@@ -110,14 +110,29 @@ class Doubanfm(object):
             logger.error("Error communicating with Douban.fm API.")
         return s.text
 
-    def get_playlist(self):
+    def get_first_song(self):
         """
-        获取播放列表
+        初始获取歌曲
 
         :params return: list
         """
-        s = self.requests_url('n')
-        return json.loads(s, object_hook=decode_dict)['song']
+        while True:
+            s = self.requests_url('n')
+            song = json.loads(s, object_hook=decode_dict)['song']
+            if song:
+                return song[0]
+
+    def get_song(self, sid):
+        """
+        获取歌曲
+
+        :params sid: 歌曲sid string
+        """
+        while True:
+            s = self.requests_url('n', sid=sid)
+            song = json.loads(s, object_hook=decode_dict)['song']
+            if song:
+                return song[0]
 
     def skip_song(self, playingsong):
         """

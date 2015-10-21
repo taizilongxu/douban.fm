@@ -3,7 +3,8 @@
 """
 数据层
 """
-from threading import RLock
+from threading import RLock, Thread
+import logging
 import functools
 import Queue
 
@@ -11,9 +12,10 @@ from doubanfm.API.api import Doubanfm
 from doubanfm.API.netease_api import Netease
 from doubanfm.config import db_config
 
+logger = logging.getLogger('doubanfm')
 douban = Doubanfm()
-
 mutex = RLock()
+QUEUE_SIZE = 10
 
 
 class Playlist(object):
@@ -31,8 +33,9 @@ class Playlist(object):
     """
 
     def __init__(self):
-        self._playlist = Queue.Queue(0)
+        self._playlist = Queue.Queue(QUEUE_SIZE)
         self._playingsong = None
+        self._get_first_song()
 
         # 根据歌曲来改变歌词
         self._lrc = {}
@@ -51,6 +54,23 @@ class Playlist(object):
                 mutex.release()
         return _func
 
+    def _watchdog(self):
+        sid = self._playingsong['sid']
+        logger.info(sid)
+        while 1:
+            song = douban.get_song(sid)
+            sid = song['sid']
+            logger.info(sid)
+            self._playlist.put(song)
+
+    @lock
+    def _get_first_song(self):
+        song = douban.get_first_song()
+        print song
+        self._playlist.put(song)
+        self._playingsong = song
+        Thread(target=self._watchdog).start()
+
     def get_lrc(self):
         """
         返回当前播放歌曲歌词
@@ -68,19 +88,21 @@ class Playlist(object):
         """
         douban.set_channel(channel_num)
 
-    @lock
-    def _get_list(self, channel=None):
-        """
-        获取歌词列表, 如果channel不为空则重新设置频道
+    # @lock
+    # def _get_list(self, channel=None):
+    #     """
+    #     获取歌词列表, 如果channel不为空则重新设置频道
 
-        :params channel: int
-        """
-        if channel:
-            douban.set_channel(channel)
-            self.empty()
+    #     :params channel: int
+    #     """
+    #     if channel:
+    #         douban.set_channel(channel)
+    #         self.empty()
 
-        for i in douban.get_playlist():
-            self._playlist.put(i)
+    #     playlist = douban.get_playlist()
+    #     for i in playlist:
+    #         self._playlist.put(i)
+    #     logger.info(playlist)
 
     def set_song_like(self):
         douban.rate_music(self._playingsong)
@@ -93,16 +115,14 @@ class Playlist(object):
         """
         不再播放, 返回新列表
         """
-        for i in douban.bye(self._playingsong):
-            self._playlist.put(i)
+        douban.bye(self._playingsong)
 
     @lock
     def get_song(self, netease=False):
         """
         获取歌曲, 如果获取完歌曲列表为空则重新获取列表
         """
-        if self._playlist.empty():
-            self._get_list()
+        logger.info(self._playlist.qsize())
 
         song = self._playlist.get(True)
 
