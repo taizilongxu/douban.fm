@@ -149,6 +149,7 @@ class Router(object):
 
         # 退出保存信息
         self.quit()
+        os._exit(0)
 
     def quit(self):
         # 退出保存信息

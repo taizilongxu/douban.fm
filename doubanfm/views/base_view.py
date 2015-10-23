@@ -28,6 +28,7 @@ _title:界面标题的设定
 #######################################################################
 
 import subprocess
+import sys
 
 
 class Cli(object):
@@ -47,7 +48,7 @@ class Cli(object):
 
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
-        subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
+        sys.stdout.write('\033[?25l')
 
     def set_title(self, string):
         self._title = string
