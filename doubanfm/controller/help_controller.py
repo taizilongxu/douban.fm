@@ -17,3 +17,6 @@ class HelpController(LrcController):
         # 接受player, data, view
         super(HelpController, self).__init__(player, data)
         self.view = help_view.Help(self.data)
+
+    def _bind_view(self):
+        self.view = help_view.Help(self.data)

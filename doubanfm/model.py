@@ -66,7 +66,6 @@ class Playlist(object):
     @lock
     def _get_first_song(self):
         song = douban.get_first_song()
-        print song
         self._playlist.put(song)
         self._playingsong = song
         Thread(target=self._watchdog).start()

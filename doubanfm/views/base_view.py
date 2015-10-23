@@ -27,9 +27,8 @@ _title:界面标题的设定
 # displayline = 0
 #######################################################################
 
-import subprocess
 import sys
-
+sys.stdout.write('\033[?25l')
 
 class Cli(object):
 
@@ -47,8 +46,6 @@ class Cli(object):
         self._suffix_deselected = ''
 
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
-
-        sys.stdout.write('\033[?25l')
 
     def set_title(self, string):
         self._title = string
@@ -91,10 +88,34 @@ class Cli(object):
         return: 屏幕高度 int
                 屏幕宽度 int
         """
-        num = subprocess.check_output('stty size', shell=True).split(' ')
-        height = int(num[0]) - 4  # -4 上下空余
-        width = int(num[1])
-        return height, width
+        import os
+        env = os.environ
+
+        def ioctl_GWINSZ(fd):
+            try:
+                import fcntl, termios, struct
+                cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,
+            '1234'))
+            except:
+                return
+            return cr
+        cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+        if not cr:
+            try:
+                fd = os.open(os.ctermid(), os.O_RDONLY)
+                cr = ioctl_GWINSZ(fd)
+                os.close(fd)
+            except:
+                pass
+        if not cr:
+            cr = (env.get('LINES', 25), env.get('COLUMNS', 80))
+
+        # Use get(key[, default]) instead of a try/catch
+        # try:
+        #    cr = (env['LINES'], env['COLUMNS'])
+        # except:
+        #    cr = (25, 80)
+        return int(cr[0]), int(cr[1])
 
     def make_display_lines(self):
         """

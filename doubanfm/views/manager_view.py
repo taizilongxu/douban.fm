@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import subprocess
-
 from doubanfm.views.lrc_view import Lrc
 from doubanfm.dal.dal_manager import ManagerDal
 
@@ -19,7 +17,6 @@ class Manager(Lrc):
     def display(self):
         self.set_dal()
         self.make_display_lines()
-        subprocess.call('clear', shell=True)
         for i in self.display_lines:
             print i
 

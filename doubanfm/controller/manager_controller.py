@@ -23,8 +23,11 @@ class ManagerController(object):
         # 接受player, data, view
         self.player = player
         self.data = data
-        self.view = manager_view.Manager(self.data)
+        self._bind_view()
         self.queue = Queue.Queue(0)
+
+    def _bind_view(self):
+        self.view = manager_view.Manager(self.data)
 
     def run(self, switch_queue):
         """

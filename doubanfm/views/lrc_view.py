@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import subprocess
 import logging
 from main_view import Win
 from threading import RLock
@@ -33,11 +32,10 @@ class Lrc(Win):
             self.set_dal()
             self.markline = self.find_line()
             self.make_display_lines()
-            subprocess.call('clear', shell=True)  # 清屏
             # logger.info(self.display_lines)
-            # print '\n'.join(self.display_lines)
-            for i in self.display_lines:
-                print i
+            print '\n'.join(self.display_lines)
+            # for i in self.display_lines:
+            #     print i
         finally:
             mutex.release()
 
@@ -62,11 +60,11 @@ class Lrc(Win):
         """通过歌词生成屏幕需要显示的内容"""
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
-        display_lines = ['\n']
+        display_lines = ['']
         display_lines.append(self._title + '\r')
-        display_lines.append('\n')
+        display_lines.append('')
 
-        for linenum in range(self.screen_height - 2):
+        for linenum in range(self.screen_height - 6):
             if self.screen_height/2 - linenum > self.markline - self.topline or \
                     linenum - self.screen_height/2 >= len(self._lines) - self.markline:
                 display_lines.append('\r')
@@ -82,6 +80,7 @@ class Lrc(Win):
                     line = color_func(self.c['LRC']['line'])(line)
                     display_lines.append(' ' * flag_num + line + '\r')
 
+        display_lines.append('')  # 空行
         display_lines.append(self.center_suffix_selected())  # 歌词页面标题
 
         self.display_lines = display_lines

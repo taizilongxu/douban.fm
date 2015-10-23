@@ -21,9 +21,12 @@ class LrcController(MainController):
         self.data = data
         self.keys = data.keys
         self.quit = False
-        self.view = lrc_view.Lrc(self.data)
         self.rate_times = 0
         self.queue = Queue.Queue(0)
+        self._bind_view()
+
+    def _bind_view(self):
+        self.view = lrc_view.Lrc(self.data)
 
     def _watchdog_queue(self):
         """

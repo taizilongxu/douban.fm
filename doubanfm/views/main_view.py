@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import subprocess
 from threading import RLock
 
 from doubanfm.colorset.colors import color_func  # colors
@@ -57,7 +56,6 @@ class Win(Cli):
         try:
             self.set_dal()
             self.make_display_lines()
-            subprocess.call('clear', shell=True)  # 清屏
             print '\n'.join(self.display_lines)
         finally:
             mutex.release()
@@ -70,11 +68,11 @@ class Win(Cli):
         """
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
 
-        display_lines = ['\n\r']
+        display_lines = ['\r']
         display_lines.append(self._title + '\r')
 
         top = self.topline
-        bottom = self.topline + self.screen_height + 1
+        bottom = self.topline + self.screen_height - 3
 
         for index, i in enumerate(self._lines[top:bottom]):
             # 箭头指向

@@ -17,6 +17,8 @@ class QuitController(LrcController):
     def __init__(self, player, data):
         # 接受player, data, view
         super(QuitController, self).__init__(player, data)
+
+    def _bind_view(self):
         self.view = quit_view.Quit(self.data)
 
     def _watchdog_queue(self):

@@ -9,6 +9,7 @@ from player import MPlayer       # player
 import subprocess
 import logging
 import Queue
+import sys
 import os
 
 from doubanfm.config import db_config
@@ -19,6 +20,9 @@ from doubanfm.controller.lrc_controller import LrcController
 from doubanfm.controller.help_controller import HelpController
 from doubanfm.controller.manager_controller import ManagerController
 from doubanfm.controller.quit_controller import QuitController
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 # root logger config
 logging.basicConfig(
@@ -128,7 +132,6 @@ class Router(object):
             'quit': QuitController(self.player, self.data)
         }
 
-        subprocess.call('echo  "\033[?25l"', shell=True)  # 取消光标
         # 切换线程
         Thread(target=self._watchdog_switch).start()
 

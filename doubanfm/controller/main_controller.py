@@ -29,11 +29,14 @@ class MainController(object):
         self.data = data
         self.keys = data.keys
         self.quit = False
-        self.view = main_view.Win(self.data)  # 绑定view
 
+        self._bind_view()
         self.player.start_queue(self, data.volume)
         self.queue = Queue.Queue(0)
         self.rate_times = 0
+
+    def _bind_view(self):
+        self.view = main_view.Win(self.data)  # 绑定view
 
     def run(self, switch_queue):
         """
