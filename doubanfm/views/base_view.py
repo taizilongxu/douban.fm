@@ -136,15 +136,16 @@ class Cli(object):
         :params incrment: 1 向下滚动
                           -1 向上滚动
         """
+        scroll_line_num = self.screen_height - 4
         # paging
         if increment == -1 and self.markline == 0 and self.topline != 0:
             self.topline -= 1
-        elif increment == 1 and self.markline + self.topline != len(self._lines) - 1 and self.markline == self.screen_height:
+        elif increment == 1 and self.markline + self.topline != len(self._lines) - 1 and self.markline == scroll_line_num:
             self.topline += 1
         # scroll
         if increment == -1 and self.markline != 0:
             self.markline -= 1
-        elif increment == 1 and self.markline != self.screen_height and self.markline < len(self._lines) - 1:
+        elif increment == 1 and self.markline != scroll_line_num and self.markline < len(self._lines) - 1:
             self.markline += 1
 
     def up(self):
@@ -154,11 +155,11 @@ class Cli(object):
         self.updown(1)
 
     def go_bottom(self):
-        if len(self._lines) < self.screen_height:
+        if len(self._lines) < self.screen_height - 3:
             self.markline = len(self._lines) - 1
         else:
-            self.markline = self.screen_height
-            self.topline = len(self._lines) - self.screen_height - 1
+            self.markline = self.screen_height - 4
+            self.topline = len(self._lines) - self.screen_height + 3
 
     def go_top(self):
         self.markline = 0

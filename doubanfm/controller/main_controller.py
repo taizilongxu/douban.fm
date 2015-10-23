@@ -175,6 +175,7 @@ class MainController(object):
         # self.player.start_queue(self)
         self.player.next()
 
+    @display('已在浏览器打开专辑主页')
     def set_url(self):
         '''打开豆瓣网页'''
         import webbrowser

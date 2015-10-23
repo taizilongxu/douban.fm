@@ -61,7 +61,6 @@ class Data(object):
         self.playlist.set_song_unlike(playingsong)
 
     def submit_music(self, playingsong):
-        logger.info(playingsong)
         self.playlist.submit_music(playingsong)
 
     def change_volume(self, increment):
