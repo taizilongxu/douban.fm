@@ -115,6 +115,7 @@ class Config(object):
         print '\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]'
 
         self.netease = login_data.get('netease', False)
+        self.keys = self.get_keys()
 
     def get_user_states(self, login_data):
         """
@@ -123,9 +124,8 @@ class Config(object):
         self.run_times = login_data.get('run_times', 0)
         self.total_time = login_data.get('total_time', 0)
 
-    @property
     @output('Get keys')
-    def keys(self):
+    def get_keys(self):
         '''
         获取配置并检查是否更改
         '''

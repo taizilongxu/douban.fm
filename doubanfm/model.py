@@ -56,11 +56,9 @@ class Playlist(object):
 
     def _watchdog(self):
         sid = self._playingsong['sid']
-        logger.info(sid)
         while 1:
             song = douban.get_song(sid)
             sid = song['sid']
-            logger.info(sid)
             self._playlist.put(song)
 
     @lock
@@ -103,11 +101,11 @@ class Playlist(object):
     #         self._playlist.put(i)
     #     logger.info(playlist)
 
-    def set_song_like(self):
-        douban.rate_music(self._playingsong)
+    def set_song_like(self, playingsong):
+        douban.rate_music(playingsong)
 
-    def set_song_unlike(self):
-        douban.unrate_music(self._playingsong)
+    def set_song_unlike(self, playingsong):
+        douban.unrate_music(playingsong)
 
     @lock
     def bye(self):
@@ -121,7 +119,6 @@ class Playlist(object):
         """
         获取歌曲, 如果获取完歌曲列表为空则重新获取列表
         """
-        logger.info(self._playlist.qsize())
 
         song = self._playlist.get(True)
 
@@ -146,8 +143,8 @@ class Playlist(object):
         """
         self._playlist.clear()
 
-    def submit_music(self):
-        douban.submit_music(self._playingsong)
+    def submit_music(self, playingsong):
+        douban.submit_music(playingsong)
 
 
 class History(object):

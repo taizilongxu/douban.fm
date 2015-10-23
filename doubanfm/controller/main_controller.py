@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import functools
 import logging
 import Queue
 from threading import Thread
@@ -28,6 +27,7 @@ class MainController(object):
         self.player = player
         self.data = data
         self.keys = data.keys
+        self.playingsong = None
         self.quit = False
 
         self._bind_view()
@@ -54,24 +54,23 @@ class MainController(object):
         """
         pass
 
-    def after_play(self):
+    def after_play(self, playingsong, rate_times):
         """
         """
         if not self.quit:
-            logger.info('after_play')
             # 提交播放完毕
-            Thread(target=self.submit_music).start()
-            Thread(target=self.submit_rate).start()
+            Thread(target=self.submit_music, args=(playingsong,)).start()
+            Thread(target=self.submit_rate, args=(playingsong, rate_times,)).start()
 
-    def submit_music(self):
-        self.data.submit_music()
+    def submit_music(self, playingsong):
+        self.data.submit_music(playingsong)
 
-    def submit_rate(self):
-        if self.rate_times % 2 == 0:
-            if self.data.song_like:
-                self.data.set_song_like()
+    def submit_rate(self, playingsong, rate_times):
+        if rate_times % 2 == 1:
+            if playingsong['like']:
+                self.data.set_song_unlike(playingsong)
             else:
-                self.data.set_song_unlike()
+                self.data.set_song_like(playingsong)
 
     def display(info):
         def _deco(func):
@@ -86,16 +85,21 @@ class MainController(object):
         return _deco
 
     # 提供给player的两个方法
-    @property
-    def playingsong(self):
-        return self.data.playingsong
+    def get_playingsong(self):
+        self.playingsong = self.data.playingsong
+        return self.playingsong
 
     @display('正在加载歌曲...')
     def get_song(self):
         """
         切换歌曲时刷新
         """
-        return self.data.get_song()
+        if self.playingsong:
+            logger.info(self.playingsong['title'])
+            self.after_play(self.playingsong, self.rate_times)
+        self.playingsong = self.data.get_song()
+        self.rate_times = 0
+        return self.playingsong
 
     @display('')
     def up(self):
@@ -167,7 +171,7 @@ class MainController(object):
 
     @display('不再播放...')
     def set_bye(self):
-        self.data.bye()
+        Thread(target=self.data.bye).start()
         # self.player.start_queue(self)
         self.player.next()
 

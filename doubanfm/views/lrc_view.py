@@ -48,14 +48,6 @@ class Lrc(Win):
                 return locate[0] + self.lrc_offset
         return 0
 
-    # def display_line(self):
-    #     """显示歌词当前播放对应行"""
-    #     locate = \
-    #         [index for index, i in enumerate(self.sort_lrc_dict)
-    #             if i[0] == self.song_time]
-    #     if locate:
-    #         self.markline = locate[0]
-
     def make_display_lines(self):
         """通过歌词生成屏幕需要显示的内容"""
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
@@ -81,7 +73,7 @@ class Lrc(Win):
                     display_lines.append(' ' * flag_num + line + '\r')
 
         display_lines.append('')  # 空行
-        display_lines.append(self.center_suffix_selected())  # 歌词页面标题
+        display_lines.append(self.center_suffix_selected() + '\r')  # 歌词页面标题
 
         self.display_lines = display_lines
 

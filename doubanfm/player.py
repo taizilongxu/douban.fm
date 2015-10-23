@@ -113,9 +113,6 @@ class Player(object):
         logger.debug("Watching %s[%d]",
                      self._player_command, self.sub_proc.pid)
         returncode = self.sub_proc.wait()
-        logger.info('returncode=' + str(returncode))
-        if self.queue:
-            self.queue.after_play()
         logger.debug("%s[%d] exit with code %d",
                      self._player_command, self.sub_proc.pid, returncode)
         self._exit_event.set()
@@ -174,7 +171,7 @@ class MPlayer(Player):
         '-nolirc',          # Get rid of a warning
         '-quiet',           # Cannot use really-quiet because of get_* queries
         '-softvol',         # Avoid using hardware (global) volume
-        '-cache', '5120',   # Use 5MiB cache
+        '-cache', '1024',   # Use 5MiB cache
         '-cache-min', '0.1'   # Start playing after 2% cache filled
     ]
 
@@ -190,7 +187,7 @@ class MPlayer(Player):
 
         while self._exit_queue_event:
             if self._loop:
-                self.start(self.queue.playingsong['url'])
+                self.start(self.queue.get_playingsong()['url'])
             else:
                 self.start(self.queue.get_song()['url'])
             self.sub_proc.wait()  # Wait for event
@@ -214,8 +211,6 @@ class MPlayer(Player):
         self.start_queue(self.queue, self._volume)
 
     def start(self, url):
-        if self.queue:
-            self.queue.before_play()
         self._run_player(['-volume', str(self._volume), url])
 
     def pause(self):

@@ -17,7 +17,6 @@ class Quit(Help):
 
     def make_display_lines(self):
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数
-        logger.info(self.screen_height)
         display_lines = []
 
         for i in range(self.screen_height):
