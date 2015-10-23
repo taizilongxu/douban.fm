@@ -56,16 +56,17 @@ class Lrc(Win):
         display_lines.append(self._title + '\r')
         display_lines.append('')
 
-        for linenum in range(self.screen_height - 6):
-            if self.screen_height/2 - linenum > self.markline - self.topline or \
-                    linenum - self.screen_height/2 >= len(self._lines) - self.markline:
+        scroll_line_num = self.screen_height - 6
+        for linenum in range(scroll_line_num):
+            if scroll_line_num/2 - linenum > self.markline - self.topline or \
+                    linenum - scroll_line_num/2 >= len(self._lines) - self.markline:
                 display_lines.append('\r')
             else:
-                line = self._lines[self.markline - (self.screen_height/2 - linenum)]
+                line = self._lines[self.markline - (scroll_line_num/2 - linenum)]
                 line = line.strip('\n')
                 l = self.center_num(line)
                 flag_num = (self.screen_width - l) / 2
-                if linenum == self.screen_height/2:
+                if linenum == scroll_line_num/2:
                     i = color_func(self.c['LRC']['highlight'])(line)
                     display_lines.append(' ' * flag_num + i + '\r')
                 else:
