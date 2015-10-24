@@ -75,11 +75,13 @@ class MainController(object):
     def display(info):
         def _deco(func):
             def _func(self, *args, **kwargs):
-                tmp = func(self, *args, **kwargs)
                 if self.view and not self.quit:
                     self.view.override_suffix_selected(info)
                     self.view.display()
+                    tmp = func(self, *args, **kwargs)
                     self.view.cancel_override()
+                else:
+                    tmp = func(self, *args, **kwargs)
                 return tmp
             return _func
         return _deco
@@ -101,26 +103,27 @@ class MainController(object):
         self.rate_times = 0
         return self.playingsong
 
-    @display('')
     def up(self):
         self.view.up()
+        self.view.display()
 
-    @display('')
     def down(self):
         self.view.down()
+        self.view.display()
 
-    @display('')
     def go_bottom(self):
         self.view.go_bottom()
+        self.view.display()
 
-    @display('')
     def go_top(self):
         self.view.go_top()
+        self.view.display()
 
     @display('切换频道中...')
     def set_channel(self):
         self.data.channel = self.view.set_channel()  # 获取view里的channel索引
-        self.data.playlist.set_channel(self.data.channel)  # 设置API里的channel
+        self.data.set_channel(self.data.channel)  # 设置API里的channel
+        self.player.next()
 
     @display('')
     def set_mute(self):
@@ -138,10 +141,10 @@ class MainController(object):
         self.data.loop = False if self.data.loop else True
         self.player.loop()
 
-    @display('')
     def set_rate(self):
         self.data.song_like = False if self.data.song_like else True
         self.rate_times += 1
+        self.view.display()
 
     @display('')
     def set_pause(self):

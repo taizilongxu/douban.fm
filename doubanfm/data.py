@@ -54,6 +54,9 @@ class Data(object):
         self.song_like = playingsong['like']
         return playingsong
 
+    def set_channel(self, channel_index):
+        self.playlist.set_channel(channel_index)
+
     def set_song_like(self, playingsong):
         self.playlist.set_song_like(playingsong)
 

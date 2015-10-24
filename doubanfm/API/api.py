@@ -188,7 +188,8 @@ class Doubanfm(object):
         """
         歌曲结束标记
         """
-        self.requests_url('e', sid=playingsong['sid'])
+        s = self.requests_url('e', sid=playingsong['sid'])
+        logger.info(s)
 
     def get_lrc(self, playingsong):
         """

@@ -15,7 +15,7 @@ from doubanfm.config import db_config
 logger = logging.getLogger('doubanfm')
 douban = Doubanfm()
 mutex = RLock()
-QUEUE_SIZE = 10
+QUEUE_SIZE = 5
 
 
 class Playlist(object):
@@ -60,6 +60,8 @@ class Playlist(object):
             song = douban.get_song(sid)
             sid = song['sid']
             self._playlist.put(song)
+            if not self._playingsong:
+                self._playlist.get(False)
 
     @lock
     def _get_first_song(self):
@@ -84,22 +86,8 @@ class Playlist(object):
         :params channel_num: channel_list的索引值 int
         """
         douban.set_channel(channel_num)
-
-    # @lock
-    # def _get_list(self, channel=None):
-    #     """
-    #     获取歌词列表, 如果channel不为空则重新设置频道
-
-    #     :params channel: int
-    #     """
-    #     if channel:
-    #         douban.set_channel(channel)
-    #         self.empty()
-
-    #     playlist = douban.get_playlist()
-    #     for i in playlist:
-    #         self._playlist.put(i)
-    #     logger.info(playlist)
+        self.empty()
+        self._get_first_song()
 
     def set_song_like(self, playingsong):
         douban.rate_music(playingsong)
@@ -141,7 +129,8 @@ class Playlist(object):
         """
         清空playlist
         """
-        self._playlist.clear()
+        self._playingsong = None
+        self._playlist = Queue.Queue(QUEUE_SIZE)
 
     def submit_music(self, playingsong):
         douban.submit_music(playingsong)
