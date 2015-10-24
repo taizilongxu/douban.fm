@@ -90,4 +90,8 @@ class Win(Cli):
             line = color_func(self.c['LINE']['line'])(line)
 
             display_lines.append(line + '\r')
+
+        return_num = self.screen_height - 3 - len(self._lines)
+        for _ in range(return_num):
+            display_lines.append('\r')
         self.display_lines = display_lines
