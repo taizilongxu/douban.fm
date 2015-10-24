@@ -41,6 +41,9 @@ class Playlist(object):
         self._lrc = {}
         self._pre_playingsong = None
 
+        # 会有重复的歌曲避免重复播放
+        self.hash_sid = {}
+
     def lock(func):
         """
         互斥锁
@@ -57,8 +60,14 @@ class Playlist(object):
     def _watchdog(self):
         sid = self._playingsong['sid']
         while 1:
-            song = douban.get_song(sid)
-            sid = song['sid']
+
+            # 去重
+            while 1:
+                song = douban.get_song(sid)
+                sid = song['sid']
+                if song['sid'] not in self.hash_sid:
+                    break
+
             self._playlist.put(song)
             if not self._playingsong:
                 self._playlist.get(False)
@@ -105,10 +114,10 @@ class Playlist(object):
     @lock
     def get_song(self, netease=False):
         """
-        获取歌曲, 如果获取完歌曲列表为空则重新获取列表
+        获取歌曲, 对外统一接口
         """
-
         song = self._playlist.get(True)
+        self.hash_sid[song['sid']] = True  # 去重
 
         # 网易320k音乐
         if netease:
