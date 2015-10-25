@@ -1,12 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import os
-import ConfigParser
+from threading import Thread
 import cPickle as pickle
+import ConfigParser
 import logging
 import time
+import os
 
 from doubanfm.API.login import request_token
+from doubanfm.check_version import is_latest, update_package
 
 logger = logging.getLogger('doubanfm')  # get logger
 
@@ -65,6 +67,7 @@ class Config(object):
         self.run_times = 0  # 登陆次数
         self.last_time = time.time()  # 当前登陆时间戳
         self.total_time = 0  # 总共登陆时间
+        self.is_latest = True
 
         self.login_data = self.get_login_data()
 
@@ -94,8 +97,22 @@ class Config(object):
 
         self.get_default_set(login_data)
         self.get_user_states(login_data)
+        self.get_is_latest_version(login_data)
+        Thread(target=self.check_version).start()  # 这里每次异步检测, 下次打开时进行提示
 
         return login_data
+
+    def check_version(self):
+        self.is_latest = is_latest('douban.fm')
+
+    def get_is_latest_version(self, login_data):
+        self.is_latest = login_data.get('is_latest', True)
+        if not self.is_latest:
+            if_update = raw_input('检测到douban.fm有更新, 是否升级?(Y)')
+            if if_update.lower() == 'y':
+                update_package('douban.fm')
+            print '请重新打开douban.fm'
+            os._exit(0)
 
     def get_default_set(self, login_data):
         """
@@ -164,6 +181,7 @@ class Config(object):
         self.login_data['last_time'] = self.last_time
         self.login_data['total_time'] = self.total_time +\
             time.time() - self.last_time
+        self.login_data['is_latest'] = self.is_latest
         with open(PATH_TOKEN, 'w') as f:
             pickle.dump(self.login_data, f)
 

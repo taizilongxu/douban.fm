@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import Queue
+import copy
 from threading import Thread
 
 from doubanfm import getch
@@ -97,8 +98,10 @@ class MainController(object):
         切换歌曲时刷新
         """
         if self.playingsong:
-            logger.info(self.playingsong['title'])
-            self.after_play(self.playingsong, self.rate_times)
+            playingsong = copy.deepcopy(self.playingsong)
+            rate_times = self.rate_times
+            logger.info(playingsong['title'])
+            self.after_play(playingsong, rate_times)
         self.playingsong = self.data.get_song()
         self.rate_times = 0
         return self.playingsong
