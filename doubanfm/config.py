@@ -108,11 +108,14 @@ class Config(object):
     def get_is_latest_version(self, login_data):
         self.is_latest = login_data.get('is_latest', True)
         if not self.is_latest:
-            if_update = raw_input('检测到douban.fm有更新, 是否升级?(Y)')
+            if_update = raw_input('检测到douban.fm有更新, 是否升级?(Y) ')
             if if_update.lower() == 'y':
                 update_package('douban.fm')
-            print '请重新打开douban.fm'
-            os._exit(0)
+                with open(PATH_TOKEN, 'w') as f:
+                    login_data['is_latest'] = True
+                    pickle.dump(login_data, f)
+                print '请重新打开douban.fm(升级失败可能需要sudo权限, 试试sudo pip install --upgrade douban.fm)'
+                os._exit(0)
 
     def get_default_set(self, login_data):
         """
