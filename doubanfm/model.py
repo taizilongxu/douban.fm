@@ -99,17 +99,17 @@ class Playlist(object):
         self._get_first_song()
 
     def set_song_like(self, playingsong):
-        douban.rate_music(playingsong)
+        douban.rate_music(playingsong['sid'])
 
     def set_song_unlike(self, playingsong):
-        douban.unrate_music(playingsong)
+        douban.unrate_music(playingsong['sid'])
 
     @lock
     def bye(self):
         """
         不再播放, 返回新列表
         """
-        douban.bye(self._playingsong)
+        douban.bye(self._playingsong['sid'])
 
     @lock
     def get_song(self, netease=False):
@@ -142,7 +142,7 @@ class Playlist(object):
         self._playlist = Queue.Queue(QUEUE_SIZE)
 
     def submit_music(self, playingsong):
-        douban.submit_music(playingsong)
+        douban.submit_music(playingsong['sid'])
 
 
 class History(object):

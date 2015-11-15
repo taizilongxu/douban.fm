@@ -76,7 +76,7 @@ class MainController(object):
     def display(info):
         def _deco(func):
             def _func(self, *args, **kwargs):
-                if self.view and not self.quit:
+                if info and self.view and not self.quit:
                     self.view.override_suffix_selected(info)
                     self.view.display()
                     tmp = func(self, *args, **kwargs)
@@ -128,7 +128,6 @@ class MainController(object):
         self.data.set_channel(self.data.channel)  # 设置API里的channel
         self.player.next()
 
-    @display('')
     def set_mute(self):
         if self.data.mute:
             self.data.volume = self.data.mute
@@ -138,34 +137,35 @@ class MainController(object):
             self.data.mute = self.data.volume
             self.data.volume = 0
             self.player.set_volume(0)
+        self.view.display()
 
-    @display('')
     def set_loop(self):
         self.data.loop = False if self.data.loop else True
         self.player.loop()
+        self.view.display()
 
     def set_rate(self):
         self.data.song_like = False if self.data.song_like else True
         self.rate_times += 1
         self.view.display()
 
-    @display('')
     def set_pause(self):
         self.data.pause = False if self.data.pause else True
         self.player.pause()
+        self.view.display()
 
-    @display('')
     def set_volume(self, vol):
         self.data.change_volume(vol)
         self.player.set_volume(self.data.volume)
+        self.view.display()
 
-    @display('')
     def set_high(self):
         self.data.netease = False if self.data.netease else True
+        self.view.display()
 
-    @display('')
     def set_theme(self, k):
         self.data.set_theme_id(int(k) - 1)
+        self.view.display()
 
     @display('获取歌词中...')
     def set_lrc(self):

@@ -91,6 +91,8 @@ class Config(object):
             # 使用上次登录保存的token
             with open(PATH_TOKEN, 'r') as f:
                 login_data = pickle.load(f)
+            if 'cookies' not in login_data:
+                login_data = request_token()
         else:
             # 未登陆
             login_data = request_token()
@@ -121,6 +123,7 @@ class Config(object):
         """
         记录退出时的播放状态
         """
+        self.cookies = login_data.get('cookies', '')
         self.user_name = login_data.get('user_name', '')
         print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
             login_data['user_name']
@@ -176,6 +179,7 @@ class Config(object):
         """
         存储历史记录和登陆信息
         """
+        self.login_data['cookies'] = self.cookies
         self.login_data['volume'] = volume
         self.login_data['channel'] = channel
         self.login_data['theme_id'] = theme

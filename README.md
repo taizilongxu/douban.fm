@@ -1,5 +1,7 @@
 ##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615)
 
+更新API, 暂时只设定了3个频道, 登录时需要输入下验证码
+
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
 ### Developer Wiki

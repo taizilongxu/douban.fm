@@ -5,9 +5,7 @@
 """
 import requests
 import logging
-import urllib
 import json
-import sys
 
 from doubanfm.config import db_config
 from doubanfm.lrc2dic import lrc2dict
@@ -26,49 +24,34 @@ class Doubanfm(object):
             2. 获取频道列表
             3. 处理本地data, 装入post_data
 
-        :param post_data:{'app_name': 'radio_desktop_win',
-                          'version': 100,
-                          'user_id': user_id,
-                          'expire': exprie,
-                          'token': token,
-                          'channel': channel}
         """
         self.login_data = db_config.login_data
         self._get_channels()
-        self.post_data = self._process_login_data()
+        self._cookies = self.login_data['cookies']
+        self._channel_id = self._process_login_data()
 
     def _process_login_data(self):
         """
         return post_data
         """
         channel_id = self._get_channel_id(self.login_data['channel'])
-        post_data = {'app_name': 'radio_desktop_win',  # 固定
-                     'version': 100,  # 固定
-                     'user_id': self.login_data['user_id'],  # 登录必填
-                     'expire': self.login_data['expire'],  # 登录必填
-                     'token': self.login_data['token'],  # 登录必填
-                     'channel': channel_id}  # 可选项
-        return post_data
+        return channel_id
 
     def _get_channels(self):
         """
-        获取channel列表，将channel name/id存入self._channel_list
+        获取channel列表
         """
-        # 红心兆赫需要手动添加
-        self._channel_list = [{
-            'name': '红心兆赫',
-            'channel_id': -3
-        }]
-        try:
-            r = requests.get('http://www.douban.com/j/app/radio/channels')
-        except requests.exceptions.ConnectionError:
-            print 'ConnectionError'
-            sys.exit()
-        try:
-            self._channel_list += json.loads(r.text, object_hook=decode_dict)['channels']
-        except ValueError:
-            print '403 Forbidden'
-            sys.exit()
+        self._channel_list = [
+            {
+                'name': '红心兆赫', 'channel_id': -3
+            },
+            {
+                'name': '私人兆赫', 'channel_id': 0
+            },
+            {
+                'name': '豆瓣精选兆赫', 'channel_id': -10
+            }
+        ]
 
     def _get_channel_id(self, line):
         """
@@ -76,8 +59,21 @@ class Doubanfm(object):
         """
         return self._channel_list[line]['channel_id']
 
+    def _change_channel(self, fcid, tcid):
+        """
+        这个貌似没啥用
+        :params fcid, tcid: string
+        """
+        url = 'http://douban.fm/j/change_channel'
+        options = {
+            'fcid': fcid,
+            'tcid': tcid,
+            'area': 'system_chis'
+        }
+        requests.get(url, params=options, cookies=self._cookies)
+
     def set_channel(self, line):
-        self.post_data['channel'] = self._channel_list[line]['channel_id']
+        self._channel_id = self._channel_list[line]['channel_id']
 
     @property
     def channels(self):
@@ -99,28 +95,36 @@ class Doubanfm(object):
                       r 标记喜欢
                       u 取消标记喜欢
         """
-        post_data = self.post_data.copy()
-        post_data['type'] = ptype
-        for x in data:
-            post_data[x] = data[x]
-        url = 'http://www.douban.com/j/app/radio/people?' + urllib.urlencode(post_data)
-        try:
-            s = requests.get(url)
-        except requests.exceptions.RequestException:
-            logger.error("Error communicating with Douban.fm API.")
-        return s.text
+        options = {
+            'type': ptype,
+            'pt': '3.1',
+            'channel': self._channel_id,
+            'pb': '128',
+            'from': 'mainsite',
+            'r': ''
+        }
+        if 'sid' in data:
+            options['sid'] = data['sid']
+        url = 'http://douban.fm/j/mine/playlist'
+        while 1:
+            try:
+                s = requests.get(url, params=options, cookies=self._cookies)
+                req_json = s.json()
+                if req_json['r'] == 0:
+                    if 'song' not in req_json:
+                        break
+                    return req_json['song'][0]
+            except requests.exceptions.RequestException:
+                logger.error("Error communicating with Douban.fm API.")
+                break
 
     def get_first_song(self):
         """
         初始获取歌曲
 
-        :params return: list
+        :params return: json
         """
-        while True:
-            s = self.requests_url('n')
-            song = json.loads(s, object_hook=decode_dict)['song']
-            if song:
-                return song[0]
+        return self.requests_url('n')
 
     def get_song(self, sid):
         """
@@ -128,68 +132,42 @@ class Doubanfm(object):
 
         :params sid: 歌曲sid string
         """
-        while True:
-            s = self.requests_url('n', sid=sid)
-            song = json.loads(s, object_hook=decode_dict)['song']
-            if song:
-                return song[0]
+        return self.requests_url('p', sid=sid)
 
-    def skip_song(self, playingsong):
+    def skip_song(self, sid):
         """
         跳过歌曲
 
-        :param playingsong: {
-                "album": "/subject/5952615/",
-                "picture": "http://img3.douban.com/mpic/s4616653.jpg",
-                "ssid": "e1b2",
-                "artist": "Bruno Mars / B.o.B",
-                "url": "http://mr3.douban.com/201308250247/4a3de2e8016b5d659821ec76e6a2f35d/view/song/small/p1562725.mp3",
-                "company": "EMI",
-                "title": "Nothin' On You",
-                "rating_avg": 4.04017,
-                "length": 267,
-                "subtype": "",
-                "public_time": "2011",
-                "sid": "1562725",
-                "aid": "5952615",
-                "sha256": "2422b6fa22611a7858060fd9c238e679626b3173bb0d161258b4175d69f17473",
-                "kbps": "64",
-                "albumtitle": "2011 Grammy Nominees",
-                "like": 1
-            }
         return: list
         """
-        s = self.requests_url('s', sid=playingsong['sid'])
-        return json.loads(s, object_hook=decode_dict)['song']
+        return self.requests_url('s', sid=sid)
 
-    def bye(self, playingsong):
+    def bye(self, sid):
         """
         不再播放
 
-        : params playingsong
+        : params sid: string
         : return: list
         """
-        s = self.requests_url('b', sid=playingsong['sid'])
-        return json.loads(s, object_hook=decode_dict)['song']
+        return self.requests_url('b', sid=sid)
 
-    def rate_music(self, playingsong):
+    def rate_music(self, sid):
         """
-        标记喜欢歌曲
+        标记喜欢歌曲, 返回新的下一首歌
         """
-        self.requests_url('r', sid=playingsong['sid'])
+        return self.requests_url('r', sid=sid)
 
-    def unrate_music(self, playingsong):
+    def unrate_music(self, sid):
         """
         取消标记喜欢歌曲
         """
-        self.requests_url('u', sid=playingsong['sid'])
+        return self.requests_url('u', sid=sid)
 
-    def submit_music(self, playingsong):
+    def submit_music(self, sid):
         """
         歌曲结束标记
         """
-        s = self.requests_url('e', sid=playingsong['sid'])
-        logger.info(s)
+        self.requests_url('e', sid=sid)
 
     def get_lrc(self, playingsong):
         """
