@@ -14,6 +14,7 @@ PASS_INFO = colored('➔', 'red') + colored(' Password: ', 'green')
 CAPTCHA_INFO = colored('➔', 'red') + colored(' Solution: ', 'green')
 ERROR = colored('(╯‵□′)╯︵┻━┻: ', 'red')
 
+HEADERS = {"User-Agent": "Paw/2.2.5 (Macintosh; OS X/10.11.1) GCDHTTPRequest"}
 
 def win_login():
     """登陆界面"""
@@ -62,9 +63,8 @@ def request_token():
             'captcha_id': captcha_id,
             'task': 'sync_channel_list'
         }
-        r = requests.post('http://douban.fm/j/login', data=options)
+        r = requests.post('http://douban.fm/j/login', data=options, headers=HEADERS)
         req_json = json.loads(r.text, object_hook=decode_dict)
-        print req_json
         if req_json['r'] == 0:
             post_data = {
                 # will not save
@@ -87,7 +87,7 @@ def request_token():
 
 
 def get_captcha_id():
-    r = requests.get('http://douban.fm/j/new_captcha')
+    r = requests.get('http://douban.fm/j/new_captcha', headers=HEADERS)
     return r.text.strip('"')
 
 
@@ -97,6 +97,10 @@ def get_capthca_pic(captcha_id=None):
         'id': captcha_id
     }
     r = requests.get('http://douban.fm/misc/captcha',
-                     params=options)
-    i = Image.open(StringIO(r.content))
-    i.save('/tmp/captcha_pic.jpg')
+                     params=options,
+                     headers=HEADERS)
+    if r.status_code == 200:
+        i = Image.open(StringIO(r.content))
+        i.save('/tmp/captcha_pic.jpg')
+    else:
+        print "get_captcha_pic " + r.status_code

@@ -14,6 +14,7 @@ from doubanfm.API.json_utils import decode_dict
 
 logger = logging.getLogger('doubanfm')  # get logger
 
+HEADERS = {"User-Agent": "Paw/2.2.5 (Macintosh; OS X/10.11.1) GCDHTTPRequest"}
 
 class Doubanfm(object):
 
@@ -70,7 +71,7 @@ class Doubanfm(object):
             'tcid': tcid,
             'area': 'system_chis'
         }
-        requests.get(url, params=options, cookies=self._cookies)
+        requests.get(url, params=options, cookies=self._cookies, headers=HEADERS)
 
     def set_channel(self, line):
         self._channel_id = self._channel_list[line]['channel_id']
@@ -108,7 +109,7 @@ class Doubanfm(object):
         url = 'http://douban.fm/j/mine/playlist'
         while 1:
             try:
-                s = requests.get(url, params=options, cookies=self._cookies)
+                s = requests.get(url, params=options, cookies=self._cookies, headers=HEADERS)
                 req_json = s.json()
                 if req_json['r'] == 0:
                     if 'song' not in req_json:
@@ -186,7 +187,7 @@ class Doubanfm(object):
                 'ssid': playingsong['ssid'],
             }
             s = requests.session()
-            response = s.post(url, data=postdata)
+            response = s.post(url, data=postdata, headers=HEADERS)
 
             # 把歌词解析成字典
             lyric = json.loads(response.text, object_hook=decode_dict)
