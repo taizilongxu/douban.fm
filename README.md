@@ -1,7 +1,5 @@
 ##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615)
 
-更新API, 暂时只设定了3个频道, 登录时需要输入下验证码
-
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
 ### Developer Wiki
@@ -123,6 +121,10 @@ HELP = h     # 查看帮助
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+V0.4.11 增加固定频道
+
+V0.4.10 更改为豆瓣Web端API
 
 V0.4.7 修复版本检测功能BUG
 

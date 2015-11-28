@@ -16,6 +16,7 @@ logger = logging.getLogger('doubanfm')  # get logger
 
 HEADERS = {"User-Agent": "Paw/2.2.5 (Macintosh; OS X/10.11.1) GCDHTTPRequest"}
 
+
 class Doubanfm(object):
 
     def __init__(self):
@@ -43,15 +44,29 @@ class Doubanfm(object):
         获取channel列表
         """
         self._channel_list = [
-            {
-                'name': '红心兆赫', 'channel_id': -3
-            },
-            {
-                'name': '私人兆赫', 'channel_id': 0
-            },
-            {
-                'name': '豆瓣精选兆赫', 'channel_id': -10
-            }
+            {'name': '红心兆赫', 'channel_id': -3},
+            {'name': '私人兆赫', 'channel_id': 0},
+            {'name': '豆瓣精选兆赫', 'channel_id': -10},
+            {'name': '华语', 'channel_id': 1},
+            {'name': '粤语', 'channel_id': 6},
+            {'name': '欧美', 'channel_id': 2},
+            {'name': '法语', 'channel_id': 22},
+            {'name': '日语', 'channel_id': 17},
+            {'name': '韩语', 'channel_id': 18},
+            {'name': '民谣', 'channel_id': 8},
+            {'name': '摇滚', 'channel_id': 7},
+            {'name': '爵士', 'channel_id': 13},
+            {'name': '古典', 'channel_id': 27},
+            {'name': '电子', 'channel_id': 14},
+            {'name': 'R&B', 'channel_id': 16},
+            {'name': '说唱', 'channel_id': 15},
+            {'name': '女声', 'channel_id': 20},
+            {'name': '动漫', 'channel_id': 28},
+            {'name': '咖啡', 'channel_id': 32},
+            {'name': '电影原声', 'channel_id': 10},
+            {'name': '70年代', 'channel_id': 3},
+            {'name': '80年代', 'channel_id': 4},
+            {'name': '90年代', 'channel_id': 5},
         ]
 
     def _get_channel_id(self, line):
