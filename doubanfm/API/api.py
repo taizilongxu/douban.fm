@@ -10,6 +10,7 @@ import json
 from doubanfm.config import db_config
 from doubanfm.lrc2dic import lrc2dict
 from doubanfm.API.json_utils import decode_dict
+from doubanfm.exceptions import APIError
 
 
 logger = logging.getLogger('doubanfm')  # get logger
@@ -130,8 +131,8 @@ class Doubanfm(object):
                     if 'song' not in req_json:
                         break
                     return req_json['song'][0]
-            except requests.exceptions.RequestException:
-                logger.error("Error communicating with Douban.fm API.")
+            except Exception, err:
+                raise APIError(err)
                 break
 
     def get_first_song(self):

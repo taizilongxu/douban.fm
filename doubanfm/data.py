@@ -1,5 +1,12 @@
 import logging
-from doubanfm.config import db_config
+
+from doubanfm.exceptions import Fatal
+
+try:
+    from doubanfm.config import db_config
+except Exception, err:
+    raise Fatal(err)
+
 from doubanfm.model import Playlist, Channel
 from doubanfm.colorset import theme
 

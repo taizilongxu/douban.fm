@@ -9,6 +9,7 @@ import os
 
 from doubanfm.API.login import request_token
 from doubanfm.check_version import is_latest, update_package
+from doubanfm.exceptions import ConfigError
 
 logger = logging.getLogger('doubanfm')  # get logger
 

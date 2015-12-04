@@ -8,6 +8,7 @@ import getpass
 import json
 
 from doubanfm.API.json_utils import decode_dict
+from doubanfm.exceptions import APIError
 
 EMAIL_INFO = colored('➔', 'red') + colored(' Email: ', 'green')
 PASS_INFO = colored('➔', 'red') + colored(' Password: ', 'green')
@@ -16,12 +17,14 @@ ERROR = colored('(╯‵□′)╯︵┻━┻: ', 'red')
 
 HEADERS = {"User-Agent": "Paw/2.2.5 (Macintosh; OS X/10.11.1) GCDHTTPRequest"}
 
+
 def win_login():
     """登陆界面"""
     email = raw_input(EMAIL_INFO)
     password = getpass.getpass(PASS_INFO)
     captcha_id = get_captcha_id()
     get_capthca_pic(captcha_id)
+
     import webbrowser
     url = "file:///tmp/captcha_pic.jpg"
     webbrowser.open(url)
@@ -87,8 +90,11 @@ def request_token():
 
 
 def get_captcha_id():
-    r = requests.get('http://douban.fm/j/new_captcha', headers=HEADERS)
-    return r.text.strip('"')
+    try:
+        r = requests.get('http://douban.fm/j/new_captcha', headers=HEADERS)
+        return r.text.strip('"')
+    except Exception as e:
+        raise APIError('get_captcha_id error ' + e)
 
 
 def get_capthca_pic(captcha_id=None):
