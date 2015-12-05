@@ -24,6 +24,10 @@ class ConfigError(GenericError):
     pass
 
 
+class MplayerError(GenericError):
+    message = "Mplayer error, check if install mplayer"
+
+
 class Success(object):
     def __init__(self, s):
         print >>sys.stderr, "OK:\n", s

@@ -8,8 +8,10 @@ import time
 import os
 
 from doubanfm.API.login import request_token
-from doubanfm.check_version import is_latest, update_package
+from doubanfm.check import is_latest, update_package, is_mplayer
 from doubanfm.exceptions import ConfigError
+
+is_mplayer()
 
 logger = logging.getLogger('doubanfm')  # get logger
 

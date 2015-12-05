@@ -4,7 +4,6 @@
 豆瓣fm主程序
 """
 from threading import Thread
-from player import MPlayer       # player
 # import notification             # desktop notification
 import subprocess
 import logging
@@ -13,6 +12,7 @@ import sys
 import os
 
 from doubanfm import data
+from doubanfm.player import MPlayer       # player
 from doubanfm.controller.main_controller import MainController
 from doubanfm.controller.lrc_controller import LrcController
 from doubanfm.controller.help_controller import HelpController

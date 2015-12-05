@@ -1,7 +1,11 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 import xmlrpclib
+import subprocess
 import pip
+
+from doubanfm.exceptions import MplayerError
+
 
 def is_latest(package_name):
     pypi = xmlrpclib.ServerProxy('http://pypi.python.org/pypi')
@@ -12,5 +16,13 @@ def is_latest(package_name):
                 return False
             return True
 
+
 def update_package(package_name):
     pip.main(['install', package_name, '--upgrade'])
+
+
+def is_mplayer():
+    try:
+        subprocess.call("mplayer")
+    except Exception:
+        raise MplayerError()
