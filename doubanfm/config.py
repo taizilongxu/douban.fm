@@ -70,6 +70,9 @@ class Config(object):
         self.run_times = 0  # 登陆次数
         self.last_time = time.time()  # 当前登陆时间戳
         self.total_time = 0  # 总共登陆时间
+        self.liked = 0  # 加❤歌曲
+        self.banned = 0  # 不再播放
+        self.played = 0  # 累计播放
         self.is_latest = True
 
         self.login_data = self.get_login_data()

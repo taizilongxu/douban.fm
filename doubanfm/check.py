@@ -23,6 +23,6 @@ def update_package(package_name):
 
 def is_mplayer():
     try:
-        subprocess.call("mplayer")
+        subprocess.check_output("mplayer")
     except Exception:
         raise MplayerError()

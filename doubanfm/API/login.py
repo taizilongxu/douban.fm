@@ -1,8 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from termcolor import colored
-from StringIO import StringIO
-from PIL import Image
 import requests
 import getpass
 import json
@@ -106,7 +104,9 @@ def get_capthca_pic(captcha_id=None):
                      params=options,
                      headers=HEADERS)
     if r.status_code == 200:
-        i = Image.open(StringIO(r.content))
-        i.save('/tmp/captcha_pic.jpg')
+        path = '/tmp/captcha_pic.jpg'
+        with open(path, 'wb') as f:
+            for chunk in r.iter_content(1024):
+                f.write(chunk)
     else:
         print "get_captcha_pic " + r.status_code
