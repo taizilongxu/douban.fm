@@ -5,7 +5,7 @@ import sys, os
 打包的用的setup必须引入，
 """
 
-VERSION = '0.4.11'
+VERSION = '0.4.12'
 
 setup(name='douban.fm',
       version=VERSION,
@@ -23,7 +23,6 @@ setup(name='douban.fm',
       install_requires=[
         'termcolor',
         'requests',
-        'pillow'
       ] + (['pyobjc-core', 'pyobjc'] if 'darwin' in sys.platform else []),
       entry_points={
         'console_scripts':[

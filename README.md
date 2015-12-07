@@ -121,6 +121,7 @@ HELP = h     # 查看帮助
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+V0.4.12 去掉pillow包, 增加exception
 
 V0.4.11 增加固定频道
 
