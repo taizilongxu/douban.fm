@@ -1,4 +1,4 @@
-##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615)
+##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615) [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](https://badge.fury.io/py/douban.fm)
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
