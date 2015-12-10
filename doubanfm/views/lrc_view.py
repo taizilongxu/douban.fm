@@ -88,9 +88,8 @@ class Lrc(Win):
             # song['public_time']
         ).replace('\\', '').strip()
         l = self.center_num(tmp)
-        if song['like']:
-            l += 2
-        flag_num = (self.screen_width - l) / 2
+        l += 2 if song['like'] else 0
+        flag_num = (self.screen_width - l - 6) / 2
         return ' ' * flag_num + self._suffix_selected + '\r'  # 歌词页面标题
 
     def up(self):
