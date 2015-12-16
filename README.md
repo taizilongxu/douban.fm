@@ -1,10 +1,7 @@
-##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615) [![PyPI version](https://badge.fury.io/py/douban.fm.svg)](https://badge.fury.io/py/douban.fm)
+##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615) [![PyPI version](https://img.shields.io/pypi/v/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![licence](https://img.shields.io/pypi/l/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/)
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
-### Developer Wiki
-
-https://github.com/taizilongxu/douban.fm/wiki
 
 ### Authors
 
@@ -159,6 +156,10 @@ V0.2.9 支持歌词,支持Mac OS X
 
 V0.2.8 增加config
 
-### License (MIT)
+### Developer Wiki
+
+https://github.com/taizilongxu/douban.fm/wiki
+
+### License (MIT) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/taizilongxu/douban.fm/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 Copyright (c) 2014-2015 hackerxu
