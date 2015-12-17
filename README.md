@@ -163,3 +163,7 @@ https://github.com/taizilongxu/douban.fm/wiki
 ### License (MIT) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/taizilongxu/douban.fm/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 Copyright (c) 2014-2015 hackerxu
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/taizilongxu/douban.fm/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
