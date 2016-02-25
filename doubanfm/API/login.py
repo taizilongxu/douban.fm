@@ -106,6 +106,7 @@ def get_capthca_pic(captcha_id=None):
                      headers=HEADERS)
     if r.status_code == 200:
         path = '/tmp/captcha_pic.jpg'
+        print 'Download captcha in ' + path
         with open(path, 'wb') as f:
             for chunk in r.iter_content(1024):
                 f.write(chunk)

@@ -2,13 +2,44 @@
 # -*- coding: utf-8 -*-
 import logging
 import Queue
+import ctypes
 import copy
 from threading import Thread
+import threading
 
 from doubanfm import getch
 from doubanfm.views import main_view
 
 logger = logging.getLogger('doubanfm')
+
+NULL = 0
+
+
+def ctype_async_raise(thread_obj, exception):
+    found = False
+    target_tid = 0
+    for tid, tobj in threading._active.items():
+        if tobj is thread_obj:
+            found = True
+            target_tid = tid
+            break
+
+    if not found:
+        raise ValueError("Invalid thread object")
+
+    ret = ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(target_tid),
+                                                     ctypes.py_object(exception))
+    # ret = ctypes.pythonapi.PyThreadState_SetAsyncExc(target_tid, ctypes.py_object(exception))
+    # ref: http://docs.python.org/c-api/init.html#PyThreadState_SetAsyncExc
+    if ret == 0:
+        raise ValueError("Invalid thread ID")
+    elif ret > 1:
+        # Huh? Why would we notify more than one threads?
+        # Because we punch a hole into C level interpreter.
+        # So it is better to clean up the mess.
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(target_tid, NULL)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
+    print "Successfully set asynchronized exception for", target_tid
 
 
 class MainController(object):
@@ -47,7 +78,8 @@ class MainController(object):
         self.quit = False
 
         Thread(target=self._controller).start()
-        Thread(target=self._watchdog_queue).start()
+        self.t = Thread(target=self._watchdog_queue)
+        self.t.start()
         Thread(target=self._watchdog_time).start()
 
     def before_play(self):
@@ -189,6 +221,25 @@ class MainController(object):
             self.data.playingsong['album'].replace('\/', '/')
         webbrowser.open(url)
 
+    def terminate_thread(self, thread):
+        """Terminates a python thread from another thread.
+
+        :param thread: a threading.Thread instance
+        """
+        if not thread.isAlive():
+            return
+
+        exc = ctypes.py_object(SystemExit)
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
+            ctypes.c_long(thread.ident), exc)
+        if res == 0:
+            raise ValueError("nonexistent thread id")
+        elif res > 1:
+            # """if it returns a number greater than one, you're in trouble,
+            # and you should call it again with exc=NULL to revert the effect"""
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread.ident, None)
+            raise SystemError("PyThreadState_SetAsyncExc failed")
+
     def _watchdog_time(self):
         """
         标题时间显示
@@ -203,6 +254,7 @@ class MainController(object):
         """
         从queue里取出字符执行命令
         """
+
         while not self.quit:
             k = self.queue.get()
             if k == self.keys['QUIT']:  # 退出
@@ -259,14 +311,19 @@ class MainController(object):
             elif k in ['1', '2', '3', '4']:  # 主题选取
                 self.set_theme(k)
 
+        ctype_async_raise(self.t, SystemExit)
+
     def _controller(self):
         """
         接受按键, 存入queue
         """
-        while not self.quit:
-            k = getch.getch()
-            self.queue.put(k)
-            # 此处退出时需要做一下判断, 不然会引发切换线程无法读取的bug
-            # TODO: 按键映射
-            if k == 'o' or k == 'q' or k == 'h' or k == 't':
-                break
+        try:
+            while not self.quit:
+                k = getch.getch()
+                self.queue.put(k)
+                # 此处退出时需要做一下判断, 不然会引发切换线程无法读取的bug
+                # TODO: 按键映射
+                if k == 'o' or k == 'q' or k == 'h' or k == 't':
+                    break
+        except:
+            pass
