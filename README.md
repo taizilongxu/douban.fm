@@ -21,7 +21,7 @@ Linux / OS X
 
 ### Installation
 
-    $ sudo pip install douban.fm
+    $ sudo pip2 install douban.fm
 
 需要mplayer播放器依赖,如未安装:
 
@@ -35,7 +35,7 @@ OS X:
 
 ### Update
 
-    $ sudo pip install --upgrade douban.fm
+    $ sudo pip2 install --upgrade douban.fm
 
 ### Usage
 
