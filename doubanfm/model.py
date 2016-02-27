@@ -120,7 +120,7 @@ class Playlist(object):
         for index, i in enumerate(self._daily_playlist):
             i['title'] = str(index + 1) + '/' + str(len(self._daily_playlist)) + ' ' + i['title']
 
-    def get_daily_song(self):
+    def get_daily_song(self, netease=False):
         """
         获取单个歌曲
         """
@@ -132,7 +132,9 @@ class Playlist(object):
 
         song = self._daily_playlist[self._daily_playlist_index]
         song['index'] = self._daily_playlist_index
+        self.get_netease_song(song, netease)  # 判断是否网易320k
         self._playingsong = song
+
         return song
 
     @lock
@@ -149,16 +151,17 @@ class Playlist(object):
         """
         song = self._playlist.get(True)
         self.hash_sid[song['sid']] = True  # 去重
+        self.get_netease_song(song, netease)  # 判断是否网易320k
+        self._playingsong = song
 
+        return song
+
+    def get_netease_song(self, song, netease):
         # 网易320k音乐
         if netease:
             url, kbps = Netease().get_url_and_bitrate(song['title'])
             if url and kbps:
                 song['url'], song['kbps'] = url, kbps
-
-        self._playingsong = song
-
-        return song
 
     @lock
     def get_playingsong(self):

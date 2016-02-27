@@ -57,7 +57,7 @@ class Data(object):
         self.playlist.bye()
 
     def get_daily_song(self):
-        return self.playlist.get_daily_song()
+        return self.playlist.get_daily_song(self.netease)
 
     def get_song(self):
         playingsong = self.playlist.get_song(self.netease) if self.channel != 2 else self.get_daily_song()  # 位置2为每日推荐歌单
