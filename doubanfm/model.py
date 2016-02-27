@@ -116,6 +116,10 @@ class Playlist(object):
         """
         self._daily_playlist = douban.get_daily_songs()
 
+        # 加入索引
+        for index, i in enumerate(self._daily_playlist):
+            i['title'] = str(index + 1) + '/' + str(len(self._daily_playlist)) + ' ' + i['title']
+
     def get_daily_song(self):
         """
         获取单个歌曲
