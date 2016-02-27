@@ -142,7 +142,7 @@ class MainController(object):
 
     def set_rate(self):
         self.data.song_like = False if self.data.song_like else True
-        self.rate_times += 1
+        self.rate_times += 1  # 最后提交计算
         self.view.display()
 
     def set_pause(self):

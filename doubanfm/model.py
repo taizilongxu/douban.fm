@@ -34,6 +34,8 @@ class Playlist(object):
 
     def __init__(self):
         self._playlist = Queue.Queue(QUEUE_SIZE)
+        self._daily_playlist = []  # 每日推荐歌曲
+        self._daily_playlist_index = -1  # 歌曲
         self._playingsong = None
         self._get_first_song()
 
@@ -58,14 +60,17 @@ class Playlist(object):
         return _func
 
     def _watchdog(self):
+        """
+        更新队列线程
+        """
         sid = self._playingsong['sid']
         while 1:
 
-            # 去重
+            # 本次播放里去重
             while 1:
                 song = douban.get_song(sid)
                 sid = song['sid']
-                if song['sid'] not in self.hash_sid:
+                if sid not in self.hash_sid:
                     break
 
             self._playlist.put(song)
@@ -96,13 +101,35 @@ class Playlist(object):
         """
         douban.set_channel(channel_num)
         self.empty()
-        self._get_first_song()
+        if channel_num != 2:
+            self._get_first_song()
 
     def set_song_like(self, playingsong):
         douban.rate_music(playingsong['sid'])
 
     def set_song_unlike(self, playingsong):
         douban.unrate_music(playingsong['sid'])
+
+    def get_daily_songs(self):
+        """
+        获取每日推荐歌曲
+        """
+        self._daily_playlist = douban.get_daily_songs()
+
+    def get_daily_song(self):
+        """
+        获取单个歌曲
+        """
+        if not self._daily_playlist:
+            self.get_daily_songs()
+            self._daily_playlist_index = 0
+        else:
+            self._daily_playlist_index = (self._daily_playlist_index + 1) % len(self._daily_playlist)
+
+        song = self._daily_playlist[self._daily_playlist_index]
+        song['index'] = self._daily_playlist_index
+        self._playingsong = song
+        return song
 
     @lock
     def bye(self):

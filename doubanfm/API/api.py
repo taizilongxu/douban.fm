@@ -47,6 +47,7 @@ class Doubanfm(object):
         self._channel_list = [
             {'name': '红心兆赫', 'channel_id': -3},
             {'name': '私人兆赫', 'channel_id': 0},
+            {'name': '每日私人歌单', 'channel_id': -2},
             {'name': '豆瓣精选兆赫', 'channel_id': -10},
             {'name': '华语', 'channel_id': 1},
             {'name': '粤语', 'channel_id': 6},
@@ -101,6 +102,13 @@ class Doubanfm(object):
         """
         lines = [ch['name'] for ch in self._channel_list]
         return lines
+
+    def get_daily_songs(self):
+        url = 'http://douban.fm/j/v2/songlist/user_daily'
+        s = requests.get(url, cookies=self._cookies, headers=HEADERS)
+        req_json = s.json()
+        # TODO: 验证
+        return req_json['songs']
 
     def requests_url(self, ptype, **data):
         """

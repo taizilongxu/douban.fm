@@ -97,7 +97,7 @@ class MainDal(object):
 
     @property
     def love(self):
-        if self.song_like == 1:
+        if self.song_like:
             return color_func(self.c['PLAYINGSONG']['like'])(LOVE)
         else:
             return ''

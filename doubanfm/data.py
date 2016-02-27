@@ -56,9 +56,12 @@ class Data(object):
     def bye(self):
         self.playlist.bye()
 
+    def get_daily_song(self):
+        return self.playlist.get_daily_song()
+
     def get_song(self):
-        playingsong = self.playlist.get_song(self.netease)
-        self.song_like = playingsong['like']
+        playingsong = self.playlist.get_song(self.netease) if self.channel != 2 else self.get_daily_song()  # 位置2为每日推荐歌单
+        self.song_like = True if str(playingsong['like']) == '1' else False
         return playingsong
 
     def set_channel(self, channel_index):
