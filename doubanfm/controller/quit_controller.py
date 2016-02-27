@@ -3,7 +3,6 @@
 import logging
 
 from doubanfm.views import quit_view
-from doubanfm import getch
 from doubanfm.controller.lrc_controller import LrcController
 
 logger = logging.getLogger('doubanfm')  # get logger
@@ -14,9 +13,9 @@ class QuitController(LrcController):
     按键控制
     """
 
-    def __init__(self, player, data):
+    def __init__(self, player, data, queue):
         # 接受player, data, view
-        super(QuitController, self).__init__(player, data)
+        super(QuitController, self).__init__(player, data, queue)
 
     def _bind_view(self):
         self.view = quit_view.Quit(self.data)
@@ -32,10 +31,3 @@ class QuitController(LrcController):
         else:
             self.switch_queue.put('main')
         self.quit = True
-
-    def _controller(self):
-        """
-        接受按键, 存入queue
-        """
-        k = getch.getch()
-        self.queue.put(k)

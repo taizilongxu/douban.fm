@@ -13,9 +13,9 @@ class HelpController(LrcController):
     按键控制
     """
 
-    def __init__(self, player, data):
+    def __init__(self, player, data, queue):
         # 接受player, data, view
-        super(HelpController, self).__init__(player, data)
+        super(HelpController, self).__init__(player, data, queue)
         self.view = help_view.Help(self.data)
 
     def _bind_view(self):

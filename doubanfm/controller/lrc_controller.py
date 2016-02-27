@@ -1,9 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import Queue
 import logging
 
-from doubanfm import getch
 from doubanfm.views import lrc_view
 from doubanfm.controller.main_controller import MainController
 
@@ -15,14 +13,14 @@ class LrcController(MainController):
     按键控制
     """
 
-    def __init__(self, player, data):
+    def __init__(self, player, data, queue):
         # 接受player, data, view
         self.player = player
         self.data = data
         self.keys = data.keys
         self.quit = False
         self.rate_times = 0
-        self.queue = Queue.Queue(0)
+        self.queue = queue
         self._bind_view()
 
     def _bind_view(self):
@@ -64,13 +62,3 @@ class LrcController(MainController):
                 self.up()
             elif k == self.keys['DOWN'] or k == 'A':  # 向上
                 self.down()
-
-    def _controller(self):
-        """
-        接受按键, 存入queue
-        """
-        while not self.quit:
-            k = getch.getch()
-            self.queue.put(k)
-            if k == self.keys['QUIT']:
-                break

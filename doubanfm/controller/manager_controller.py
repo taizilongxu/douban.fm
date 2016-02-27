@@ -3,12 +3,9 @@
 """
 暂时没用
 """
-import Queue
-import time
 import logging
 from threading import Thread
 
-from doubanfm import getch
 from doubanfm.views import manager_view
 
 logger = logging.getLogger('doubanfm')  # get logger
@@ -19,12 +16,12 @@ class ManagerController(object):
     按键控制
     """
 
-    def __init__(self, player, data):
+    def __init__(self, player, data, queue):
         # 接受player, data, view
         self.player = player
         self.data = data
         self._bind_view()
-        self.queue = Queue.Queue(0)
+        self.queue = queue
 
     def _bind_view(self):
         self.view = manager_view.Manager(self.data)
@@ -37,7 +34,6 @@ class ManagerController(object):
         self.quit = False
 
         Thread(target=self._watchdog_queue).start()
-        Thread(target=self._controller).start()
         Thread(target=self._watchdog_time).start()
 
     def _watchdog_time(self):
@@ -58,14 +54,3 @@ class ManagerController(object):
             if k == 'q':  # 退出
                 self.quit = True
                 self.switch_queue.put('main')
-
-    def _controller(self):
-        """
-        接受按键, 存入queue
-        """
-        while not self.quit:
-            k = getch.getch()
-            logger.info(k)
-            self.queue.put(k)
-            if k == 'q':
-                break
