@@ -82,7 +82,7 @@ class Doubanfm(object):
         这个貌似没啥用
         :params fcid, tcid: string
         """
-        url = 'http://douban.fm/j/change_channel'
+        url = 'https://douban.fm/j/change_channel'
         options = {
             'fcid': fcid,
             'tcid': tcid,
@@ -104,7 +104,7 @@ class Doubanfm(object):
         return lines
 
     def get_daily_songs(self):
-        url = 'http://douban.fm/j/v2/songlist/user_daily'
+        url = 'https://douban.fm/j/v2/songlist/user_daily'
         s = requests.get(url, cookies=self._cookies, headers=HEADERS)
         req_json = s.json()
         # TODO: 验证
@@ -130,7 +130,7 @@ class Doubanfm(object):
         }
         if 'sid' in data:
             options['sid'] = data['sid']
-        url = 'http://douban.fm/j/mine/playlist'
+        url = 'https://douban.fm/j/mine/playlist'
         while 1:
             try:
                 s = requests.get(url, params=options, cookies=self._cookies, headers=HEADERS)
@@ -205,7 +205,7 @@ class Doubanfm(object):
          'request': 'POST /v2/fm/lyric'}
         """
         try:
-            url = "http://api.douban.com/v2/fm/lyric"
+            url = "https://api.douban.com/v2/fm/lyric"
             postdata = {
                 'sid': playingsong['sid'],
                 'ssid': playingsong['ssid'],
