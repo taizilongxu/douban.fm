@@ -10,6 +10,7 @@ Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/dou
 * [skyline75489](https://github.com/skyline75489)
 * [Hexcles](https://github.com/Hexcles)
 * [killpanda](https://github.com/killpanda)
+* [jonas8](https://github.com/jonas8)
 
 ### Screenshots
 
@@ -118,6 +119,9 @@ HELP = h     # 查看帮助
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
 ###Log
+
+v0.4.14 修改api接口
+
 V0.4.12 去掉pillow包, 增加exception
 
 V0.4.11 增加固定频道
