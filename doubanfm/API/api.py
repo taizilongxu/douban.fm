@@ -46,29 +46,45 @@ class Doubanfm(object):
         """
         self._channel_list = [
             {'name': '红心兆赫', 'channel_id': -3},
-            {'name': '私人兆赫', 'channel_id': 0},
+            {'name': '我的私人兆赫', 'channel_id': 0},
             {'name': '每日私人歌单', 'channel_id': -2},
             {'name': '豆瓣精选兆赫', 'channel_id': -10},
+            # 心情 / 场景
+            {'name': '工作学习', 'channel_id': 153},
+            {'name': '户外', 'channel_id': 151},
+            {'name': '休息', 'channel_id': 152},
+            {'name': '亢奋', 'channel_id': 154},
+            {'name': '舒缓', 'channel_id': 155},
+            {'name': 'Easy', 'channel_id': 77},
+            {'name': '咖啡', 'channel_id': 32},
+            # 语言 / 年代
             {'name': '华语', 'channel_id': 1},
-            {'name': '粤语', 'channel_id': 6},
             {'name': '欧美', 'channel_id': 2},
-            {'name': '法语', 'channel_id': 22},
+            {'name': '七零', 'channel_id': 3},
+            {'name': '八零', 'channel_id': 4},
+            {'name': '九零', 'channel_id': 5},
+            {'name': '粤语', 'channel_id': 6},
             {'name': '日语', 'channel_id': 17},
             {'name': '韩语', 'channel_id': 18},
-            {'name': '民谣', 'channel_id': 8},
+            {'name': '法语', 'channel_id': 22},
+            {'name': '新歌', 'channel_id': 61},
+            # 风格 / 流派
+            {'name': '流行', 'channel_id': 194},
             {'name': '摇滚', 'channel_id': 7},
-            {'name': '爵士', 'channel_id': 13},
-            {'name': '古典', 'channel_id': 27},
-            {'name': '电子', 'channel_id': 14},
-            {'name': 'R&B', 'channel_id': 16},
-            {'name': '说唱', 'channel_id': 15},
-            {'name': '女声', 'channel_id': 20},
-            {'name': '动漫', 'channel_id': 28},
-            {'name': '咖啡', 'channel_id': 32},
+            {'name': '民谣', 'channel_id': 8},
+            {'name': '轻音乐', 'channel_id': 9},
             {'name': '电影原声', 'channel_id': 10},
-            {'name': '70年代', 'channel_id': 3},
-            {'name': '80年代', 'channel_id': 4},
-            {'name': '90年代', 'channel_id': 5},
+            {'name': '爵士', 'channel_id': 13},
+            {'name': '电子', 'channel_id': 14},
+            {'name': '说唱', 'channel_id': 15},
+            {'name': 'R&B', 'channel_id': 16},
+            {'name': '古典', 'channel_id': 27},
+            {'name': '动漫', 'channel_id': 28},
+            {'name': '世界音乐', 'channel_id': 187},
+            {'name': '布鲁斯', 'channel_id': 188},
+            {'name': '拉丁', 'channel_id': 189},
+            {'name': '雷鬼', 'channel_id': 190},
+            {'name': '小清新', 'channel_id': 76}
         ]
 
     def _get_channel_id(self, line):
@@ -82,7 +98,7 @@ class Doubanfm(object):
         这个貌似没啥用
         :params fcid, tcid: string
         """
-        url = 'http://douban.fm/j/change_channel'
+        url = 'https://douban.fm/j/change_channel'
         options = {
             'fcid': fcid,
             'tcid': tcid,
@@ -104,7 +120,7 @@ class Doubanfm(object):
         return lines
 
     def get_daily_songs(self):
-        url = 'http://douban.fm/j/v2/songlist/user_daily'
+        url = 'https://douban.fm/j/v2/songlist/user_daily/?kbps=320'
         s = requests.get(url, cookies=self._cookies, headers=HEADERS)
         req_json = s.json()
         # TODO: 验证
@@ -124,13 +140,17 @@ class Doubanfm(object):
             'type': ptype,
             'pt': '3.1',
             'channel': self._channel_id,
-            'pb': '128',
+            'pb': '320',
             'from': 'mainsite',
-            'r': ''
+            'r': '',
+            'kbps': '320',
+            'app_name': 'radio_website',
+            'client': 's:mainsite|y:3.0',
+            'version': '100'
         }
         if 'sid' in data:
             options['sid'] = data['sid']
-        url = 'http://douban.fm/j/mine/playlist'
+        url = 'https://douban.fm/j/v2/playlist'
         while 1:
             try:
                 s = requests.get(url, params=options, cookies=self._cookies, headers=HEADERS)
@@ -205,7 +225,7 @@ class Doubanfm(object):
          'request': 'POST /v2/fm/lyric'}
         """
         try:
-            url = "http://api.douban.com/v2/fm/lyric"
+            url = "https://api.douban.com/v2/fm/lyric"
             postdata = {
                 'sid': playingsong['sid'],
                 'ssid': playingsong['ssid'],

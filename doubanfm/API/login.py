@@ -23,10 +23,14 @@ def win_login():
     password = getpass.getpass(PASS_INFO)
     captcha_id = get_captcha_id()
     get_capthca_pic(captcha_id)
-
-    import webbrowser
-    url = "file:///tmp/captcha_pic.jpg"
-    webbrowser.open(url)
+    file = '/tmp/captcha_pic.jpg'
+    try:
+        from subprocess import call
+        from os.path import expanduser
+        call([expanduser('~') + '/.iterm2/imgcat', file])
+    except:
+        import webbrowser
+        webbrowser.open('file://' + file)
     captcha_solution = raw_input(CAPTCHA_INFO)
     return email, password, captcha_solution, captcha_id
 
@@ -65,7 +69,7 @@ def request_token():
             'captcha_id': captcha_id,
             'task': 'sync_channel_list'
         }
-        r = requests.post('http://douban.fm/j/login', data=options, headers=HEADERS)
+        r = requests.post('https://douban.fm/j/login', data=options, headers=HEADERS)
         req_json = json.loads(r.text, object_hook=decode_dict)
         if req_json['r'] == 0:
             post_data = {
@@ -90,10 +94,11 @@ def request_token():
 
 def get_captcha_id():
     try:
-        r = requests.get('http://douban.fm/j/new_captcha', headers=HEADERS)
+        r = requests.get('https://douban.fm/j/new_captcha', headers=HEADERS)
+        r.raise_for_status()
         return r.text.strip('"')
     except Exception as e:
-        raise APIError('get_captcha_id error ' + e)
+        raise APIError('get captcha id error: ' + str(e))
 
 
 def get_capthca_pic(captcha_id=None):
@@ -101,7 +106,7 @@ def get_capthca_pic(captcha_id=None):
         'size': 'm',
         'id': captcha_id
     }
-    r = requests.get('http://douban.fm/misc/captcha',
+    r = requests.get('https://douban.fm/misc/captcha',
                      params=options,
                      headers=HEADERS)
     if r.status_code == 200:
@@ -111,4 +116,4 @@ def get_capthca_pic(captcha_id=None):
             for chunk in r.iter_content(1024):
                 f.write(chunk)
     else:
-        print "get_captcha_pic " + r.status_code
+        print "get captcha pic error with http code:" + str(r.status_code)
