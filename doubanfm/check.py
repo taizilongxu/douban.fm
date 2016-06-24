@@ -8,7 +8,7 @@ from doubanfm.exceptions import MplayerError
 
 
 def is_latest(package_name):
-    pypi = xmlrpclib.ServerProxy('http://pypi.python.org/pypi')
+    pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
     for dist in pip.get_installed_distributions():
         if dist.project_name == package_name:
             available = pypi.package_releases(dist.project_name)
