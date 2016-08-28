@@ -156,7 +156,7 @@ class Doubanfm(object):
                 s = requests.get(url, params=options, cookies=self._cookies, headers=HEADERS)
                 req_json = s.json()
                 if req_json['r'] == 0:
-                    if 'song' not in req_json:
+                    if 'song' not in req_json or not req_json['song']:
                         break
                     return req_json['song'][0]
             except Exception, err:
