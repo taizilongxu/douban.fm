@@ -86,7 +86,7 @@ class Router(object):
     def quit(self):
         # 退出保存信息
         self.data.save()
-        subprocess.call('echo -e "\033[?25h";clear', shell=True)
+        subprocess.call('echo -e "\033[?25h";clear;stty sane', shell=True)
 
     def _watchdog_key(self):
         """
