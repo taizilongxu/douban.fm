@@ -24,7 +24,7 @@ setup(name='douban.fm',
         'termcolor',
         'requests',
         'pycookiecheat'
-      ] + (['pyobjc-core', 'pyobjc'] if 'darwin' in sys.platform else []),
+      ],
       entry_points={
         'console_scripts':[
             'douban.fm = doubanfm.douban:main'
