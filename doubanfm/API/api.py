@@ -235,8 +235,12 @@ class Doubanfm(object):
 
             # 把歌词解析成字典
             lyric = json.loads(response.text, object_hook=decode_dict)
+            logger.info(lyric)
             if lyric.get('code', None) == 1998:
                 logger.info('lrc API access rate limit has been exceeded')
+                return {}
+            elif lyric.get('code', None) == 107:
+                logger.info('lrc API invalid_request_uri')
                 return {}
             lrc_dic = lrc2dict(lyric['lyric'])
 
