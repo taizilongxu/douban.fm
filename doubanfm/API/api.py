@@ -222,16 +222,16 @@ class Doubanfm(object):
         {'msg': 'You API access rate limit has been exceeded.
                  Contact api-master@douban.com if you want higher limit. ',
          'code': 1998,
-         'request': 'POST /v2/fm/lyric'}
+         'request': 'GET /j/v2/lyric'}
         """
         try:
-            url = "https://api.douban.com/v2/fm/lyric"
+            url = "https://douban.fm/j/v2/lyric"
             postdata = {
                 'sid': playingsong['sid'],
                 'ssid': playingsong['ssid'],
             }
             s = requests.session()
-            response = s.post(url, data=postdata, headers=HEADERS)
+            response = s.get(url, params=postdata, headers=HEADERS)
 
             # 把歌词解析成字典
             lyric = json.loads(response.text, object_hook=decode_dict)
