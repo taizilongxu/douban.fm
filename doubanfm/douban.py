@@ -7,10 +7,12 @@ from threading import Thread
 # import notification             # desktop notification
 import subprocess
 import logging
-import Queue
+from six.moves import queue
+import six
 import sys
 import os
 
+# sys.path.insert(0, '/workstation/work/joinquant/osc/douban.fm')
 from doubanfm import data
 from doubanfm import getch
 from doubanfm.player import MPlayer       # player
@@ -20,8 +22,9 @@ from doubanfm.controller.help_controller import HelpController
 from doubanfm.controller.manager_controller import ManagerController
 from doubanfm.controller.quit_controller import QuitController
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+if six.PY2:
+    reload(sys)
+    sys.setdefaultencoding('utf8')
 
 # root logger config
 logging.basicConfig(
@@ -48,8 +51,8 @@ class Router(object):
         self.quit_quit = False
         self.current_controller = None  # 当前controller
 
-        self.switch_queue = Queue.Queue(0)
-        self.key_queue = Queue.Queue(0)  # 按键队列
+        self.switch_queue = queue.Queue(0)
+        self.key_queue = queue.Queue(0)  # 按键队列
 
         self.view_control_map = {
             'main': MainController(self.player, self.data, self.key_queue),

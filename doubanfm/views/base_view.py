@@ -27,6 +27,7 @@ _title:界面标题的设定
 # displayline = 0
 #######################################################################
 
+from __future__ import print_function
 import sys
 sys.stdout.write('\033[?25l')
 

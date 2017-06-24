@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from doubanfm.views.lrc_view import Lrc
 from doubanfm.dal.dal_manager import ManagerDal
 
@@ -18,7 +19,7 @@ class Manager(Lrc):
         self.set_dal()
         self.make_display_lines()
         for i in self.display_lines:
-            print i
+            print(i)
 
     def make_display_lines(self):
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数

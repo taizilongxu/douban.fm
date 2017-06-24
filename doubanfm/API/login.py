@@ -1,7 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from pycookiecheat import chrome_cookies
 from termcolor import colored
+from six.moves import input
 import requests
 import getpass
 import json
@@ -19,7 +21,7 @@ HEADERS = {"User-Agent": "Paw/2.2.5 (Macintosh; OS X/10.11.1) GCDHTTPRequest"}
 
 def win_login():
     """登陆界面"""
-    email = raw_input(EMAIL_INFO)
+    email = input(EMAIL_INFO)
     password = getpass.getpass(PASS_INFO)
     captcha_id = get_captcha_id()
     get_capthca_pic(captcha_id)
@@ -31,7 +33,7 @@ def win_login():
     except:
         import webbrowser
         webbrowser.open('file://' + file)
-    captcha_solution = raw_input(CAPTCHA_INFO)
+    captcha_solution = input(CAPTCHA_INFO)
     return email, password, captcha_solution, captcha_id
 
 
@@ -71,6 +73,7 @@ def request_token():
         }
         r = requests.post('https://douban.fm/j/login', data=options, headers=HEADERS)
         req_json = json.loads(r.text, object_hook=decode_dict)
+        # req_json = json.loads(r.text)
         if req_json['r'] == 0:
             post_data = {
                 # will not save
@@ -88,8 +91,8 @@ def request_token():
             }
             return post_data
 
-        print req_json['err_msg']
-        print ERROR + req_json['err_msg']
+        print(req_json['err_msg'])
+        print(ERROR + req_json['err_msg'])
 
 
 def get_captcha_id():
@@ -111,9 +114,9 @@ def get_capthca_pic(captcha_id=None):
                      headers=HEADERS)
     if r.status_code == 200:
         path = '/tmp/captcha_pic.jpg'
-        print 'Download captcha in ' + path
+        print('Download captcha in ' + path)
         with open(path, 'wb') as f:
             for chunk in r.iter_content(1024):
                 f.write(chunk)
     else:
-        print "get captcha pic error with http code:" + str(r.status_code)
+        print("get captcha pic error with http code:" + str(r.status_code))

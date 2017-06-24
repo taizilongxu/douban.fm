@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from six import iteritems
 from doubanfm.dal.dal_main import MainDal
 
 
@@ -16,7 +17,7 @@ class LrcDal(MainDal):
 
     @property
     def sort_lrc_dict(self):
-        return sorted(self.lrc.iteritems(), key=lambda x: x[0])
+        return sorted(iteritems(self.lrc), key=lambda x: x[0])
 
     @property
     def title(self):
