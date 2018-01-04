@@ -7,9 +7,10 @@
 reference: https://github.com/yanunon/NeteaseCloudMusic/wiki/%E7%BD%91%E6%98%93%E4%BA%91%E9%9F%B3%E4%B9%90API%E5%88%86%E6%9E%90
 TODO: 有可能歌曲匹配不准确
 """
+from __future__ import print_function
 import requests
 import json
-import md5
+import hashlib
 import logging
 
 logger = logging.getLogger('doubanfm')  # get logger
@@ -76,7 +77,7 @@ class Netease(object):
         byte1_len = len(byte1)
         for i in xrange(len(byte2)):
             byte2[i] = byte2[i]^byte1[i%byte1_len]
-        m = md5.new()
+        m = hashlib.md5()
         m.update(byte2)
         result = m.digest().encode('base64')[:-1]
         result = result.replace('/', '_')
@@ -85,5 +86,5 @@ class Netease(object):
 
 if __name__ == '__main__':
     url, bitrate = Netease().get_url_and_bitrate("董小姐")
-    print url
-    print bitrate
+    print(url)
+    print(bitrate)

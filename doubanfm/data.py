@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 import logging
 
 from doubanfm.exceptions import Fatal
 
 try:
     from doubanfm.config import db_config
-except Exception, err:
+except Exception as err:
+    print(err)
     raise Fatal(err)
 
 from doubanfm.model import Playlist, Channel

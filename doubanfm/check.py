@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-import xmlrpclib
+from six.moves import xmlrpc_client
 import subprocess
 import pip
 
@@ -8,7 +8,7 @@ from doubanfm.exceptions import MplayerError
 
 
 def is_latest(package_name):
-    pypi = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
+    pypi = xmlrpc_client.ServerProxy('https://pypi.python.org/pypi')
     for dist in pip.get_installed_distributions():
         if dist.project_name == package_name:
             available = pypi.package_releases(dist.project_name)

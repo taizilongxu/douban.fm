@@ -4,6 +4,7 @@
 歌词解析, 把歌词解析成字典形式
 reference: (http://reverland.org/python/2014/10/09/lrc/)
 """
+from __future__ import print_function
 import re
 
 
@@ -31,6 +32,8 @@ def lrc2dict(lrc):
                     time_lrc = int(tag_flag) * 60
                     time_lrc += int(t.split(':')[1].split('.')[0])
                     lrc_dict[time_lrc] = lyric
+            else:
+                lrc_dict[0] = line
     return lrc_dict
 
 
@@ -39,7 +42,7 @@ def main():
         lrc = F.read()
     lrc_dict = lrc2dict(lrc)
     for key in lrc_dict:
-        print key, lrc_dict[key]
+        print(key, lrc_dict[key])
 
 if __name__ == '__main__':
     main()

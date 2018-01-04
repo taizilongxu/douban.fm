@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from doubanfm.views.lrc_view import Lrc
 from doubanfm.dal.dal_help import HelpDal
 
@@ -19,7 +20,7 @@ class Help(Lrc):
     def display(self):
         self.set_dal()
         self.make_display_lines()
-        print '\n'.join(self.display_lines)
+        print('\n'.join(self.display_lines))
 
     def make_display_lines(self):
         self.screen_height, self.screen_width = self.linesnum()  # 屏幕显示行数

@@ -6,7 +6,7 @@
 from threading import RLock, Thread
 import logging
 import functools
-import Queue
+from six.moves import queue
 
 from doubanfm.API.api import Doubanfm
 from doubanfm.API.netease_api import Netease
@@ -33,7 +33,7 @@ class Playlist(object):
     """
 
     def __init__(self):
-        self._playlist = Queue.Queue(QUEUE_SIZE)
+        self._playlist = queue.Queue(QUEUE_SIZE)
         self._daily_playlist = []  # 每日推荐歌曲
         self._daily_playlist_index = -1  # 歌曲
         self._playingsong = None
@@ -69,6 +69,8 @@ class Playlist(object):
             # 本次播放里去重
             while 1:
                 song = douban.get_song(sid)
+                if not song:
+                    continue
                 sid = song['sid']
                 if sid not in self.hash_sid:
                     break
@@ -80,9 +82,10 @@ class Playlist(object):
     @lock
     def _get_first_song(self):
         song = douban.get_first_song()
-        self._playlist.put(song)
-        self._playingsong = song
-        Thread(target=self._watchdog).start()
+        if song:
+            self._playlist.put(song)
+            self._playingsong = song
+            Thread(target=self._watchdog).start()
 
     def get_lrc(self):
         """
@@ -173,7 +176,7 @@ class Playlist(object):
         清空playlist
         """
         self._playingsong = None
-        self._playlist = Queue.Queue(QUEUE_SIZE)
+        self._playlist = queue.Queue(QUEUE_SIZE)
 
     def submit_music(self, playingsong):
         douban.submit_music(playingsong['sid'])
