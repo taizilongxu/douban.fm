@@ -1,4 +1,4 @@
-## douban.fm [![PyPI version](https://img.shields.io/pypi/v/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![licence](https://img.shields.io/pypi/l/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
+## douban.fm [![PyPI version](https://img.shields.io/pypi/v/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![licence](https://github.com/taizilongxu/douban.fm/blob/master/LICENSE)](https://pypi.python.org/pypi/douban.fm/) [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
 
