@@ -282,6 +282,7 @@ class MPlayer(Player):
         while True:
             try:
                 output = self.sub_proc.stdout.readline().rstrip()
+                output = output.decode('utf-8')
             except IOError:
                 return None
             # print output

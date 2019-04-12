@@ -1,5 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from threading import RLock
 
 from doubanfm.colorset.colors import color_func  # colors
@@ -56,7 +57,7 @@ class Win(Cli):
         try:
             self.set_dal()
             self.make_display_lines()
-            print '\n'.join(self.display_lines)
+            print('\n'.join(self.display_lines))
         finally:
             mutex.release()
 

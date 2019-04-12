@@ -1,8 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from threading import Thread
-import cPickle as pickle
-import ConfigParser
+from six.moves import input
+from six.moves import cPickle as pickle
+from six.moves import configparser as ConfigParser
 import logging
 import time
 import os
@@ -80,9 +82,9 @@ class Config(object):
     def output(args):
         def _deco(func):
             def _func(self):
-                print '\033[31m♥\033[0m ' + args,
+                print('\033[31m♥\033[0m ' + args, end='')
                 tmp = func(self)
-                print ' [\033[32m OK \033[0m]'
+                print(' [\033[32m OK \033[0m]')
                 return tmp
             return _func
         return _deco
@@ -93,13 +95,17 @@ class Config(object):
 
         这里顺带增加了 volume, channel, theme_id , netease, run_times的默认值
         """
-        if os.path.exists(PATH_TOKEN):
-            # 使用上次登录保存的token
-            with open(PATH_TOKEN, 'r') as f:
-                login_data = pickle.load(f)
-            if 'cookies' not in login_data:
-                login_data = request_token()
-        else:
+        login_data = None
+        try:
+            if os.path.exists(PATH_TOKEN):
+                # 使用上次登录保存的token
+                with open(PATH_TOKEN, 'rb') as f:
+                    login_data = pickle.load(f)
+                if 'cookies' not in login_data:
+                    login_data = request_token()
+        except Exception:
+            pass
+        if not login_data:
             # 未登陆
             login_data = request_token()
 
@@ -116,13 +122,13 @@ class Config(object):
     def get_is_latest_version(self, login_data):
         self.is_latest = login_data.get('is_latest', True)
         if not self.is_latest:
-            if_update = raw_input('检测到douban.fm有更新, 是否升级?(Y) ')
+            if_update = input('检测到douban.fm有更新, 是否升级?(Y) ')
             if if_update.lower() == 'y':
                 update_package('douban.fm')
                 with open(PATH_TOKEN, 'w') as f:
                     login_data['is_latest'] = True
                     pickle.dump(login_data, f)
-                print '请重新打开douban.fm(升级失败可能需要sudo权限, 试试sudo pip install --upgrade douban.fm)'
+                print('请重新打开douban.fm(升级失败可能需要sudo权限, 试试sudo pip install --upgrade douban.fm)')
                 os._exit(0)
 
     def get_default_set(self, login_data):
@@ -131,17 +137,17 @@ class Config(object):
         """
         self.cookies = login_data.get('cookies', '')
         self.user_name = login_data.get('user_name', '')
-        print '\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
-            login_data['user_name']
+        print('\033[31m♥\033[0m Get local token - Username: \033[33m%s\033[0m' %\
+              login_data['user_name'])
 
         self.channel = login_data.get('channel', 0)
-        print '\033[31m♥\033[0m Get channel [\033[32m OK \033[0m]'
+        print('\033[31m♥\033[0m Get channel [\033[32m OK \033[0m]')
 
         self.volume = login_data.get('volume', 50)
-        print '\033[31m♥\033[0m Get volume [\033[32m OK \033[0m]'
+        print('\033[31m♥\033[0m Get volume [\033[32m OK \033[0m]')
 
         self.theme_id = login_data.get('theme_id', 0)
-        print '\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]'
+        print('\033[31m♥\033[0m Get theme [\033[32m OK \033[0m]')
 
         self.netease = login_data.get('netease', False)
         self.keys = self.get_keys()
@@ -195,7 +201,7 @@ class Config(object):
         self.login_data['total_time'] = self.total_time +\
             time.time() - self.last_time
         self.login_data['is_latest'] = self.is_latest
-        with open(PATH_TOKEN, 'w') as f:
+        with open(PATH_TOKEN, 'wb') as f:
             pickle.dump(self.login_data, f)
 
         # with open(PATH_HISTORY, 'w') as f:

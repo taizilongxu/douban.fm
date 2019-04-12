@@ -12,6 +12,8 @@ Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/dou
 * [killpanda](https://github.com/killpanda)
 * [jonas8](https://github.com/jonas8)
 
+modified by [qytz](https://github.com/qytz) : support Python 3
+
 ### Screenshots
 
 ![](img/doubanfm.gif)
