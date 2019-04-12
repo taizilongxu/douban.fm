@@ -1,7 +1,5 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from pycookiecheat import chrome_cookies
 from termcolor import colored
 from six.moves import input
 import requests

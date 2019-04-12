@@ -22,8 +22,7 @@ setup(name='douban.fm',
       zip_safe=True,
       install_requires=[
         'termcolor',
-        'requests',
-        'pycookiecheat'
+        'requests'
       ],
       entry_points={
         'console_scripts':[
