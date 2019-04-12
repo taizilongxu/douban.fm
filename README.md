@@ -1,7 +1,6 @@
-##douban.fm [![Code Issues](https://www.quantifiedcode.com/api/v1/project/459f324d372447d992c04df79c1f5615/badge.svg)](https://www.quantifiedcode.com/app/project/459f324d372447d992c04df79c1f5615) [![PyPI version](https://img.shields.io/pypi/v/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![licence](https://img.shields.io/pypi/l/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/)
+## douban.fm [![PyPI version](https://img.shields.io/pypi/v/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![licence](https://img.shields.io/pypi/l/douban.fm.svg)](https://pypi.python.org/pypi/douban.fm/) [![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
 
 Terminal-based douban.fm inspired by [douban.fm](https://github.com/turingou/douban.fm).
-
 
 ### Authors
 
@@ -120,7 +119,7 @@ HELP = h     # 查看帮助
 * [豆瓣FM命令行播放器(pyfm)](https://github.com/skyline75489/pyfm)
 * [豆瓣电台 API](https://github.com/zonyitoo/doubanfm-qt/wiki/%E8%B1%86%E7%93%A3FM-API)
 
-###Log
+### Log
 
 v0.4.14 修改api接口
 
@@ -168,8 +167,6 @@ https://github.com/taizilongxu/douban.fm/wiki
 
 ### License (MIT)
 
-Copyright (c) 2014-2015 hackerxu
+Copyright (c) 2014-2019 hackerxu
 
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/taizilongxu/douban.fm/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
